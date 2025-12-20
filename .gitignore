@@ -1,0 +1,22 @@
+# Android/Kotlin
+*.iml
+.gradle/
+local.properties
+.idea/
+*.hprof
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+output.json
+*.jks
+*.keystore
+google-services.json
+
+# OS
+.DS_Store
+Thumbs.db
