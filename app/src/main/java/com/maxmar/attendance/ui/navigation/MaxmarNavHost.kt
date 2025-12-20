@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.maxmar.attendance.ui.screens.auth.LoginScreen
+import com.maxmar.attendance.ui.screens.home.HomeScreen
 import com.maxmar.attendance.ui.screens.splash.SplashScreen
 
 /**
@@ -78,7 +79,20 @@ fun MaxmarNavHost(
                 )
             }
         ) {
-            // TODO: HomeScreen
+            HomeScreen(
+                onNavigateToHistory = {
+                    navController.navigate(Routes.HISTORY)
+                },
+                onNavigateToProfile = {
+                    navController.navigate(Routes.PROFILE)
+                },
+                onNavigateToNotifications = {
+                    navController.navigate(Routes.NOTIFICATIONS)
+                },
+                onNavigateToAbsent = {
+                    navController.navigate(Routes.ABSENT)
+                }
+            )
         }
         
         // Face Capture Screen

@@ -1,0 +1,499 @@
+package com.maxmar.attendance.ui.screens.home
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.EventBusy
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Weekend
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.maxmar.attendance.data.model.Shift
+import com.maxmar.attendance.ui.theme.DarkColors
+import com.maxmar.attendance.ui.theme.MaxmarColors
+
+/**
+ * Home screen with dashboard, attendance actions, and navigation.
+ */
+@Composable
+fun HomeScreen(
+    onNavigateToHistory: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {},
+    onNavigateToNotifications: () -> Unit = {},
+    onNavigateToAbsent: () -> Unit = {},
+    viewModel: HomeViewModel = hiltViewModel()
+) {
+    val state by viewModel.homeState.collectAsState()
+    var selectedNavIndex by rememberSaveable { mutableIntStateOf(0) }
+    
+    Scaffold(
+        bottomBar = {
+            BottomNavBar(
+                selectedIndex = selectedNavIndex,
+                onItemSelected = { index ->
+                    selectedNavIndex = index
+                    when (index) {
+                        1 -> onNavigateToHistory()
+                        2 -> onNavigateToProfile()
+                    }
+                }
+            )
+        }
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            DarkColors.BackgroundGradientStart,
+                            DarkColors.BackgroundGradientEnd
+                        )
+                    )
+                )
+                .padding(paddingValues)
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaxmarColors.Primary
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(24.dp)
+                ) {
+                    // Header
+                    HeaderSection(
+                        greeting = viewModel.getGreeting(),
+                        employeeName = state.employee?.fullName ?: "User",
+                        onNotificationClick = onNavigateToNotifications
+                    )
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Today's Shift Card
+                    ShiftCard(
+                        isWorkday = state.isWorkday,
+                        shift = state.shift
+                    )
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    // Action Buttons
+                    ActionButtonsRow(
+                        hasCheckedIn = state.hasCheckedIn,
+                        hasCheckedOut = state.hasCheckedOut,
+                        onCheckIn = { /* TODO */ },
+                        onCheckOut = { /* TODO */ },
+                        onAbsent = onNavigateToAbsent
+                    )
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    // Monthly Summary
+                    MonthlySummaryCard()
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderSection(
+    greeting: String,
+    employeeName: String,
+    onNotificationClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Avatar
+        Box(
+            modifier = Modifier
+                .size(56.dp)
+                .clip(CircleShape)
+                .background(MaxmarColors.Primary.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Person,
+                contentDescription = null,
+                tint = MaxmarColors.Primary,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        // Greeting
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = "$greeting,",
+                style = MaterialTheme.typography.bodyMedium,
+                color = DarkColors.TextSecondary
+            )
+            Text(
+                text = employeeName,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = DarkColors.TextPrimary
+            )
+        }
+        
+        // Notification Bell
+        BadgedBox(
+            badge = {
+                Badge(containerColor = MaxmarColors.Error) {
+                    Text("3", color = Color.White)
+                }
+            }
+        ) {
+            IconButton(onClick = onNotificationClick) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications",
+                    tint = DarkColors.TextSecondary,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ShiftCard(
+    isWorkday: Boolean,
+    shift: Shift?
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = if (isWorkday) MaxmarColors.Primary else DarkColors.Surface
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isWorkday) Color.White.copy(alpha = 0.2f)
+                        else MaxmarColors.Primary.copy(alpha = 0.1f)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = if (isWorkday) Icons.Default.Schedule else Icons.Default.Weekend,
+                    contentDescription = null,
+                    tint = if (isWorkday) Color.White else DarkColors.TextSecondary,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = if (isWorkday) "Jadwal Hari Ini" else "Hari Libur",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isWorkday) Color.White.copy(alpha = 0.7f) else DarkColors.TextSecondary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = if (isWorkday && shift != null) {
+                        "${shift.startTime} - ${shift.endTime}"
+                    } else {
+                        "Tidak ada jadwal kerja"
+                    },
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = if (isWorkday) Color.White else DarkColors.TextPrimary
+                )
+            }
+            
+            if (isWorkday && shift?.dayLabel != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .background(Color.White.copy(alpha = 0.2f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                ) {
+                    Text(
+                        text = shift.dayLabel,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.SemiBold
+                        ),
+                        color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ActionButtonsRow(
+    hasCheckedIn: Boolean,
+    hasCheckedOut: Boolean,
+    onCheckIn: () -> Unit,
+    onCheckOut: () -> Unit,
+    onAbsent: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        ActionButton(
+            label = "Check In",
+            icon = Icons.Default.CheckCircle,
+            color = MaxmarColors.CheckIn,
+            enabled = !hasCheckedIn,
+            onClick = onCheckIn,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        ActionButton(
+            label = "Check Out",
+            icon = Icons.Default.Logout,
+            color = MaxmarColors.CheckOut,
+            enabled = hasCheckedIn && !hasCheckedOut,
+            onClick = onCheckOut,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        ActionButton(
+            label = "Absent",
+            icon = Icons.Default.EventBusy,
+            color = MaxmarColors.Absent,
+            enabled = true,
+            onClick = onAbsent,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun ActionButton(
+    label: String,
+    icon: ImageVector,
+    color: Color,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val displayColor = if (enabled) color else DarkColors.TextTertiary.copy(alpha = 0.3f)
+    
+    Card(
+        modifier = modifier
+            .height(100.dp)
+            .clickable(enabled = enabled, onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = DarkColors.Surface),
+        shape = RoundedCornerShape(20.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(CircleShape)
+                    .background(displayColor.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = displayColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = if (enabled) DarkColors.TextPrimary else DarkColors.TextTertiary
+            )
+        }
+    }
+}
+
+@Composable
+private fun MonthlySummaryCard() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = DarkColors.Surface),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
+        ) {
+            Text(
+                text = "Monthly Summary",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = DarkColors.TextPrimary
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                StatItem(label = "Present", value = "22", color = MaxmarColors.CheckIn)
+                StatItem(label = "Late", value = "3", color = MaxmarColors.Warning)
+                StatItem(label = "Absent", value = "1", color = MaxmarColors.CheckOut)
+            }
+        }
+    }
+}
+
+@Composable
+private fun StatItem(
+    label: String,
+    value: String,
+    color: Color
+) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
+            color = color
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = value,
+            style = MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = color
+        )
+    }
+}
+
+@Composable
+private fun BottomNavBar(
+    selectedIndex: Int,
+    onItemSelected: (Int) -> Unit
+) {
+    NavigationBar(
+        containerColor = DarkColors.Surface,
+        contentColor = DarkColors.TextPrimary
+    ) {
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+            label = { Text("Home") },
+            selected = selectedIndex == 0,
+            onClick = { onItemSelected(0) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaxmarColors.Primary,
+                selectedTextColor = MaxmarColors.Primary,
+                indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
+                unselectedIconColor = DarkColors.TextSecondary,
+                unselectedTextColor = DarkColors.TextSecondary
+            )
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.History, contentDescription = "History") },
+            label = { Text("History") },
+            selected = selectedIndex == 1,
+            onClick = { onItemSelected(1) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaxmarColors.Primary,
+                selectedTextColor = MaxmarColors.Primary,
+                indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
+                unselectedIconColor = DarkColors.TextSecondary,
+                unselectedTextColor = DarkColors.TextSecondary
+            )
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+            label = { Text("Profile") },
+            selected = selectedIndex == 2,
+            onClick = { onItemSelected(2) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaxmarColors.Primary,
+                selectedTextColor = MaxmarColors.Primary,
+                indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
+                unselectedIconColor = DarkColors.TextSecondary,
+                unselectedTextColor = DarkColors.TextSecondary
+            )
+        )
+    }
+}
