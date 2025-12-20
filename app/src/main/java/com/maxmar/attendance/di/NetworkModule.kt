@@ -4,6 +4,7 @@ import com.maxmar.attendance.BuildConfig
 import com.maxmar.attendance.data.api.AuthApi
 import com.maxmar.attendance.data.api.AuthInterceptor
 import com.maxmar.attendance.data.api.EmployeeApi
+import com.maxmar.attendance.data.local.TokenManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,6 +33,12 @@ object NetworkModule {
                 HttpLoggingInterceptor.Level.NONE
             }
         }
+    }
+    
+    @Provides
+    @Singleton
+    fun provideAuthInterceptor(tokenManager: TokenManager): AuthInterceptor {
+        return AuthInterceptor(tokenManager)
     }
     
     @Provides
@@ -71,4 +78,5 @@ object NetworkModule {
         return retrofit.create(EmployeeApi::class.java)
     }
 }
+
 

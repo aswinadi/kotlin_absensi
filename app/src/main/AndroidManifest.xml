@@ -36,7 +36,7 @@
             </intent-filter>
         </activity>
 
-        <!-- FCM Service -->
+        <!-- FCM Service - TODO: Enable after adding Firebase
         <service
             android:name=".data.service.MaxmarFirebaseMessagingService"
             android:exported="false">
@@ -44,6 +44,7 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
+        -->
 
         <!-- Google Maps API Key -->
         <meta-data
