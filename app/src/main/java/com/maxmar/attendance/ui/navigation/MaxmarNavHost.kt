@@ -9,6 +9,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.maxmar.attendance.ui.screens.auth.LoginScreen
 import com.maxmar.attendance.ui.screens.splash.SplashScreen
 
 /**
@@ -52,14 +53,13 @@ fun MaxmarNavHost(
                 fadeIn(animationSpec = tween(300))
             }
         ) {
-            // TODO: LoginScreen
-            // LoginScreen(
-            //     onLoginSuccess = {
-            //         navController.navigate(Routes.HOME) {
-            //             popUpTo(Routes.LOGIN) { inclusive = true }
-            //         }
-            //     }
-            // )
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
         }
         
         // Home Screen
