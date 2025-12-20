@@ -1,5 +1,6 @@
 package com.maxmar.attendance.ui.screens.auth
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.maxmar.attendance.R
 import com.maxmar.attendance.ui.theme.DarkColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 
@@ -213,32 +216,10 @@ fun LoginScreen(
 @Composable
 private fun LogoSection() {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .background(
-                    color = MaxmarColors.Primary.copy(alpha = 0.1f),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "M",
-                fontSize = 56.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaxmarColors.Primary
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        Text(
-            text = "MAXMAR",
-            style = MaterialTheme.typography.headlineSmall.copy(
-                fontWeight = FontWeight.Bold,
-                color = MaxmarColors.Primary,
-                letterSpacing = 4.sp
-            )
+        Image(
+            painter = painterResource(id = R.drawable.maxmar_logo),
+            contentDescription = "Maxmar Logo",
+            modifier = Modifier.size(150.dp)
         )
     }
 }
