@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
@@ -30,9 +32,11 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.maxmar.attendance.R
 import com.maxmar.attendance.ui.theme.DarkColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 import kotlinx.coroutines.delay
@@ -101,7 +105,7 @@ fun SplashScreen(
                 .alpha(fadeAnim.value)
                 .scale(scaleAnim.value)
         ) {
-            // Logo with glow effect
+            // Logo image with glow effect
             Box(
                 modifier = Modifier
                     .shadow(
@@ -111,16 +115,14 @@ fun SplashScreen(
                         shape = RoundedCornerShape(16.dp)
                     )
             ) {
-                Text(
-                    text = "MAXMAR",
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    letterSpacing = 4.sp
+                Image(
+                    painter = painterResource(id = R.drawable.maxmar_logo),
+                    contentDescription = "Maxmar Logo",
+                    modifier = Modifier.size(200.dp)
                 )
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "ATTENDANCE",
