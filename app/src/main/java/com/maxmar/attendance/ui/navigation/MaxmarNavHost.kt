@@ -108,6 +108,12 @@ fun MaxmarNavHost(
                 },
                 onNavigateToCheckOut = {
                     navController.navigate(Routes.CHECK_OUT)
+                },
+                onNavigateToBusinessTrip = {
+                    navController.navigate(Routes.BUSINESS_TRIP)
+                },
+                onNavigateToApproval = {
+                    navController.navigate(Routes.APPROVAL)
                 }
             )
         }

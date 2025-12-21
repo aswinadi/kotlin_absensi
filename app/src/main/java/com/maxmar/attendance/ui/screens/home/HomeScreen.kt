@@ -13,13 +13,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Approval
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.EventBusy
+import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Logout
@@ -71,6 +74,8 @@ fun HomeScreen(
     onNavigateToAbsent: () -> Unit = {},
     onNavigateToCheckIn: () -> Unit = {},
     onNavigateToCheckOut: () -> Unit = {},
+    onNavigateToBusinessTrip: () -> Unit = {},
+    onNavigateToApproval: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -139,7 +144,9 @@ fun HomeScreen(
                         hasCheckedOut = state.hasCheckedOut,
                         onCheckIn = onNavigateToCheckIn,
                         onCheckOut = onNavigateToCheckOut,
-                        onAbsent = onNavigateToAbsent
+                        onAbsent = onNavigateToAbsent,
+                        onBusinessTrip = onNavigateToBusinessTrip,
+                        onApproval = onNavigateToApproval
                     )
                     
                     Spacer(modifier = Modifier.height(32.dp))
@@ -304,11 +311,17 @@ private fun ActionButtonsRow(
     hasCheckedOut: Boolean,
     onCheckIn: () -> Unit,
     onCheckOut: () -> Unit,
-    onAbsent: () -> Unit
+    onAbsent: () -> Unit,
+    onBusinessTrip: () -> Unit,
+    onApproval: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
+    
     Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(scrollState),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         ActionButton(
             label = "Check In",
@@ -316,10 +329,8 @@ private fun ActionButtonsRow(
             color = MaxmarColors.CheckIn,
             enabled = !hasCheckedIn,
             onClick = onCheckIn,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.width(100.dp)
         )
-        
-        Spacer(modifier = Modifier.width(12.dp))
         
         ActionButton(
             label = "Check Out",
@@ -327,18 +338,34 @@ private fun ActionButtonsRow(
             color = MaxmarColors.CheckOut,
             enabled = hasCheckedIn && !hasCheckedOut,
             onClick = onCheckOut,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.width(100.dp)
         )
         
-        Spacer(modifier = Modifier.width(12.dp))
-        
         ActionButton(
-            label = "Absent",
+            label = "Izin",
             icon = Icons.Default.EventBusy,
             color = MaxmarColors.Absent,
             enabled = true,
             onClick = onAbsent,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.width(100.dp)
+        )
+        
+        ActionButton(
+            label = "Perdin",
+            icon = Icons.Default.FlightTakeoff,
+            color = MaxmarColors.Primary,
+            enabled = true,
+            onClick = onBusinessTrip,
+            modifier = Modifier.width(100.dp)
+        )
+        
+        ActionButton(
+            label = "Approval",
+            icon = Icons.Default.Approval,
+            color = MaxmarColors.Warning,
+            enabled = true,
+            onClick = onApproval,
+            modifier = Modifier.width(100.dp)
         )
     }
 }
