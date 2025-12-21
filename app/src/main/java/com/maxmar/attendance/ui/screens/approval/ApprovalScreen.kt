@@ -130,11 +130,17 @@ fun ApprovalScreen(
                     )
                 )
         ) {
-            // Filter chips
+            // Status filter chips (Menunggu / Selesai)
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
                 pendingCount = state.pendingItems.size,
                 onFilterSelected = { viewModel.setFilter(it) }
+            )
+            
+            // Category tabs (Semua / Izin / Perdin / Realisasi)
+            CategoryTabsRow(
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = { viewModel.setCategory(it) }
             )
             
             // List
@@ -146,10 +152,17 @@ fun ApprovalScreen(
                     CircularProgressIndicator(color = MaxmarColors.Primary)
                 }
             } else {
-                val items = if (state.selectedFilter == "pending") {
+                val baseItems = if (state.selectedFilter == "pending") {
                     state.pendingItems
                 } else {
                     state.processedItems
+                }
+                
+                // Filter by category
+                val items = if (state.selectedCategory == "all") {
+                    baseItems
+                } else {
+                    baseItems.filter { it.category == state.selectedCategory }
                 }
                 
                 if (items.isEmpty()) {
@@ -282,6 +295,42 @@ private fun FilterChipsRow(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryTabsRow(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
+    val appColors = LocalAppColors.current
+    val categories = listOf(
+        "all" to "Semua",
+        "absent" to "Izin",
+        "business_trip" to "Perdin",
+        "realization" to "Realisasi"
+    )
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        categories.forEach { (value, label) ->
+            FilterChip(
+                selected = selectedCategory == value,
+                onClick = { onCategorySelected(value) },
+                label = { Text(label, fontSize = 12.sp) },
+                colors = FilterChipDefaults.filterChipColors(
+                    selectedContainerColor = MaxmarColors.Primary,
+                    selectedLabelColor = Color.White,
+                    containerColor = appColors.cardBackground,
+                    labelColor = appColors.textSecondary
+                )
+            )
+        }
+    }
+}
+
 @Composable
 private fun ApprovalCard(
     approval: Approval,
@@ -370,6 +419,25 @@ private fun ApprovalCard(
                         fontWeight = FontWeight.Medium
                     )
                 }
+            }
+            
+            // Category badge
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = approval.categoryDisplay,
+                    color = MaxmarColors.Primary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaxmarColors.Primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                )
             }
             
             Spacer(modifier = Modifier.height(12.dp))

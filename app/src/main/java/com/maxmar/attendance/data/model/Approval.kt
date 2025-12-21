@@ -40,7 +40,9 @@ data class Approval(
     @SerializedName("approved_date")
     val approvedDate: String?,
     @SerializedName("created_at")
-    val createdAt: String?
+    val createdAt: String?,
+    // Category: "absent", "business_trip", "realization"
+    val category: String = "absent"
 ) {
     val statusDisplay: String
         get() = when (status) {
@@ -48,6 +50,14 @@ data class Approval(
             "pending_approval" -> "Menunggu Disetujui"
             "approved" -> "Disetujui"
             else -> status
+        }
+    
+    val categoryDisplay: String
+        get() = when (category) {
+            "absent" -> "Izin"
+            "business_trip" -> "Perdin"
+            "realization" -> "Realisasi"
+            else -> category
         }
     
     val isPendingAcknowledgement: Boolean
