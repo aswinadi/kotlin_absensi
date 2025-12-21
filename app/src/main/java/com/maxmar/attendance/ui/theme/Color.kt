@@ -85,6 +85,7 @@ data class AppColors(
     val backgroundGradientEnd: Color,
     val surface: Color,
     val surfaceVariant: Color,
+    val cardBackground: Color,
     val textPrimary: Color,
     val textSecondary: Color,
     val textTertiary: Color
@@ -95,6 +96,7 @@ val DarkAppColors = AppColors(
     backgroundGradientEnd = DarkColors.BackgroundGradientEnd,
     surface = DarkColors.Surface,
     surfaceVariant = DarkColors.SurfaceVariant,
+    cardBackground = DarkColors.SurfaceVariant,
     textPrimary = DarkColors.TextPrimary,
     textSecondary = DarkColors.TextSecondary,
     textTertiary = DarkColors.TextTertiary
@@ -105,9 +107,11 @@ val LightAppColors = AppColors(
     backgroundGradientEnd = LightColors.BackgroundGradientEnd,
     surface = LightColors.Surface,
     surfaceVariant = LightColors.SurfaceVariant,
+    cardBackground = LightColors.Surface,
     textPrimary = LightColors.TextPrimary,
     textSecondary = LightColors.TextSecondary,
     textTertiary = LightColors.TextTertiary
 )
 
 val LocalAppColors = staticCompositionLocalOf { DarkAppColors }
+
