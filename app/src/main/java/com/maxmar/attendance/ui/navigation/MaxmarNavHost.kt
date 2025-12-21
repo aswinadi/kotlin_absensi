@@ -13,6 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.maxmar.attendance.ui.screens.absent.AbsentScreen
 import com.maxmar.attendance.ui.screens.auth.LoginScreen
+import com.maxmar.attendance.ui.screens.businesstrip.BusinessTripDetailScreen
+import com.maxmar.attendance.ui.screens.businesstrip.BusinessTripScreen
 import com.maxmar.attendance.ui.screens.checkin.CheckInScreen
 import com.maxmar.attendance.ui.screens.checkin.CheckType
 import com.maxmar.attendance.ui.screens.checkin.GeolocationMapScreen
@@ -252,7 +254,24 @@ fun MaxmarNavHost(
         
         // Business Trip Screen
         composable(Routes.BUSINESS_TRIP) {
-            // TODO: BusinessTripScreen
+            BusinessTripScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDetail = { tripId ->
+                    navController.navigate(Routes.businessTripDetail(tripId.toString()))
+                }
+            )
+        }
+        
+        // Business Trip Detail Screen
+        composable(
+            route = Routes.BUSINESS_TRIP_DETAIL,
+            arguments = listOf(navArgument("tripId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val tripId = backStackEntry.arguments?.getString("tripId")?.toIntOrNull() ?: 0
+            BusinessTripDetailScreen(
+                tripId = tripId,
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         
         // Approval Screen

@@ -5,6 +5,7 @@ import com.maxmar.attendance.data.api.AbsentApi
 import com.maxmar.attendance.data.api.AttendanceApi
 import com.maxmar.attendance.data.api.AuthApi
 import com.maxmar.attendance.data.api.AuthInterceptor
+import com.maxmar.attendance.data.api.BusinessTripApi
 import com.maxmar.attendance.data.api.EmployeeApi
 import com.maxmar.attendance.data.local.TokenManager
 import dagger.Module
@@ -90,5 +91,11 @@ object NetworkModule {
     @Singleton
     fun provideAbsentApi(retrofit: Retrofit): AbsentApi {
         return retrofit.create(AbsentApi::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideBusinessTripApi(retrofit: Retrofit): BusinessTripApi {
+        return retrofit.create(BusinessTripApi::class.java)
     }
 }
