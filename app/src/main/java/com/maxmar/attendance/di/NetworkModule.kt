@@ -1,6 +1,7 @@
 package com.maxmar.attendance.di
 
 import com.maxmar.attendance.BuildConfig
+import com.maxmar.attendance.data.api.AbsentApi
 import com.maxmar.attendance.data.api.AttendanceApi
 import com.maxmar.attendance.data.api.AuthApi
 import com.maxmar.attendance.data.api.AuthInterceptor
@@ -83,5 +84,11 @@ object NetworkModule {
     @Singleton
     fun provideAttendanceApi(retrofit: Retrofit): AttendanceApi {
         return retrofit.create(AttendanceApi::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideAbsentApi(retrofit: Retrofit): AbsentApi {
+        return retrofit.create(AbsentApi::class.java)
     }
 }
