@@ -10,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.maxmar.attendance.ui.screens.auth.LoginScreen
+import com.maxmar.attendance.ui.screens.absent.AbsentScreen
 import com.maxmar.attendance.ui.screens.history.HistoryScreen
 import com.maxmar.attendance.ui.screens.home.HomeScreen
 import com.maxmar.attendance.ui.screens.profile.ProfileScreen
@@ -141,7 +142,11 @@ fun MaxmarNavHost(
         
         // Absent Screen
         composable(Routes.ABSENT) {
-            // TODO: AbsentScreen
+            AbsentScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
         
         // Business Trip Screen
