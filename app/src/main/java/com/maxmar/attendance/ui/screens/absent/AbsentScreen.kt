@@ -1,6 +1,8 @@
 package com.maxmar.attendance.ui.screens.absent
 
+import android.Manifest
 import android.app.DatePickerDialog
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -24,10 +26,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -40,30 +44,40 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxmar.attendance.data.model.AbsentType
 import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
+import com.maxmar.attendance.util.ImageCompressor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -167,7 +181,10 @@ private fun AbsentFormContent(
 ) {
     val appColors = LocalAppColors.current
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     var typeExpanded by remember { mutableStateOf(false) }
+    var showImagePicker by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState()
     
     // Date picker
     val calendar = Calendar.getInstance()
@@ -185,20 +202,133 @@ private fun AbsentFormContent(
         calendar.get(Calendar.DAY_OF_MONTH)
     )
     
-    // File picker
-    val fileLauncher = rememberLauncherForActivityResult(
+    // Camera capture
+    var tempPhotoUri by remember { mutableStateOf<Uri?>(null) }
+    
+    val cameraLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.TakePicture()
+    ) { success ->
+        if (success && tempPhotoUri != null) {
+            scope.launch {
+                val tempFile = File(context.cacheDir, "temp_${System.currentTimeMillis()}.jpg")
+                val compressedFile = File(context.cacheDir, "photo_${System.currentTimeMillis()}.jpg")
+                
+                // Copy from URI to temp file
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openInputStream(tempPhotoUri!!)?.use { input ->
+                        tempFile.outputStream().use { output ->
+                            input.copyTo(output)
+                        }
+                    }
+                    // Compress the image
+                    ImageCompressor.compressImage(tempFile, compressedFile)
+                    tempFile.delete()
+                }
+                onAttachmentSelected(compressedFile)
+            }
+        }
+    }
+    
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val photoFile = File(context.cacheDir, "temp_photo_${System.currentTimeMillis()}.jpg")
+            tempPhotoUri = FileProvider.getUriForFile(
+                context,
+                "${context.packageName}.fileprovider",
+                photoFile
+            )
+            cameraLauncher.launch(tempPhotoUri!!)
+        } else {
+            Toast.makeText(context, "Izin kamera diperlukan", Toast.LENGTH_SHORT).show()
+        }
+    }
+    
+    // Gallery picker
+    val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         uri?.let {
-            // Copy to cache and get file
-            val inputStream = context.contentResolver.openInputStream(it)
-            val file = File(context.cacheDir, "attachment_${System.currentTimeMillis()}.jpg")
-            inputStream?.use { input ->
-                file.outputStream().use { output ->
-                    input.copyTo(output)
+            scope.launch {
+                val compressedFile = File(context.cacheDir, "attachment_${System.currentTimeMillis()}.jpg")
+                withContext(Dispatchers.IO) {
+                    ImageCompressor.compressImage(context, it, compressedFile)
                 }
+                onAttachmentSelected(compressedFile)
             }
-            onAttachmentSelected(file)
+        }
+    }
+    
+    // Image picker bottom sheet
+    if (showImagePicker) {
+        ModalBottomSheet(
+            onDismissRequest = { showImagePicker = false },
+            sheetState = bottomSheetState,
+            containerColor = appColors.surface
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+            ) {
+                Text(
+                    text = "Pilih Sumber Gambar",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold
+                    ),
+                    color = appColors.textPrimary
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Camera option
+                ImagePickerOption(
+                    icon = Icons.Default.CameraAlt,
+                    title = "Kamera",
+                    subtitle = "Ambil foto baru",
+                    onClick = {
+                        scope.launch {
+                            bottomSheetState.hide()
+                            showImagePicker = false
+                            // Check camera permission
+                            if (ContextCompat.checkSelfPermission(
+                                    context,
+                                    Manifest.permission.CAMERA
+                                ) == PackageManager.PERMISSION_GRANTED
+                            ) {
+                                val photoFile = File(context.cacheDir, "temp_photo_${System.currentTimeMillis()}.jpg")
+                                tempPhotoUri = FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.fileprovider",
+                                    photoFile
+                                )
+                                cameraLauncher.launch(tempPhotoUri!!)
+                            } else {
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        }
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Gallery option
+                ImagePickerOption(
+                    icon = Icons.Default.PhotoLibrary,
+                    title = "Galeri",
+                    subtitle = "Pilih dari galeri",
+                    onClick = {
+                        scope.launch {
+                            bottomSheetState.hide()
+                            showImagePicker = false
+                            galleryLauncher.launch("image/*")
+                        }
+                    }
+                )
+                
+                Spacer(modifier = Modifier.height(32.dp))
+            }
         }
     }
     
@@ -356,12 +486,12 @@ private fun AbsentFormContent(
                     shape = RoundedCornerShape(12.dp)
                 )
                 
-                // Attachment (show if requires attachment or always show as optional)
+                // Attachment
                 Spacer(modifier = Modifier.height(20.dp))
                 
                 Text(
                     text = if (state.selectedType?.requiresAttachment == true) 
-                        "Surat Keterangan Dokter (Wajib)" 
+                        "Surat Keterangan Dokter (dapat diupload nanti)" 
                     else 
                         "Lampiran (Opsional)",
                     style = MaterialTheme.typography.labelLarge.copy(
@@ -404,33 +534,39 @@ private fun AbsentFormContent(
                         }
                     }
                 } else {
-                    // Show upload button
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(100.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .border(
-                                2.dp,
-                                appColors.textTertiary.copy(alpha = 0.3f),
-                                RoundedCornerShape(12.dp)
-                            )
-                            .clickable { fileLauncher.launch("image/*") },
-                        contentAlignment = Alignment.Center
+                    // Show upload buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.AttachFile,
-                                contentDescription = "Attach file",
-                                tint = appColors.textSecondary,
-                                modifier = Modifier.size(32.dp)
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = "Tap untuk memilih file",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = appColors.textSecondary
-                            )
+                        // Camera button
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(100.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .border(
+                                    2.dp,
+                                    appColors.textTertiary.copy(alpha = 0.3f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .clickable { showImagePicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.Image,
+                                    contentDescription = "Upload",
+                                    tint = appColors.textSecondary,
+                                    modifier = Modifier.size(32.dp)
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Text(
+                                    text = "Upload Foto",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = appColors.textSecondary
+                                )
+                            }
                         }
                     }
                 }
@@ -469,5 +605,56 @@ private fun AbsentFormContent(
         }
         
         Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun ImagePickerOption(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
+) {
+    val appColors = LocalAppColors.current
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(48.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaxmarColors.Primary.copy(alpha = 0.1f)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaxmarColors.Primary,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                color = appColors.textPrimary
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                color = appColors.textSecondary
+            )
+        }
     }
 }

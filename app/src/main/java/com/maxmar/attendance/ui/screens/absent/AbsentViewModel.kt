@@ -122,13 +122,8 @@ class AbsentViewModel @Inject constructor(
             return
         }
         
-        // Check if attachment is required but not provided
-        if (state.selectedType?.requiresAttachment == true && state.attachmentFile == null) {
-            _formState.value = _formState.value.copy(
-                error = "Surat keterangan dokter diperlukan untuk ${state.selectedType.name}"
-            )
-            return
-        }
+        // Note: Attachment is optional at submission. For sick leave, 
+        // user can upload doctor's note later on the same day.
         
         viewModelScope.launch {
             _formState.value = _formState.value.copy(isSubmitting = true, error = null)
