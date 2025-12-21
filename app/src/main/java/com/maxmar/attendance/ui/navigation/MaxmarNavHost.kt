@@ -6,11 +6,16 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.maxmar.attendance.ui.screens.auth.LoginScreen
+import androidx.navigation.navArgument
 import com.maxmar.attendance.ui.screens.absent.AbsentScreen
+import com.maxmar.attendance.ui.screens.auth.LoginScreen
+import com.maxmar.attendance.ui.screens.checkin.CheckInScreen
+import com.maxmar.attendance.ui.screens.checkin.CheckType
+import com.maxmar.attendance.ui.screens.checkin.GeolocationMapScreen
 import com.maxmar.attendance.ui.screens.history.HistoryScreen
 import com.maxmar.attendance.ui.screens.home.HomeScreen
 import com.maxmar.attendance.ui.screens.profile.ProfileScreen
@@ -94,11 +99,94 @@ fun MaxmarNavHost(
                 },
                 onNavigateToAbsent = {
                     navController.navigate(Routes.ABSENT)
+                },
+                onNavigateToCheckIn = {
+                    navController.navigate(Routes.CHECK_IN)
+                },
+                onNavigateToCheckOut = {
+                    navController.navigate(Routes.CHECK_OUT)
                 }
             )
         }
         
-        // Face Capture Screen
+        // Check In Screen
+        composable(
+            route = Routes.CHECK_IN,
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
+            CheckInScreen(
+                checkType = CheckType.CHECK_IN,
+                onNavigateBack = { navController.popBackStack() },
+                onShowMap = { userLat, userLon, officeLat, officeLon, radius, officeName ->
+                    navController.navigate(
+                        Routes.geolocationMap(userLat, userLon, officeLat, officeLon, radius, officeName)
+                    )
+                }
+            )
+        }
+        
+        // Check Out Screen
+        composable(
+            route = Routes.CHECK_OUT,
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
+            CheckInScreen(
+                checkType = CheckType.CHECK_OUT,
+                onNavigateBack = { navController.popBackStack() },
+                onShowMap = { userLat, userLon, officeLat, officeLon, radius, officeName ->
+                    navController.navigate(
+                        Routes.geolocationMap(userLat, userLon, officeLat, officeLon, radius, officeName)
+                    )
+                }
+            )
+        }
+        
+        // Geolocation Map Screen
+        composable(
+            route = Routes.GEOLOCATION_MAP,
+            arguments = listOf(
+                navArgument("userLat") { type = NavType.StringType },
+                navArgument("userLon") { type = NavType.StringType },
+                navArgument("officeLat") { type = NavType.StringType },
+                navArgument("officeLon") { type = NavType.StringType },
+                navArgument("radius") { type = NavType.IntType },
+                navArgument("officeName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            GeolocationMapScreen(
+                userLat = backStackEntry.arguments?.getString("userLat")?.toDoubleOrNull() ?: 0.0,
+                userLon = backStackEntry.arguments?.getString("userLon")?.toDoubleOrNull() ?: 0.0,
+                officeLat = backStackEntry.arguments?.getString("officeLat")?.toDoubleOrNull() ?: 0.0,
+                officeLon = backStackEntry.arguments?.getString("officeLon")?.toDoubleOrNull() ?: 0.0,
+                radiusMeters = backStackEntry.arguments?.getInt("radius") ?: 100,
+                officeName = backStackEntry.arguments?.getString("officeName")?.replace("_", "/") ?: "Kantor",
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // Face Capture Screen (legacy)
         composable(
             route = Routes.FACE_CAPTURE,
             enterTransition = {
@@ -114,7 +202,16 @@ fun MaxmarNavHost(
                 )
             }
         ) {
-            // TODO: FaceCaptureScreen
+            // Redirect to CHECK_IN
+            CheckInScreen(
+                checkType = CheckType.CHECK_IN,
+                onNavigateBack = { navController.popBackStack() },
+                onShowMap = { userLat, userLon, officeLat, officeLon, radius, officeName ->
+                    navController.navigate(
+                        Routes.geolocationMap(userLat, userLon, officeLat, officeLon, radius, officeName)
+                    )
+                }
+            )
         }
         
         // History Screen
@@ -143,9 +240,13 @@ fun MaxmarNavHost(
         // Absent Screen
         composable(Routes.ABSENT) {
             AbsentScreen(
+<<<<<<< HEAD
                 onNavigateBack = {
                     navController.popBackStack()
                 }
+=======
+                onNavigateBack = { navController.popBackStack() }
+>>>>>>> feature/check-in-out
             )
         }
         

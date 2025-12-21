@@ -71,3 +71,29 @@ data class AttendanceSummaryResponse(
     val success: Boolean,
     val data: AttendanceSummary?
 )
+
+/**
+ * Check-in/out result data.
+ */
+data class CheckInOutResult(
+    @SerializedName("attendance_id")
+    val attendanceId: Int,
+    @SerializedName("check_in_time")
+    val checkInTime: String?,
+    @SerializedName("check_out_time")
+    val checkOutTime: String?,
+    @SerializedName("is_within_radius")
+    val isWithinRadius: Boolean
+) {
+    val time: String
+        get() = checkInTime ?: checkOutTime ?: ""
+}
+
+/**
+ * Check-in/out API response.
+ */
+data class CheckInOutResponse(
+    val success: Boolean,
+    val message: String?,
+    val data: CheckInOutResult?
+)

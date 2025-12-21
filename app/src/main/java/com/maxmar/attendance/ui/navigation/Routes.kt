@@ -9,6 +9,9 @@ object Routes {
     const val LOGIN = "login"
     const val HOME = "home"
     const val FACE_CAPTURE = "face_capture"
+    const val CHECK_IN = "check_in"
+    const val CHECK_OUT = "check_out"
+    const val GEOLOCATION_MAP = "geolocation_map/{userLat}/{userLon}/{officeLat}/{officeLon}/{radius}/{officeName}"
     const val MAP = "map"
     const val HISTORY = "history"
     const val PROFILE = "profile"
@@ -20,4 +23,13 @@ object Routes {
     
     // Helper function for routes with arguments
     fun businessTripDetail(tripId: String) = "business_trip/$tripId"
+    
+    fun geolocationMap(
+        userLat: Double,
+        userLon: Double,
+        officeLat: Double,
+        officeLon: Double,
+        radius: Int,
+        officeName: String
+    ) = "geolocation_map/$userLat/$userLon/$officeLat/$officeLon/$radius/${officeName.replace("/", "_")}"
 }

@@ -69,6 +69,8 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit = {},
     onNavigateToNotifications: () -> Unit = {},
     onNavigateToAbsent: () -> Unit = {},
+    onNavigateToCheckIn: () -> Unit = {},
+    onNavigateToCheckOut: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -135,8 +137,8 @@ fun HomeScreen(
                     ActionButtonsRow(
                         hasCheckedIn = state.hasCheckedIn,
                         hasCheckedOut = state.hasCheckedOut,
-                        onCheckIn = { /* TODO */ },
-                        onCheckOut = { /* TODO */ },
+                        onCheckIn = onNavigateToCheckIn,
+                        onCheckOut = onNavigateToCheckOut,
                         onAbsent = onNavigateToAbsent
                     )
                     
