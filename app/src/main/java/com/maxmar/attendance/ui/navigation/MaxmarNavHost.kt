@@ -284,7 +284,9 @@ fun MaxmarNavHost(
         
         // Notifications Screen
         composable(Routes.NOTIFICATIONS) {
-            // TODO: NotificationScreen
+            com.maxmar.attendance.ui.screens.notification.NotificationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         
         // Map Screen
