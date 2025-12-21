@@ -34,6 +34,15 @@ data class BusinessTripDetailState(
 )
 
 /**
+ * Business Trip form state.
+ */
+data class BusinessTripFormState(
+    val isSubmitting: Boolean = false,
+    val isSuccess: Boolean = false,
+    val error: String? = null
+)
+
+/**
  * ViewModel for Business Trip screens.
  */
 @HiltViewModel
@@ -46,6 +55,9 @@ class BusinessTripViewModel @Inject constructor(
     
     private val _detailState = MutableStateFlow(BusinessTripDetailState())
     val detailState: StateFlow<BusinessTripDetailState> = _detailState.asStateFlow()
+    
+    private val _formState = MutableStateFlow(BusinessTripFormState())
+    val formState: StateFlow<BusinessTripFormState> = _formState.asStateFlow()
     
     init {
         loadTrips()
@@ -148,9 +160,58 @@ class BusinessTripViewModel @Inject constructor(
     }
     
     /**
+     * Create a new business trip.
+     */
+    fun createBusinessTrip(
+        purpose: String,
+        location: String,
+        destinationCity: String?,
+        departureDate: String,
+        arrivalDate: String,
+        notes: String?
+    ) {
+        viewModelScope.launch {
+            _formState.value = BusinessTripFormState(isSubmitting = true)
+            
+            when (val result = repository.createBusinessTrip(
+                purpose = purpose,
+                location = location,
+                destinationCity = destinationCity,
+                departureDate = departureDate,
+                arrivalDate = arrivalDate,
+                notes = notes
+            )) {
+                is AuthResult.Success -> {
+                    _formState.value = BusinessTripFormState(isSuccess = true)
+                    // Refresh list
+                    loadTrips(refresh = true)
+                }
+                is AuthResult.Error -> {
+                    _formState.value = BusinessTripFormState(error = result.message)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Reset form state after success.
+     */
+    fun resetFormState() {
+        _formState.value = BusinessTripFormState()
+    }
+    
+    /**
+     * Clear form error.
+     */
+    fun clearFormError() {
+        _formState.value = _formState.value.copy(error = null)
+    }
+    
+    /**
      * Refresh trips list.
      */
     fun refresh() {
         loadTrips(refresh = true)
     }
 }
+

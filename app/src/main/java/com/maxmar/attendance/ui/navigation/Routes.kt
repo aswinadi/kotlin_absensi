@@ -18,6 +18,7 @@ object Routes {
     const val ABSENT = "absent"
     const val BUSINESS_TRIP = "business_trip"
     const val BUSINESS_TRIP_DETAIL = "business_trip/{tripId}"
+    const val BUSINESS_TRIP_CREATE = "business_trip_create"
     const val APPROVAL = "approval"
     const val NOTIFICATIONS = "notifications"
     

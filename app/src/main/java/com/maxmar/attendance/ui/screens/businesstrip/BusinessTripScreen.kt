@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
@@ -33,6 +34,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +69,7 @@ import com.maxmar.attendance.ui.theme.MaxmarColors
 fun BusinessTripScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToDetail: (Int) -> Unit = {},
+    onNavigateToCreate: () -> Unit = {},
     viewModel: BusinessTripViewModel = hiltViewModel()
 ) {
     val state by viewModel.listState.collectAsState()
@@ -105,6 +108,18 @@ fun BusinessTripScreen(
                     navigationIconContentColor = appColors.textPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToCreate,
+                containerColor = MaxmarColors.Primary,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Buat Perjalanan Dinas"
+                )
+            }
         }
     ) { paddingValues ->
         Column(

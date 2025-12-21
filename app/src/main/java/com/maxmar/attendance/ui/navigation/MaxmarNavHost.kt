@@ -259,7 +259,18 @@ fun MaxmarNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToDetail = { tripId ->
                     navController.navigate(Routes.businessTripDetail(tripId.toString()))
+                },
+                onNavigateToCreate = {
+                    navController.navigate(Routes.BUSINESS_TRIP_CREATE)
                 }
+            )
+        }
+        
+        // Business Trip Create Screen
+        composable(Routes.BUSINESS_TRIP_CREATE) {
+            com.maxmar.attendance.ui.screens.businesstrip.BusinessTripFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
             )
         }
         

@@ -57,4 +57,34 @@ class BusinessTripRepository @Inject constructor(
             AuthResult.Error("Terjadi kesalahan: ${e.message}")
         }
     }
+    
+    /**
+     * Create a new business trip.
+     */
+    suspend fun createBusinessTrip(
+        purpose: String,
+        location: String,
+        destinationCity: String?,
+        departureDate: String,
+        arrivalDate: String,
+        notes: String?
+    ): AuthResult<BusinessTrip> {
+        return try {
+            val response = businessTripApi.createBusinessTrip(
+                purpose = purpose,
+                location = location,
+                destinationCity = destinationCity,
+                departureDate = departureDate,
+                arrivalDate = arrivalDate,
+                notes = notes
+            )
+            AuthResult.Success(response.data)
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            AuthResult.Error("Error: ${e.code()} - $errorBody")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
 }
+
