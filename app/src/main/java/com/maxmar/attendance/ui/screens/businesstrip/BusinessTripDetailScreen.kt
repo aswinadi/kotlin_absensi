@@ -352,21 +352,21 @@ private fun TripDetailContent(trip: BusinessTrip) {
                 
                 ApprovalRow(
                     label = "Ditugaskan oleh",
-                    approver = trip.assignedBy?.name ?: "-"
+                    approver = trip.assignedBy?.by ?: "-"
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 ApprovalRow(
                     label = "Diketahui oleh",
-                    approver = trip.acknowledgedBy?.name ?: "Menunggu"
+                    approver = trip.acknowledgedBy?.by ?: "Menunggu"
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 ApprovalRow(
                     label = "Disetujui oleh",
-                    approver = trip.approvedBy?.name ?: "Menunggu"
+                    approver = trip.approvedBy?.by ?: "Menunggu"
                 )
             }
         }
