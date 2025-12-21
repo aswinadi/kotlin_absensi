@@ -44,6 +44,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -79,16 +80,22 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
+    // Always reset to Home (index 0) when this screen is displayed
     var selectedNavIndex by rememberSaveable { mutableIntStateOf(0) }
     val appColors = LocalAppColors.current
+    
+    // Reset to Home tab when screen recomposes (coming back from other screens)
+    LaunchedEffect(Unit) {
+        selectedNavIndex = 0
+    }
     
     Scaffold(
         bottomBar = {
             BottomNavBar(
                 selectedIndex = selectedNavIndex,
                 onItemSelected = { index ->
-                    selectedNavIndex = index
                     when (index) {
+                        0 -> selectedNavIndex = 0 // Stay on home
                         1 -> onNavigateToHistory()
                         2 -> onNavigateToProfile()
                     }
