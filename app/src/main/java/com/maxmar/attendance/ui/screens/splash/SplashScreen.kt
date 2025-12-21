@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.maxmar.attendance.R
-import com.maxmar.attendance.ui.theme.DarkColors
+import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 import kotlinx.coroutines.delay
 
@@ -53,6 +53,7 @@ fun SplashScreen(
     // Animation values
     val fadeAnim = remember { Animatable(0f) }
     val scaleAnim = remember { Animatable(0.8f) }
+    val appColors = LocalAppColors.current
     
     // Glow animation
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
@@ -91,8 +92,8 @@ fun SplashScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        DarkColors.BackgroundGradientStart,
-                        DarkColors.BackgroundGradientEnd
+                        appColors.backgroundGradientStart,
+                        appColors.backgroundGradientEnd
                     )
                 )
             ),
@@ -141,7 +142,7 @@ fun SplashScreen(
                     .height(2.dp)
                     .clip(RoundedCornerShape(1.dp)),
                 color = MaxmarColors.Primary,
-                trackColor = DarkColors.GlassBackground
+                trackColor = appColors.surfaceVariant
             )
         }
         

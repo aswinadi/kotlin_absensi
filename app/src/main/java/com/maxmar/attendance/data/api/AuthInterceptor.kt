@@ -25,10 +25,12 @@ class AuthInterceptor @Inject constructor(
             originalRequest.newBuilder()
                 .header("Authorization", "Bearer $token")
                 .header("Accept", "application/json")
+                .header("ngrok-skip-browser-warning", "true")
                 .build()
         } else {
             originalRequest.newBuilder()
                 .header("Accept", "application/json")
+                .header("ngrok-skip-browser-warning", "true")
                 .build()
         }
         

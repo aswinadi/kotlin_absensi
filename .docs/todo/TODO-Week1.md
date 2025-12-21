@@ -1,23 +1,39 @@
-# TODO - Week 1
+# TODO - Week 1 ✅ COMPLETED
 
-## Project Setup
-- [ ] Create Android project with Compose
-- [ ] Configure Gradle dependencies
-- [ ] Setup Hilt DI
-- [ ] Configure Retrofit API client
-- [ ] Setup DataStore for preferences
+## Project Setup ✅
+- [x] Create Android project with Compose
+- [x] Configure Gradle dependencies
+- [x] Setup Hilt DI
+- [x] Configure Retrofit API client
+- [x] Setup DataStore for preferences
 
-## Theme System
-- [ ] Define color palette (Dark + Light)
-- [ ] Configure typography (Inter font)
-- [ ] Create theme toggle logic
+## Theme System ✅
+- [x] Define color palette (Dark + Light)
+- [x] Configure typography
+- [x] Create theme toggle logic
 
-## Navigation
-- [ ] Setup Navigation Compose
-- [ ] Define route constants
-- [ ] Create NavHost with screens
+## Navigation ✅
+- [x] Setup Navigation Compose
+- [x] Define route constants
+- [x] Create NavHost with screens
 
-## Auth
-- [ ] Login screen UI
-- [ ] Auth ViewModel
-- [ ] Token storage
+## Auth ✅
+- [x] Login screen UI
+- [x] Auth ViewModel
+- [x] Token storage
+
+## Home Screen ✅
+- [x] Dashboard UI with schedule card
+- [x] Action buttons (Check In, Check Out, Absent)
+- [x] Monthly summary card
+- [x] Bottom navigation
+
+## Profile Screen ✅
+- [x] Profile UI with employee info
+- [x] Logout functionality
+- [x] API integration
+
+## History Screen ✅
+- [x] Attendance list with lazy column
+- [x] Pagination support
+- [x] Check-in/Check-out display

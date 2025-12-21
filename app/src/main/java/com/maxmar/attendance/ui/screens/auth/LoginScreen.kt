@@ -64,7 +64,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxmar.attendance.R
-import com.maxmar.attendance.ui.theme.DarkColors
+import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 
 /**
@@ -78,6 +78,7 @@ fun LoginScreen(
     val authState by viewModel.authState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
+    val appColors = LocalAppColors.current
     
     // Form state
     var email by rememberSaveable { mutableStateOf("") }
@@ -140,8 +141,8 @@ fun LoginScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            DarkColors.BackgroundGradientStart,
-                            DarkColors.BackgroundGradientEnd
+                            appColors.backgroundGradientStart,
+                            appColors.backgroundGradientEnd
                         )
                     )
                 )
@@ -226,12 +227,14 @@ private fun LogoSection() {
 
 @Composable
 private fun HeaderSection() {
+    val appColors = LocalAppColors.current
+    
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Text(
             text = "Selamat Datang",
             style = MaterialTheme.typography.headlineMedium.copy(
                 fontWeight = FontWeight.Bold,
-                color = DarkColors.TextPrimary
+                color = appColors.textPrimary
             )
         )
         
@@ -240,7 +243,7 @@ private fun HeaderSection() {
         Text(
             text = "Masuk untuk melanjutkan",
             style = MaterialTheme.typography.bodyLarge.copy(
-                color = DarkColors.TextSecondary
+                color = appColors.textSecondary
             )
         )
     }
@@ -259,21 +262,23 @@ private fun LoginForm(
     onEmailDone: () -> Unit,
     onPasswordDone: () -> Unit
 ) {
+    val appColors = LocalAppColors.current
+    
     val textFieldColors = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = DarkColors.TextPrimary,
-        unfocusedTextColor = DarkColors.TextPrimary,
-        focusedContainerColor = DarkColors.Surface,
-        unfocusedContainerColor = DarkColors.Surface,
+        focusedTextColor = appColors.textPrimary,
+        unfocusedTextColor = appColors.textPrimary,
+        focusedContainerColor = appColors.surface,
+        unfocusedContainerColor = appColors.surface,
         focusedBorderColor = MaxmarColors.Primary,
-        unfocusedBorderColor = DarkColors.TextTertiary.copy(alpha = 0.5f),
+        unfocusedBorderColor = appColors.textTertiary.copy(alpha = 0.5f),
         errorBorderColor = MaxmarColors.Error,
         cursorColor = MaxmarColors.Primary,
         focusedLabelColor = MaxmarColors.Primary,
-        unfocusedLabelColor = DarkColors.TextSecondary,
-        focusedLeadingIconColor = DarkColors.TextSecondary,
-        unfocusedLeadingIconColor = DarkColors.TextSecondary,
-        focusedTrailingIconColor = DarkColors.TextSecondary,
-        unfocusedTrailingIconColor = DarkColors.TextSecondary
+        unfocusedLabelColor = appColors.textSecondary,
+        focusedLeadingIconColor = appColors.textSecondary,
+        unfocusedLeadingIconColor = appColors.textSecondary,
+        focusedTrailingIconColor = appColors.textSecondary,
+        unfocusedTrailingIconColor = appColors.textSecondary
     )
     
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -358,6 +363,8 @@ private fun RememberMeAndForgotSection(
     rememberMe: Boolean,
     onRememberMeChange: (Boolean) -> Unit
 ) {
+    val appColors = LocalAppColors.current
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -369,7 +376,7 @@ private fun RememberMeAndForgotSection(
                 onCheckedChange = onRememberMeChange,
                 colors = CheckboxDefaults.colors(
                     checkedColor = MaxmarColors.Primary,
-                    uncheckedColor = DarkColors.TextSecondary,
+                    uncheckedColor = appColors.textSecondary,
                     checkmarkColor = Color.White
                 ),
                 modifier = Modifier.size(24.dp)
@@ -380,7 +387,7 @@ private fun RememberMeAndForgotSection(
             Text(
                 text = "Ingat saya",
                 style = MaterialTheme.typography.bodyMedium.copy(
-                    color = DarkColors.TextSecondary
+                    color = appColors.textSecondary
                 )
             )
         }
@@ -439,6 +446,8 @@ private fun LoginButton(
 
 @Composable
 private fun FooterSection() {
+    val appColors = LocalAppColors.current
+    
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -446,20 +455,20 @@ private fun FooterSection() {
         ) {
             HorizontalDivider(
                 modifier = Modifier.weight(1f),
-                color = DarkColors.TextTertiary.copy(alpha = 0.3f)
+                color = appColors.textTertiary.copy(alpha = 0.3f)
             )
             
             Text(
                 text = "Maxmar Attendance",
                 style = MaterialTheme.typography.bodySmall.copy(
-                    color = DarkColors.TextTertiary
+                    color = appColors.textTertiary
                 ),
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             
             HorizontalDivider(
                 modifier = Modifier.weight(1f),
-                color = DarkColors.TextTertiary.copy(alpha = 0.3f)
+                color = appColors.textTertiary.copy(alpha = 0.3f)
             )
         }
         
@@ -468,7 +477,7 @@ private fun FooterSection() {
         Text(
             text = "v1.0.0",
             style = MaterialTheme.typography.bodySmall.copy(
-                color = DarkColors.TextTertiary
+                color = appColors.textTertiary
             )
         )
     }

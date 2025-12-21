@@ -55,8 +55,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.maxmar.attendance.data.model.AttendanceSummary
 import com.maxmar.attendance.data.model.Shift
-import com.maxmar.attendance.ui.theme.DarkColors
+import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 
 /**
@@ -72,6 +73,7 @@ fun HomeScreen(
 ) {
     val state by viewModel.homeState.collectAsState()
     var selectedNavIndex by rememberSaveable { mutableIntStateOf(0) }
+    val appColors = LocalAppColors.current
     
     Scaffold(
         bottomBar = {
@@ -93,8 +95,8 @@ fun HomeScreen(
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            DarkColors.BackgroundGradientStart,
-                            DarkColors.BackgroundGradientEnd
+                            appColors.backgroundGradientStart,
+                            appColors.backgroundGradientEnd
                         )
                     )
                 )
@@ -141,7 +143,7 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(32.dp))
                     
                     // Monthly Summary
-                    MonthlySummaryCard()
+                    MonthlySummaryCard(summary = state.summary)
                 }
             }
         }
@@ -154,6 +156,8 @@ private fun HeaderSection(
     employeeName: String,
     onNotificationClick: () -> Unit
 ) {
+    val appColors = LocalAppColors.current
+    
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
@@ -181,14 +185,14 @@ private fun HeaderSection(
             Text(
                 text = "$greeting,",
                 style = MaterialTheme.typography.bodyMedium,
-                color = DarkColors.TextSecondary
+                color = appColors.textSecondary
             )
             Text(
                 text = employeeName,
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = DarkColors.TextPrimary
+                color = appColors.textPrimary
             )
         }
         
@@ -204,7 +208,7 @@ private fun HeaderSection(
                 Icon(
                     imageVector = Icons.Default.Notifications,
                     contentDescription = "Notifications",
-                    tint = DarkColors.TextSecondary,
+                    tint = appColors.textSecondary,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -217,10 +221,12 @@ private fun ShiftCard(
     isWorkday: Boolean,
     shift: Shift?
 ) {
+    val appColors = LocalAppColors.current
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isWorkday) MaxmarColors.Primary else DarkColors.Surface
+            containerColor = if (isWorkday) MaxmarColors.Primary else appColors.surface
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -243,7 +249,7 @@ private fun ShiftCard(
                 Icon(
                     imageVector = if (isWorkday) Icons.Default.Schedule else Icons.Default.Weekend,
                     contentDescription = null,
-                    tint = if (isWorkday) Color.White else DarkColors.TextSecondary,
+                    tint = if (isWorkday) Color.White else appColors.textSecondary,
                     modifier = Modifier.size(24.dp)
                 )
             }
@@ -254,7 +260,7 @@ private fun ShiftCard(
                 Text(
                     text = if (isWorkday) "Jadwal Hari Ini" else "Hari Libur",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isWorkday) Color.White.copy(alpha = 0.7f) else DarkColors.TextSecondary
+                    color = if (isWorkday) Color.White.copy(alpha = 0.7f) else appColors.textSecondary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -266,7 +272,7 @@ private fun ShiftCard(
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = if (isWorkday) Color.White else DarkColors.TextPrimary
+                    color = if (isWorkday) Color.White else appColors.textPrimary
                 )
             }
             
@@ -344,13 +350,14 @@ private fun ActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val displayColor = if (enabled) color else DarkColors.TextTertiary.copy(alpha = 0.3f)
+    val appColors = LocalAppColors.current
+    val displayColor = if (enabled) color else appColors.textTertiary.copy(alpha = 0.3f)
     
     Card(
         modifier = modifier
             .height(100.dp)
             .clickable(enabled = enabled, onClick = onClick),
-        colors = CardDefaults.cardColors(containerColor = DarkColors.Surface),
+        colors = CardDefaults.cardColors(containerColor = appColors.surface),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
@@ -382,17 +389,19 @@ private fun ActionButton(
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = if (enabled) DarkColors.TextPrimary else DarkColors.TextTertiary
+                color = if (enabled) appColors.textPrimary else appColors.textTertiary
             )
         }
     }
 }
 
 @Composable
-private fun MonthlySummaryCard() {
+private fun MonthlySummaryCard(summary: AttendanceSummary?) {
+    val appColors = LocalAppColors.current
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = DarkColors.Surface),
+        colors = CardDefaults.cardColors(containerColor = appColors.surface),
         shape = RoundedCornerShape(24.dp)
     ) {
         Column(
@@ -401,22 +410,54 @@ private fun MonthlySummaryCard() {
                 .padding(24.dp)
         ) {
             Text(
-                text = "Monthly Summary",
+                text = "Ringkasan ${summary?.monthName ?: "Bulan Ini"}",
                 style = MaterialTheme.typography.titleMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = DarkColors.TextPrimary
+                color = appColors.textPrimary
             )
             
             Spacer(modifier = Modifier.height(24.dp))
             
+            // First row: Hadir, Terlambat, Tidak Hadir
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
-                StatItem(label = "Present", value = "22", color = MaxmarColors.CheckIn)
-                StatItem(label = "Late", value = "3", color = MaxmarColors.Warning)
-                StatItem(label = "Absent", value = "1", color = MaxmarColors.CheckOut)
+                StatItem(
+                    label = "Hadir",
+                    value = summary?.present?.toString() ?: "-",
+                    color = MaxmarColors.CheckIn
+                )
+                StatItem(
+                    label = "Terlambat",
+                    value = summary?.late?.toString() ?: "-",
+                    color = MaxmarColors.Warning
+                )
+                StatItem(
+                    label = "Tidak Hadir",
+                    value = summary?.absent?.toString() ?: "-",
+                    color = MaxmarColors.CheckOut
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Second row: Sakit, Cuti
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                StatItem(
+                    label = "Sakit",
+                    value = summary?.sick?.toString() ?: "-",
+                    color = MaxmarColors.Error
+                )
+                StatItem(
+                    label = "Cuti",
+                    value = summary?.leave?.toString() ?: "-",
+                    color = MaxmarColors.Primary
+                )
             }
         }
     }
@@ -452,9 +493,11 @@ private fun BottomNavBar(
     selectedIndex: Int,
     onItemSelected: (Int) -> Unit
 ) {
+    val appColors = LocalAppColors.current
+    
     NavigationBar(
-        containerColor = DarkColors.Surface,
-        contentColor = DarkColors.TextPrimary
+        containerColor = appColors.surface,
+        contentColor = appColors.textPrimary
     ) {
         NavigationBarItem(
             icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
@@ -465,8 +508,8 @@ private fun BottomNavBar(
                 selectedIconColor = MaxmarColors.Primary,
                 selectedTextColor = MaxmarColors.Primary,
                 indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
-                unselectedIconColor = DarkColors.TextSecondary,
-                unselectedTextColor = DarkColors.TextSecondary
+                unselectedIconColor = appColors.textSecondary,
+                unselectedTextColor = appColors.textSecondary
             )
         )
         NavigationBarItem(
@@ -478,8 +521,8 @@ private fun BottomNavBar(
                 selectedIconColor = MaxmarColors.Primary,
                 selectedTextColor = MaxmarColors.Primary,
                 indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
-                unselectedIconColor = DarkColors.TextSecondary,
-                unselectedTextColor = DarkColors.TextSecondary
+                unselectedIconColor = appColors.textSecondary,
+                unselectedTextColor = appColors.textSecondary
             )
         )
         NavigationBarItem(
@@ -491,8 +534,8 @@ private fun BottomNavBar(
                 selectedIconColor = MaxmarColors.Primary,
                 selectedTextColor = MaxmarColors.Primary,
                 indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
-                unselectedIconColor = DarkColors.TextSecondary,
-                unselectedTextColor = DarkColors.TextSecondary
+                unselectedIconColor = appColors.textSecondary,
+                unselectedTextColor = appColors.textSecondary
             )
         )
     }

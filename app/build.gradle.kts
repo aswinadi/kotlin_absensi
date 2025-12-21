@@ -20,8 +20,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // API Base URL
-        buildConfigField("String", "BASE_URL", "\"https://filament-absensi.test/api/v1/\"")
+        // API Base URL - Using ngrok tunnel for external access
+        buildConfigField("String", "BASE_URL", "\"https://biogeographic-raylan-interdentally.ngrok-free.dev/api/v1/\"")
     }
 
     buildTypes {

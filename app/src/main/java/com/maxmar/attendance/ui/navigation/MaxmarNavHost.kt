@@ -10,7 +10,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.maxmar.attendance.ui.screens.auth.LoginScreen
+import com.maxmar.attendance.ui.screens.history.HistoryScreen
 import com.maxmar.attendance.ui.screens.home.HomeScreen
+import com.maxmar.attendance.ui.screens.profile.ProfileScreen
 import com.maxmar.attendance.ui.screens.splash.SplashScreen
 
 /**
@@ -116,12 +118,25 @@ fun MaxmarNavHost(
         
         // History Screen
         composable(Routes.HISTORY) {
-            // TODO: HistoryScreen
+            HistoryScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
         
         // Profile Screen
         composable(Routes.PROFILE) {
-            // TODO: ProfileScreen
+            ProfileScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                },
+                onLogout = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
         
         // Absent Screen

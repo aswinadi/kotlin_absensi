@@ -2,8 +2,10 @@ package com.maxmar.attendance.ui.screens.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxmar.attendance.data.model.AttendanceSummary
 import com.maxmar.attendance.data.model.Employee
 import com.maxmar.attendance.data.model.Shift
+import com.maxmar.attendance.data.repository.AttendanceRepository
 import com.maxmar.attendance.data.repository.AuthResult
 import com.maxmar.attendance.data.repository.EmployeeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,6 +24,7 @@ data class HomeState(
     val employee: Employee? = null,
     val isWorkday: Boolean = false,
     val shift: Shift? = null,
+    val summary: AttendanceSummary? = null,
     val hasCheckedIn: Boolean = false,
     val hasCheckedOut: Boolean = false,
     val error: String? = null
@@ -32,7 +35,8 @@ data class HomeState(
  */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    private val employeeRepository: EmployeeRepository
+    private val employeeRepository: EmployeeRepository,
+    private val attendanceRepository: AttendanceRepository
 ) : ViewModel() {
     
     private val _homeState = MutableStateFlow(HomeState())
@@ -64,15 +68,25 @@ class HomeViewModel @Inject constructor(
                 is AuthResult.Success -> {
                     _homeState.value = _homeState.value.copy(
                         isWorkday = shiftResult.data.isWorkday,
-                        shift = shiftResult.data.shift,
+                        shift = shiftResult.data.shift
+                    )
+                }
+                is AuthResult.Error -> {
+                    _homeState.value = _homeState.value.copy(error = shiftResult.message)
+                }
+            }
+            
+            // Fetch monthly summary
+            when (val summaryResult = attendanceRepository.fetchSummary()) {
+                is AuthResult.Success -> {
+                    _homeState.value = _homeState.value.copy(
+                        summary = summaryResult.data,
                         isLoading = false
                     )
                 }
                 is AuthResult.Error -> {
-                    _homeState.value = _homeState.value.copy(
-                        isLoading = false,
-                        error = shiftResult.message
-                    )
+                    // Don't fail the whole screen if summary fails
+                    _homeState.value = _homeState.value.copy(isLoading = false)
                 }
             }
         }

@@ -24,6 +24,7 @@ object ApiEndpoints {
     const val CHECK_IN = "attendance/check-in"
     const val CHECK_OUT = "attendance/check-out"
     const val ATTENDANCE_HISTORY = "attendance/history"
+    const val ATTENDANCE_SUMMARY = "attendance/summary"
     
     // Absent endpoints
     const val ABSENT_TYPES = "absent-types"
