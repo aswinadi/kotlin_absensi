@@ -22,6 +22,7 @@ firebase = "33.7.0"
 coil = "2.7.0"
 serialization = "1.7.3"
 googleServices = "4.4.2"
+osmdroid = "6.1.18"
 
 [libraries]
 # Core
@@ -70,6 +71,7 @@ mlkit-face = { group = "com.google.mlkit", name = "face-detection", version.ref 
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
+osmdroid = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid" }
 
 # Firebase
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase" }

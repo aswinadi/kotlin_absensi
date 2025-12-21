@@ -101,6 +101,7 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
+    implementation(libs.osmdroid)
 
     // Firebase - TODO: Enable after adding google-services.json
     // implementation(platform(libs.firebase.bom))
