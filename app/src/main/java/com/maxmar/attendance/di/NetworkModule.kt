@@ -8,6 +8,7 @@ import com.maxmar.attendance.data.api.AuthApi
 import com.maxmar.attendance.data.api.AuthInterceptor
 import com.maxmar.attendance.data.api.BusinessTripApi
 import com.maxmar.attendance.data.api.EmployeeApi
+import com.maxmar.attendance.data.api.NotificationApi
 import com.maxmar.attendance.data.local.TokenManager
 import dagger.Module
 import dagger.Provides
@@ -104,5 +105,11 @@ object NetworkModule {
     @Singleton
     fun provideApprovalApi(retrofit: Retrofit): ApprovalApi {
         return retrofit.create(ApprovalApi::class.java)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideNotificationApi(retrofit: Retrofit): NotificationApi {
+        return retrofit.create(NotificationApi::class.java)
     }
 }

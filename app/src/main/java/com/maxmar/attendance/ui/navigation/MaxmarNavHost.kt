@@ -243,13 +243,7 @@ fun MaxmarNavHost(
         // Absent Screen
         composable(Routes.ABSENT) {
             AbsentScreen(
-<<<<<<< HEAD
-                onNavigateBack = {
-                    navController.popBackStack()
-                }
-=======
                 onNavigateBack = { navController.popBackStack() }
->>>>>>> feature/check-in-out
             )
         }
         
@@ -284,7 +278,9 @@ fun MaxmarNavHost(
         
         // Notifications Screen
         composable(Routes.NOTIFICATIONS) {
-            // TODO: NotificationScreen
+            com.maxmar.attendance.ui.screens.notification.NotificationScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         
         // Map Screen
