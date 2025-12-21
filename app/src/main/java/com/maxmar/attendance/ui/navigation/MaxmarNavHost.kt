@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.maxmar.attendance.ui.screens.absent.AbsentScreen
+import com.maxmar.attendance.ui.screens.approval.ApprovalScreen
 import com.maxmar.attendance.ui.screens.auth.LoginScreen
 import com.maxmar.attendance.ui.screens.businesstrip.BusinessTripDetailScreen
 import com.maxmar.attendance.ui.screens.businesstrip.BusinessTripScreen
@@ -276,7 +277,9 @@ fun MaxmarNavHost(
         
         // Approval Screen
         composable(Routes.APPROVAL) {
-            // TODO: ApprovalScreen
+            ApprovalScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
         
         // Notifications Screen
