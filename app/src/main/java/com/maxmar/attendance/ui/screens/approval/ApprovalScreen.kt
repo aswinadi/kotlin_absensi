@@ -193,7 +193,7 @@ fun ApprovalScreen(
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        items(items, key = { it.id }) { approval ->
+                        items(items, key = { "${it.category ?: "izin"}_${it.id}" }) { approval ->
                             ApprovalCard(
                                 approval = approval,
                                 onAcknowledge = { viewModel.acknowledge(approval) },
