@@ -1,5 +1,7 @@
 package com.maxmar.attendance.data.api
 
+import com.maxmar.attendance.data.model.AllowanceResponse
+import com.maxmar.attendance.data.model.AssignableUsersResponse
 import com.maxmar.attendance.data.model.BusinessTripDetailResponse
 import com.maxmar.attendance.data.model.BusinessTripListResponse
 import com.maxmar.attendance.data.model.MasterDataResponse
@@ -33,6 +35,14 @@ interface BusinessTripApi {
     @GET("business-trip-destinations")
     suspend fun getDestinations(): MasterDataResponse
     
+    @GET("business-trips/assignable-users")
+    suspend fun getAssignableUsers(): AssignableUsersResponse
+    
+    @GET("business-trips/allowance")
+    suspend fun getEmployeeAllowance(
+        @Query("destination_type") destinationType: String
+    ): AllowanceResponse
+    
     @FormUrlEncoded
     @POST(ApiEndpoints.BUSINESS_TRIPS)
     suspend fun createBusinessTrip(
@@ -41,9 +51,13 @@ interface BusinessTripApi {
         @Field("business_trip_destination_id") destinationId: Int,
         @Field("destination_city") destinationCity: String?,
         @Field("departure_date") departureDate: String,
+        @Field("departure_time") departureTime: String?,
         @Field("arrival_date") arrivalDate: String,
+        @Field("arrival_time") arrivalTime: String?,
+        @Field("assigned_by") assignedBy: Int?,
         @Field("notes") notes: String?
     ): BusinessTripDetailResponse
 }
+
 
 

@@ -2,6 +2,8 @@ package com.maxmar.attendance.ui.screens.businesstrip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxmar.attendance.data.model.AllowanceData
+import com.maxmar.attendance.data.model.AssignableUser
 import com.maxmar.attendance.data.model.BusinessTrip
 import com.maxmar.attendance.data.model.MasterDataItem
 import com.maxmar.attendance.data.repository.AuthResult
@@ -43,6 +45,8 @@ data class BusinessTripFormState(
     val isSuccess: Boolean = false,
     val purposes: List<MasterDataItem> = emptyList(),
     val destinations: List<MasterDataItem> = emptyList(),
+    val assignableUsers: List<AssignableUser> = emptyList(),
+    val allowancePerDay: Double = 0.0,
     val error: String? = null
 )
 
@@ -68,7 +72,7 @@ class BusinessTripViewModel @Inject constructor(
     }
     
     /**
-     * Load form master data (purposes and destinations).
+     * Load form master data (purposes, destinations, and assignable users).
      */
     fun loadFormData() {
         viewModelScope.launch {
@@ -76,12 +80,32 @@ class BusinessTripViewModel @Inject constructor(
             
             val purposesResult = repository.fetchPurposes()
             val destinationsResult = repository.fetchDestinations()
+            val usersResult = repository.fetchAssignableUsers()
             
             _formState.value = _formState.value.copy(
                 isLoading = false,
                 purposes = (purposesResult as? AuthResult.Success)?.data ?: emptyList(),
-                destinations = (destinationsResult as? AuthResult.Success)?.data ?: emptyList()
+                destinations = (destinationsResult as? AuthResult.Success)?.data ?: emptyList(),
+                assignableUsers = (usersResult as? AuthResult.Success)?.data ?: emptyList()
             )
+        }
+    }
+    
+    /**
+     * Fetch allowance based on destination type.
+     */
+    fun fetchAllowance(destinationType: String) {
+        viewModelScope.launch {
+            when (val result = repository.fetchAllowance(destinationType)) {
+                is AuthResult.Success -> {
+                    _formState.value = _formState.value.copy(
+                        allowancePerDay = result.data?.allowancePerDay ?: 0.0
+                    )
+                }
+                is AuthResult.Error -> {
+                    _formState.value = _formState.value.copy(allowancePerDay = 0.0)
+                }
+            }
         }
     }
     
@@ -190,7 +214,10 @@ class BusinessTripViewModel @Inject constructor(
         destinationId: Int,
         destinationCity: String?,
         departureDate: String,
+        departureTime: String?,
         arrivalDate: String,
+        arrivalTime: String?,
+        assignedBy: Int?,
         notes: String?
     ) {
         viewModelScope.launch {
@@ -202,7 +229,10 @@ class BusinessTripViewModel @Inject constructor(
                 destinationId = destinationId,
                 destinationCity = destinationCity,
                 departureDate = departureDate,
+                departureTime = departureTime,
                 arrivalDate = arrivalDate,
+                arrivalTime = arrivalTime,
+                assignedBy = assignedBy,
                 notes = notes
             )) {
                 is AuthResult.Success -> {

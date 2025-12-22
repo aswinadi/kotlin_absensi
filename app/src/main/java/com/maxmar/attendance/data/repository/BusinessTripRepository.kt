@@ -1,6 +1,8 @@
 package com.maxmar.attendance.data.repository
 
 import com.maxmar.attendance.data.api.BusinessTripApi
+import com.maxmar.attendance.data.model.AllowanceData
+import com.maxmar.attendance.data.model.AssignableUser
 import com.maxmar.attendance.data.model.BusinessTrip
 import com.maxmar.attendance.data.model.MasterDataItem
 import com.maxmar.attendance.data.model.PaginationMeta
@@ -41,6 +43,30 @@ class BusinessTripRepository @Inject constructor(
     suspend fun fetchDestinations(): AuthResult<List<MasterDataItem>> {
         return try {
             val response = businessTripApi.getDestinations()
+            AuthResult.Success(response.data)
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
+     * Fetch assignable users for dropdown.
+     */
+    suspend fun fetchAssignableUsers(): AuthResult<List<AssignableUser>> {
+        return try {
+            val response = businessTripApi.getAssignableUsers()
+            AuthResult.Success(response.data)
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
+     * Fetch allowance based on destination type.
+     */
+    suspend fun fetchAllowance(destinationType: String): AuthResult<AllowanceData?> {
+        return try {
+            val response = businessTripApi.getEmployeeAllowance(destinationType)
             AuthResult.Success(response.data)
         } catch (e: Exception) {
             AuthResult.Error("Terjadi kesalahan: ${e.message}")
@@ -92,7 +118,10 @@ class BusinessTripRepository @Inject constructor(
         destinationId: Int,
         destinationCity: String?,
         departureDate: String,
+        departureTime: String?,
         arrivalDate: String,
+        arrivalTime: String?,
+        assignedBy: Int?,
         notes: String?
     ): AuthResult<BusinessTrip> {
         return try {
@@ -102,7 +131,10 @@ class BusinessTripRepository @Inject constructor(
                 destinationId = destinationId,
                 destinationCity = destinationCity,
                 departureDate = departureDate,
+                departureTime = departureTime,
                 arrivalDate = arrivalDate,
+                arrivalTime = arrivalTime,
+                assignedBy = assignedBy,
                 notes = notes
             )
             AuthResult.Success(response.data)
@@ -114,5 +146,6 @@ class BusinessTripRepository @Inject constructor(
         }
     }
 }
+
 
 
