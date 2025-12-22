@@ -76,11 +76,13 @@ fun BusinessTripScreen(
     val appColors = LocalAppColors.current
     val listState = rememberLazyListState()
     
-    // Pagination trigger
+    // Pagination trigger - only fires when near end of list AND list has items
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItem >= state.trips.size - 3 && state.hasMore && !state.isLoading
+            val totalItems = state.trips.size
+            // Only trigger when: list has items, near end of list, has more data, not loading
+            totalItems > 0 && lastVisibleItem >= totalItems - 3 && state.hasMore && !state.isLoading
         }
     }
     
