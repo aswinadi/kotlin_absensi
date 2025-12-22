@@ -567,5 +567,6 @@ private fun ApprovalCard(
                 }
             }
         }
+        }
     }
 }
