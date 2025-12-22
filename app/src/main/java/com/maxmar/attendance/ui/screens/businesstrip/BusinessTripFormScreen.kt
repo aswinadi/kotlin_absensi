@@ -401,39 +401,45 @@ private fun DatePickerField(
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     
+    val showPicker = {
+        DatePickerDialog(
+            context,
+            { _, year, month, day ->
+                onDateSelected(String.format("%04d-%02d-%02d", year, month + 1, day))
+            },
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        ).show()
+    }
+    
     Column(modifier = modifier) {
         Text(text = label, color = appColors.textPrimary, fontWeight = FontWeight.Medium, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = value.ifEmpty { "Pilih tanggal" },
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, day ->
-                            onDateSelected(String.format("%04d-%02d-%02d", year, month + 1, day))
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
+        Box {
+            OutlinedTextField(
+                value = value.ifEmpty { "Pilih tanggal" },
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(Icons.Default.CalendarMonth, contentDescription = "Calendar", tint = appColors.textSecondary)
                 },
-            trailingIcon = {
-                Icon(Icons.Default.CalendarMonth, contentDescription = "Calendar")
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaxmarColors.Primary,
-                unfocusedBorderColor = appColors.textSecondary.copy(alpha = 0.3f),
-                focusedContainerColor = appColors.cardBackground,
-                unfocusedContainerColor = appColors.cardBackground,
-                focusedTextColor = if (value.isEmpty()) appColors.textSecondary else appColors.textPrimary,
-                unfocusedTextColor = if (value.isEmpty()) appColors.textSecondary else appColors.textPrimary
-            ),
-            shape = RoundedCornerShape(12.dp)
-        )
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledBorderColor = appColors.textSecondary.copy(alpha = 0.3f),
+                    disabledContainerColor = appColors.cardBackground,
+                    disabledTextColor = if (value.isEmpty()) appColors.textSecondary else appColors.textPrimary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+            // Transparent clickable overlay
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { showPicker() }
+            )
+        }
     }
 }
 
@@ -448,39 +454,45 @@ private fun TimePickerField(
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
     
+    val showPicker = {
+        TimePickerDialog(
+            context,
+            { _, hour, minute ->
+                onTimeSelected(String.format("%02d:%02d", hour, minute))
+            },
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            true
+        ).show()
+    }
+    
     Column(modifier = modifier) {
         Text(text = label, color = appColors.textPrimary, fontWeight = FontWeight.Medium, fontSize = 14.sp)
         Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = value.ifEmpty { "--:--" },
-            onValueChange = {},
-            readOnly = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable {
-                    TimePickerDialog(
-                        context,
-                        { _, hour, minute ->
-                            onTimeSelected(String.format("%02d:%02d", hour, minute))
-                        },
-                        calendar.get(Calendar.HOUR_OF_DAY),
-                        calendar.get(Calendar.MINUTE),
-                        true
-                    ).show()
+        Box {
+            OutlinedTextField(
+                value = value.ifEmpty { "--:--" },
+                onValueChange = {},
+                readOnly = true,
+                enabled = false,
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    Icon(Icons.Default.Schedule, contentDescription = "Time", tint = appColors.textSecondary)
                 },
-            trailingIcon = {
-                Icon(Icons.Default.Schedule, contentDescription = "Time")
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaxmarColors.Primary,
-                unfocusedBorderColor = appColors.textSecondary.copy(alpha = 0.3f),
-                focusedContainerColor = appColors.cardBackground,
-                unfocusedContainerColor = appColors.cardBackground,
-                focusedTextColor = if (value.isEmpty()) appColors.textSecondary else appColors.textPrimary,
-                unfocusedTextColor = if (value.isEmpty()) appColors.textSecondary else appColors.textPrimary
-            ),
-            shape = RoundedCornerShape(12.dp)
-        )
+                colors = OutlinedTextFieldDefaults.colors(
+                    disabledBorderColor = appColors.textSecondary.copy(alpha = 0.3f),
+                    disabledContainerColor = appColors.cardBackground,
+                    disabledTextColor = if (value.isEmpty()) appColors.textSecondary else appColors.textPrimary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            )
+            // Transparent clickable overlay
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .clickable { showPicker() }
+            )
+        }
     }
 }
 
