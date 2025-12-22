@@ -3,6 +3,7 @@ package com.maxmar.attendance.ui.screens.businesstrip
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxmar.attendance.data.model.BusinessTrip
+import com.maxmar.attendance.data.model.MasterDataItem
 import com.maxmar.attendance.data.repository.AuthResult
 import com.maxmar.attendance.data.repository.BusinessTripRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -37,8 +38,11 @@ data class BusinessTripDetailState(
  * Business Trip form state.
  */
 data class BusinessTripFormState(
+    val isLoading: Boolean = false,
     val isSubmitting: Boolean = false,
     val isSuccess: Boolean = false,
+    val purposes: List<MasterDataItem> = emptyList(),
+    val destinations: List<MasterDataItem> = emptyList(),
     val error: String? = null
 )
 
@@ -61,6 +65,24 @@ class BusinessTripViewModel @Inject constructor(
     
     init {
         loadTrips()
+    }
+    
+    /**
+     * Load form master data (purposes and destinations).
+     */
+    fun loadFormData() {
+        viewModelScope.launch {
+            _formState.value = _formState.value.copy(isLoading = true)
+            
+            val purposesResult = repository.fetchPurposes()
+            val destinationsResult = repository.fetchDestinations()
+            
+            _formState.value = _formState.value.copy(
+                isLoading = false,
+                purposes = (purposesResult as? AuthResult.Success)?.data ?: emptyList(),
+                destinations = (destinationsResult as? AuthResult.Success)?.data ?: emptyList()
+            )
+        }
     }
     
     /**
@@ -163,31 +185,33 @@ class BusinessTripViewModel @Inject constructor(
      * Create a new business trip.
      */
     fun createBusinessTrip(
-        purpose: String,
+        purposeId: Int,
         location: String,
+        destinationId: Int,
         destinationCity: String?,
         departureDate: String,
         arrivalDate: String,
         notes: String?
     ) {
         viewModelScope.launch {
-            _formState.value = BusinessTripFormState(isSubmitting = true)
+            _formState.value = _formState.value.copy(isSubmitting = true)
             
             when (val result = repository.createBusinessTrip(
-                purpose = purpose,
+                purposeId = purposeId,
                 location = location,
+                destinationId = destinationId,
                 destinationCity = destinationCity,
                 departureDate = departureDate,
                 arrivalDate = arrivalDate,
                 notes = notes
             )) {
                 is AuthResult.Success -> {
-                    _formState.value = BusinessTripFormState(isSuccess = true)
+                    _formState.value = _formState.value.copy(isSubmitting = false, isSuccess = true)
                     // Refresh list
                     loadTrips(refresh = true)
                 }
                 is AuthResult.Error -> {
-                    _formState.value = BusinessTripFormState(error = result.message)
+                    _formState.value = _formState.value.copy(isSubmitting = false, error = result.message)
                 }
             }
         }

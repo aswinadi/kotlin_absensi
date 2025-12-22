@@ -2,6 +2,7 @@ package com.maxmar.attendance.data.api
 
 import com.maxmar.attendance.data.model.BusinessTripDetailResponse
 import com.maxmar.attendance.data.model.BusinessTripListResponse
+import com.maxmar.attendance.data.model.MasterDataResponse
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
@@ -25,15 +26,24 @@ interface BusinessTripApi {
         @Path("id") id: Int
     ): BusinessTripDetailResponse
     
+    // Master data endpoints
+    @GET("business-trip-purposes")
+    suspend fun getPurposes(): MasterDataResponse
+    
+    @GET("business-trip-destinations")
+    suspend fun getDestinations(): MasterDataResponse
+    
     @FormUrlEncoded
     @POST(ApiEndpoints.BUSINESS_TRIPS)
     suspend fun createBusinessTrip(
-        @Field("purpose") purpose: String,
+        @Field("business_trip_purpose_id") purposeId: Int,
         @Field("location") location: String,
+        @Field("business_trip_destination_id") destinationId: Int,
         @Field("destination_city") destinationCity: String?,
         @Field("departure_date") departureDate: String,
         @Field("arrival_date") arrivalDate: String,
         @Field("notes") notes: String?
     ): BusinessTripDetailResponse
 }
+
 
