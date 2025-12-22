@@ -434,22 +434,6 @@ private fun DatePickerField(
             ),
             shape = RoundedCornerShape(12.dp)
         )
-        // Invisible click overlay
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .clickable {
-                    DatePickerDialog(
-                        context,
-                        { _, year, month, day ->
-                            onDateSelected(String.format("%04d-%02d-%02d", year, month + 1, day))
-                        },
-                        calendar.get(Calendar.YEAR),
-                        calendar.get(Calendar.MONTH),
-                        calendar.get(Calendar.DAY_OF_MONTH)
-                    ).show()
-                }
-        )
     }
 }
 
