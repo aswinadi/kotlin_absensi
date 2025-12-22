@@ -6,47 +6,48 @@ import com.google.gson.annotations.SerializedName
  * Business Trip model.
  */
 data class BusinessTrip(
-    val id: Int,
+    val id: Int = 0,
     @SerializedName("transaction_code")
-    val transactionCode: String,
+    val transactionCode: String = "",
     @SerializedName("transaction_date")
-    val transactionDate: String,
-    val purpose: String,
-    val location: String,
+    val transactionDate: String? = null,
+    val purpose: String? = null,
+    val location: String? = null,
     @SerializedName("destination_type")
-    val destinationType: String,
+    val destinationType: String? = null,
     @SerializedName("destination_city")
-    val destinationCity: String?,
-    @SerializedName("start_date") // Mapped from departure_date in API resource usually
-    val startDate: String,
-    @SerializedName("end_date") // Mapped from arrival_date in API resource usually
-    val endDate: String,
+    val destinationCity: String? = null,
+    @SerializedName("start_date")
+    val startDate: String? = null,
+    @SerializedName("end_date")
+    val endDate: String? = null,
     @SerializedName("start_time")
-    val startTime: String?,
+    val startTime: String? = null,
     @SerializedName("end_time")
-    val endTime: String?,
-    val days: Int,
+    val endTime: String? = null,
+    val days: Int = 0,
     @SerializedName("allowance_per_day")
-    val allowancePerDay: Double,
+    val allowancePerDay: Double = 0.0,
     @SerializedName("total_allowance")
-    val totalAllowance: Double,
+    val totalAllowance: Double = 0.0,
     @SerializedName("cash_advance")
-    val cashAdvance: Double,
-    val status: String,
+    val cashAdvance: Double = 0.0,
+    val status: String = "pending",
     @SerializedName("assigned_by")
-    val assignedBy: ApprovalInfo?,
+    val assignedBy: String? = null,
     @SerializedName("acknowledged_by")
-    val acknowledgedBy: ApprovalInfo?,
+    val acknowledgedBy: String? = null,
     @SerializedName("approved_by")
-    val approvedBy: ApprovalInfo?
+    val approvedBy: String? = null
 )
 
 /**
  * Business Trip List Response.
  */
 data class BusinessTripListResponse(
-    val data: List<BusinessTrip>,
-    val meta: PaginationMeta?
+    val success: Boolean = false,
+    val data: List<BusinessTrip> = emptyList(),
+    val meta: PaginationMeta? = null
 )
 
 /**

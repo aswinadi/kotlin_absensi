@@ -199,7 +199,7 @@ private fun TripDetailContent(trip: BusinessTrip) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Text(
-                    text = trip.purpose,
+                    text = trip.purpose ?: "-",
                     style = MaterialTheme.typography.titleMedium,
                     color = appColors.textPrimary
                 )
@@ -228,7 +228,7 @@ private fun TripDetailContent(trip: BusinessTrip) {
                 InfoRow(
                     icon = Icons.Default.LocationOn,
                     label = "Lokasi",
-                    value = trip.location
+                    value = trip.location ?: "-"
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -236,7 +236,7 @@ private fun TripDetailContent(trip: BusinessTrip) {
                 InfoRow(
                     icon = Icons.Default.CalendarMonth,
                     label = "Tanggal",
-                    value = "${trip.startDate} - ${trip.endDate}"
+                    value = "${trip.startDate ?: "-"} - ${trip.endDate ?: "-"}"
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -352,21 +352,21 @@ private fun TripDetailContent(trip: BusinessTrip) {
                 
                 ApprovalRow(
                     label = "Ditugaskan oleh",
-                    approver = trip.assignedBy?.by ?: "-"
+                    approver = trip.assignedBy ?: "-"
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 ApprovalRow(
                     label = "Diketahui oleh",
-                    approver = trip.acknowledgedBy?.by ?: "Menunggu"
+                    approver = trip.acknowledgedBy ?: "Menunggu"
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 ApprovalRow(
                     label = "Disetujui oleh",
-                    approver = trip.approvedBy?.by ?: "Menunggu"
+                    approver = trip.approvedBy ?: "Menunggu"
                 )
             }
         }

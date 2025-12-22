@@ -2,7 +2,10 @@ package com.maxmar.attendance.ui.screens.businesstrip
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.maxmar.attendance.data.model.AllowanceData
+import com.maxmar.attendance.data.model.AssignableUser
 import com.maxmar.attendance.data.model.BusinessTrip
+import com.maxmar.attendance.data.model.MasterDataItem
 import com.maxmar.attendance.data.repository.AuthResult
 import com.maxmar.attendance.data.repository.BusinessTripRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,6 +37,20 @@ data class BusinessTripDetailState(
 )
 
 /**
+ * Business Trip form state.
+ */
+data class BusinessTripFormState(
+    val isLoading: Boolean = false,
+    val isSubmitting: Boolean = false,
+    val isSuccess: Boolean = false,
+    val purposes: List<MasterDataItem> = emptyList(),
+    val destinations: List<MasterDataItem> = emptyList(),
+    val assignableUsers: List<AssignableUser> = emptyList(),
+    val allowancePerDay: Double = 0.0,
+    val error: String? = null
+)
+
+/**
  * ViewModel for Business Trip screens.
  */
 @HiltViewModel
@@ -47,8 +64,49 @@ class BusinessTripViewModel @Inject constructor(
     private val _detailState = MutableStateFlow(BusinessTripDetailState())
     val detailState: StateFlow<BusinessTripDetailState> = _detailState.asStateFlow()
     
+    private val _formState = MutableStateFlow(BusinessTripFormState())
+    val formState: StateFlow<BusinessTripFormState> = _formState.asStateFlow()
+    
     init {
         loadTrips()
+    }
+    
+    /**
+     * Load form master data (purposes, destinations, and assignable users).
+     */
+    fun loadFormData() {
+        viewModelScope.launch {
+            _formState.value = _formState.value.copy(isLoading = true)
+            
+            val purposesResult = repository.fetchPurposes()
+            val destinationsResult = repository.fetchDestinations()
+            val usersResult = repository.fetchAssignableUsers()
+            
+            _formState.value = _formState.value.copy(
+                isLoading = false,
+                purposes = (purposesResult as? AuthResult.Success)?.data ?: emptyList(),
+                destinations = (destinationsResult as? AuthResult.Success)?.data ?: emptyList(),
+                assignableUsers = (usersResult as? AuthResult.Success)?.data ?: emptyList()
+            )
+        }
+    }
+    
+    /**
+     * Fetch allowance based on destination ID.
+     */
+    fun fetchAllowance(destinationId: Int) {
+        viewModelScope.launch {
+            when (val result = repository.fetchAllowance(destinationId)) {
+                is AuthResult.Success -> {
+                    _formState.value = _formState.value.copy(
+                        allowancePerDay = result.data?.allowancePerDay ?: 0.0
+                    )
+                }
+                is AuthResult.Error -> {
+                    _formState.value = _formState.value.copy(allowancePerDay = 0.0)
+                }
+            }
+        }
     }
     
     /**
@@ -148,9 +206,66 @@ class BusinessTripViewModel @Inject constructor(
     }
     
     /**
+     * Create a new business trip.
+     */
+    fun createBusinessTrip(
+        purposeId: Int,
+        location: String,
+        destinationId: Int,
+        destinationCity: String,
+        departureDate: String,
+        departureTime: String?,
+        arrivalDate: String,
+        arrivalTime: String?,
+        assignedBy: Int,
+        notes: String?
+    ) {
+        viewModelScope.launch {
+            _formState.value = _formState.value.copy(isSubmitting = true)
+            
+            when (val result = repository.createBusinessTrip(
+                purposeId = purposeId,
+                location = location,
+                destinationId = destinationId,
+                destinationCity = destinationCity,
+                departureDate = departureDate,
+                departureTime = departureTime,
+                arrivalDate = arrivalDate,
+                arrivalTime = arrivalTime,
+                assignedBy = assignedBy,
+                notes = notes
+            )) {
+                is AuthResult.Success -> {
+                    _formState.value = _formState.value.copy(isSubmitting = false, isSuccess = true)
+                    // Refresh list
+                    loadTrips(refresh = true)
+                }
+                is AuthResult.Error -> {
+                    _formState.value = _formState.value.copy(isSubmitting = false, error = result.message)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Reset form state after success.
+     */
+    fun resetFormState() {
+        _formState.value = BusinessTripFormState()
+    }
+    
+    /**
+     * Clear form error.
+     */
+    fun clearFormError() {
+        _formState.value = _formState.value.copy(error = null)
+    }
+    
+    /**
      * Refresh trips list.
      */
     fun refresh() {
         loadTrips(refresh = true)
     }
 }
+

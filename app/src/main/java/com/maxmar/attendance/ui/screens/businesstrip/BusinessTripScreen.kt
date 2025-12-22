@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
@@ -33,6 +34,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,17 +69,20 @@ import com.maxmar.attendance.ui.theme.MaxmarColors
 fun BusinessTripScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToDetail: (Int) -> Unit = {},
+    onNavigateToCreate: () -> Unit = {},
     viewModel: BusinessTripViewModel = hiltViewModel()
 ) {
     val state by viewModel.listState.collectAsState()
     val appColors = LocalAppColors.current
     val listState = rememberLazyListState()
     
-    // Pagination trigger
+    // Pagination trigger - only fires when near end of list AND list has items
     val shouldLoadMore by remember {
         derivedStateOf {
             val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            lastVisibleItem >= state.trips.size - 3 && state.hasMore && !state.isLoading
+            val totalItems = state.trips.size
+            // Only trigger when: list has items, near end of list, has more data, not loading
+            totalItems > 0 && lastVisibleItem >= totalItems - 3 && state.hasMore && !state.isLoading
         }
     }
     
@@ -105,6 +110,18 @@ fun BusinessTripScreen(
                     navigationIconContentColor = appColors.textPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onNavigateToCreate,
+                containerColor = MaxmarColors.Primary,
+                contentColor = Color.White
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Buat Perjalanan Dinas"
+                )
+            }
         }
     ) { paddingValues ->
         Column(
@@ -297,7 +314,7 @@ private fun BusinessTripCard(
             
             // Purpose
             Text(
-                text = trip.purpose,
+                text = trip.purpose ?: "-",
                 style = MaterialTheme.typography.bodyLarge,
                 color = appColors.textPrimary
             )
@@ -314,7 +331,7 @@ private fun BusinessTripCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = trip.location,
+                    text = trip.location ?: "-",
                     style = MaterialTheme.typography.bodyMedium,
                     color = appColors.textSecondary
                 )
@@ -332,7 +349,7 @@ private fun BusinessTripCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "${trip.startDate} - ${trip.endDate} (${trip.days} hari)",
+                    text = "${trip.startDate ?: "-"} - ${trip.endDate ?: "-"} (${trip.days} hari)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = appColors.textSecondary
                 )
