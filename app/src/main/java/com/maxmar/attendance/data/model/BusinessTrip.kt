@@ -45,8 +45,9 @@ data class BusinessTrip(
  * Business Trip List Response.
  */
 data class BusinessTripListResponse(
-    val data: List<BusinessTrip>,
-    val meta: PaginationMeta?
+    val success: Boolean = false,
+    val data: List<BusinessTrip> = emptyList(),
+    val meta: PaginationMeta? = null
 )
 
 /**
