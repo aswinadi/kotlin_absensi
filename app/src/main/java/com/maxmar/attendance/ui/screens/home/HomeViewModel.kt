@@ -8,6 +8,7 @@ import com.maxmar.attendance.data.model.Shift
 import com.maxmar.attendance.data.repository.AttendanceRepository
 import com.maxmar.attendance.data.repository.AuthResult
 import com.maxmar.attendance.data.repository.EmployeeRepository
+import com.maxmar.attendance.data.repository.NotificationRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +30,7 @@ data class HomeState(
     val hasCheckedOut: Boolean = false,
     val checkInTime: String? = null,
     val checkOutTime: String? = null,
+    val unreadNotificationCount: Int = 0,
     val error: String? = null
 )
 
@@ -38,7 +40,8 @@ data class HomeState(
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val employeeRepository: EmployeeRepository,
-    private val attendanceRepository: AttendanceRepository
+    private val attendanceRepository: AttendanceRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
     
     private val _homeState = MutableStateFlow(HomeState())
@@ -96,7 +99,19 @@ class HomeViewModel @Inject constructor(
                         hasCheckedIn = today?.checkIn != null,
                         hasCheckedOut = today?.checkOut != null,
                         checkInTime = today?.checkIn?.time,
-                        checkOutTime = today?.checkOut?.time,
+                        checkOutTime = today?.checkOut?.time
+                    )
+                }
+                is AuthResult.Error -> {
+                    // Don't fail for attendance
+                }
+            }
+            
+            // Fetch unread notification count
+            when (val countResult = notificationRepository.fetchUnreadCount()) {
+                is AuthResult.Success -> {
+                    _homeState.value = _homeState.value.copy(
+                        unreadNotificationCount = countResult.data,
                         isLoading = false
                     )
                 }

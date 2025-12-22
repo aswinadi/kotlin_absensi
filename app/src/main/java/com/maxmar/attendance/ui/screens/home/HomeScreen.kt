@@ -135,6 +135,7 @@ fun HomeScreen(
                     HeaderSection(
                         greeting = viewModel.getGreeting(),
                         employeeName = state.employee?.fullName ?: "User",
+                        notificationCount = state.unreadNotificationCount,
                         onNotificationClick = onNavigateToNotifications
                     )
                     
@@ -183,6 +184,7 @@ fun HomeScreen(
 private fun HeaderSection(
     greeting: String,
     employeeName: String,
+    notificationCount: Int,
     onNotificationClick: () -> Unit
 ) {
     val appColors = LocalAppColors.current
@@ -228,8 +230,10 @@ private fun HeaderSection(
         // Notification Bell
         BadgedBox(
             badge = {
-                Badge(containerColor = MaxmarColors.Error) {
-                    Text("3", color = Color.White)
+                if (notificationCount > 0) {
+                    Badge(containerColor = MaxmarColors.Error) {
+                        Text(notificationCount.toString(), color = Color.White)
+                    }
                 }
             }
         ) {
