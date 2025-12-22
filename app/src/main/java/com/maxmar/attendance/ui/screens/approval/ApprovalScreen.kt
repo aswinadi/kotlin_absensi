@@ -130,17 +130,17 @@ fun ApprovalScreen(
                     )
                 )
         ) {
-            // Status filter chips (Menunggu / Selesai)
+            // Category tabs (Semua / Izin / Perdin) - First row
+            CategoryTabsRow(
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = { viewModel.setCategory(it) }
+            )
+            
+            // Status filter chips (Menunggu / Selesai) - Second row
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
                 pendingCount = state.pendingItems.size,
                 onFilterSelected = { viewModel.setFilter(it) }
-            )
-            
-            // Category tabs (Semua / Izin / Perdin)
-            CategoryTabsRow(
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = { viewModel.setCategory(it) }
             )
             
             // List
