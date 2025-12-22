@@ -144,6 +144,16 @@ fun HomeScreen(
                         shift = state.shift
                     )
                     
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    // Today's Attendance Card
+                    TodayAttendanceCard(
+                        hasCheckedIn = state.hasCheckedIn,
+                        hasCheckedOut = state.hasCheckedOut,
+                        checkInTime = state.checkInTime,
+                        checkOutTime = state.checkOutTime
+                    )
+                    
                     Spacer(modifier = Modifier.height(24.dp))
                     
                     // Action Buttons
@@ -306,6 +316,130 @@ private fun ShiftCard(
                             fontWeight = FontWeight.SemiBold
                         ),
                         color = Color.White
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TodayAttendanceCard(
+    hasCheckedIn: Boolean,
+    hasCheckedOut: Boolean,
+    checkInTime: String?,
+    checkOutTime: String?
+) {
+    val appColors = LocalAppColors.current
+    val currentDate = remember {
+        java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", java.util.Locale("id", "ID"))
+            .format(java.util.Date())
+    }
+    val currentTime = remember {
+        java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+            .format(java.util.Date())
+    }
+    
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = appColors.cardBackground),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            // Date and Time Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = currentDate,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = appColors.textPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = MaxmarColors.Primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = currentTime,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = appColors.textSecondary
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Check In / Check Out Status
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Check In
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = if (hasCheckedIn) MaxmarColors.CheckIn else appColors.textSecondary.copy(alpha = 0.3f),
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Check In",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = appColors.textSecondary
+                    )
+                    Text(
+                        text = checkInTime ?: "--:--",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (hasCheckedIn) MaxmarColors.CheckIn else appColors.textSecondary,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                
+                // Divider
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(60.dp)
+                        .background(appColors.textSecondary.copy(alpha = 0.2f))
+                )
+                
+                // Check Out
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Logout,
+                        contentDescription = null,
+                        tint = if (hasCheckedOut) MaxmarColors.CheckOut else appColors.textSecondary.copy(alpha = 0.3f),
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Check Out",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = appColors.textSecondary
+                    )
+                    Text(
+                        text = checkOutTime ?: "--:--",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = if (hasCheckedOut) MaxmarColors.CheckOut else appColors.textSecondary,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }

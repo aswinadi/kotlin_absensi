@@ -48,6 +48,22 @@ class AttendanceRepository @Inject constructor(
     }
     
     /**
+     * Fetch today's attendance record.
+     */
+    suspend fun fetchTodayAttendance(): AuthResult<Attendance?> {
+        return try {
+            val today = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+                .format(java.util.Date())
+            val response = attendanceApi.getHistory(today, today, 1)
+            AuthResult.Success(response.data.firstOrNull())
+        } catch (e: retrofit2.HttpException) {
+            AuthResult.Error("Error: ${e.code()}")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
      * Fetch monthly attendance summary.
      */
     suspend fun fetchSummary(

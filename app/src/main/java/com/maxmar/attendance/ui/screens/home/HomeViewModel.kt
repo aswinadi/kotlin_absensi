@@ -27,6 +27,8 @@ data class HomeState(
     val summary: AttendanceSummary? = null,
     val hasCheckedIn: Boolean = false,
     val hasCheckedOut: Boolean = false,
+    val checkInTime: String? = null,
+    val checkOutTime: String? = null,
     val error: String? = null
 )
 
@@ -79,13 +81,26 @@ class HomeViewModel @Inject constructor(
             // Fetch monthly summary
             when (val summaryResult = attendanceRepository.fetchSummary()) {
                 is AuthResult.Success -> {
+                    _homeState.value = _homeState.value.copy(summary = summaryResult.data)
+                }
+                is AuthResult.Error -> {
+                    // Don't fail the whole screen if summary fails
+                }
+            }
+            
+            // Fetch today's attendance for check-in/out times
+            when (val todayResult = attendanceRepository.fetchTodayAttendance()) {
+                is AuthResult.Success -> {
+                    val today = todayResult.data
                     _homeState.value = _homeState.value.copy(
-                        summary = summaryResult.data,
+                        hasCheckedIn = today?.checkIn != null,
+                        hasCheckedOut = today?.checkOut != null,
+                        checkInTime = today?.checkIn?.time,
+                        checkOutTime = today?.checkOut?.time,
                         isLoading = false
                     )
                 }
                 is AuthResult.Error -> {
-                    // Don't fail the whole screen if summary fails
                     _homeState.value = _homeState.value.copy(isLoading = false)
                 }
             }
