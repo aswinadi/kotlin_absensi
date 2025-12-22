@@ -338,7 +338,7 @@ private fun TodayAttendanceCard(
             .format(java.util.Date())
     }
     
-    // Auto-updating time every minute
+    // Auto-updating time every second
     var currentTime by remember { mutableStateOf(
         java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
             .format(java.util.Date())
@@ -346,9 +346,9 @@ private fun TodayAttendanceCard(
     
     LaunchedEffect(Unit) {
         while (true) {
-            kotlinx.coroutines.delay(60_000) // Update every minute
             currentTime = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
                 .format(java.util.Date())
+            kotlinx.coroutines.delay(1000) // Check every second
         }
     }
     
