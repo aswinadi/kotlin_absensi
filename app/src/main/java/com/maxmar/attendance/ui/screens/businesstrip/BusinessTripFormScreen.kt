@@ -307,12 +307,12 @@ fun BusinessTripFormScreen(
                             purposeId = selectedPurposeId,
                             location = location,
                             destinationId = selectedDestinationId,
-                            destinationCity = destinationCity.ifEmpty { null },
+                            destinationCity = destinationCity,
                             departureDate = departureDate,
                             departureTime = departureTime.ifEmpty { null },
                             arrivalDate = arrivalDate,
                             arrivalTime = arrivalTime.ifEmpty { null },
-                            assignedBy = if (selectedAssignedById > 0) selectedAssignedById else null,
+                            assignedBy = selectedAssignedById,
                             notes = notes.ifEmpty { null }
                         )
                     },
@@ -323,8 +323,10 @@ fun BusinessTripFormScreen(
                              selectedPurposeId > 0 &&
                              selectedDestinationId > 0 &&
                              location.isNotBlank() && 
+                             destinationCity.isNotBlank() &&
                              departureDate.isNotBlank() && 
-                             arrivalDate.isNotBlank(),
+                             arrivalDate.isNotBlank() &&
+                             selectedAssignedById > 0,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaxmarColors.Primary,
                         contentColor = Color.White,

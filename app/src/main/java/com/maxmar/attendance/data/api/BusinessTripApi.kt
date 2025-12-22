@@ -49,12 +49,12 @@ interface BusinessTripApi {
         @Field("business_trip_purpose_id") purposeId: Int,
         @Field("location") location: String,
         @Field("business_trip_destination_id") destinationId: Int,
-        @Field("destination_city") destinationCity: String?,
+        @Field("destination_city") destinationCity: String,
         @Field("departure_date") departureDate: String,
         @Field("departure_time") departureTime: String?,
         @Field("arrival_date") arrivalDate: String,
         @Field("arrival_time") arrivalTime: String?,
-        @Field("assigned_by") assignedBy: Int?,
+        @Field("assigned_by") assignedBy: Int,
         @Field("notes") notes: String?
     ): BusinessTripDetailResponse
 }

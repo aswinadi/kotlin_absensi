@@ -116,12 +116,12 @@ class BusinessTripRepository @Inject constructor(
         purposeId: Int,
         location: String,
         destinationId: Int,
-        destinationCity: String?,
+        destinationCity: String,
         departureDate: String,
         departureTime: String?,
         arrivalDate: String,
         arrivalTime: String?,
-        assignedBy: Int?,
+        assignedBy: Int,
         notes: String?
     ): AuthResult<BusinessTrip> {
         return try {
