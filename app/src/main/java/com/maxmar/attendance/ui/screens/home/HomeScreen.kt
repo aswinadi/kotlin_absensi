@@ -48,6 +48,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -336,9 +337,19 @@ private fun TodayAttendanceCard(
         java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", java.util.Locale("id", "ID"))
             .format(java.util.Date())
     }
-    val currentTime = remember {
+    
+    // Auto-updating time every minute
+    var currentTime by remember { mutableStateOf(
         java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
             .format(java.util.Date())
+    )}
+    
+    LaunchedEffect(Unit) {
+        while (true) {
+            kotlinx.coroutines.delay(60_000) // Update every minute
+            currentTime = java.text.SimpleDateFormat("HH:mm", java.util.Locale.getDefault())
+                .format(java.util.Date())
+        }
     }
     
     Card(
