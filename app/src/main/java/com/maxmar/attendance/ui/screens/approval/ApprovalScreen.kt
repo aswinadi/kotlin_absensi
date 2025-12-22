@@ -363,15 +363,32 @@ private fun ApprovalCard(
         else -> appColors.textSecondary
     }
     
+    // Category-based color for card indicator
+    val categoryColor = when (approval.category) {
+        "perdin" -> MaxmarColors.Primary
+        else -> MaxmarColors.Absent // izin/cuti
+    }
+    
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = appColors.cardBackground),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         shape = RoundedCornerShape(16.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+        Row {
+            // Category color indicator strip
+            Box(
+                modifier = Modifier
+                    .width(6.dp)
+                    .fillMaxHeight()
+                    .background(categoryColor)
+            )
+            
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(16.dp)
+            ) {
             // Header: Employee + Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
