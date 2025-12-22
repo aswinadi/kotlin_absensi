@@ -314,7 +314,7 @@ private fun BusinessTripCard(
             
             // Purpose
             Text(
-                text = trip.purpose,
+                text = trip.purpose ?: "-",
                 style = MaterialTheme.typography.bodyLarge,
                 color = appColors.textPrimary
             )
@@ -331,7 +331,7 @@ private fun BusinessTripCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = trip.location,
+                    text = trip.location ?: "-",
                     style = MaterialTheme.typography.bodyMedium,
                     color = appColors.textSecondary
                 )
@@ -349,7 +349,7 @@ private fun BusinessTripCard(
                 )
                 Spacer(modifier = Modifier.width(4.dp))
                 Text(
-                    text = "${trip.startDate} - ${trip.endDate} (${trip.days} hari)",
+                    text = "${trip.startDate ?: "-"} - ${trip.endDate ?: "-"} (${trip.days} hari)",
                     style = MaterialTheme.typography.bodyMedium,
                     color = appColors.textSecondary
                 )
