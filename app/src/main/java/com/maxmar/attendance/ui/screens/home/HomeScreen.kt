@@ -97,7 +97,8 @@ fun HomeScreen(
                     when (index) {
                         0 -> selectedNavIndex = 0 // Stay on home
                         1 -> onNavigateToHistory()
-                        2 -> onNavigateToProfile()
+                        2 -> onNavigateToApproval()
+                        3 -> onNavigateToProfile()
                     }
                 }
             )
@@ -320,60 +321,59 @@ private fun ActionButtonsRow(
     onCheckOut: () -> Unit,
     onAbsent: () -> Unit,
     onBusinessTrip: () -> Unit,
-    onApproval: () -> Unit
+    onApproval: () -> Unit // Keep param for compatibility but don't use
 ) {
-    val scrollState = rememberScrollState()
-    
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .horizontalScroll(scrollState),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        ActionButton(
-            label = "Check In",
-            icon = Icons.Default.CheckCircle,
-            color = MaxmarColors.CheckIn,
-            enabled = !hasCheckedIn,
-            onClick = onCheckIn,
-            modifier = Modifier.width(100.dp)
-        )
+        // First row: Check In, Check Out
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ActionButton(
+                label = "Check In",
+                icon = Icons.Default.CheckCircle,
+                color = MaxmarColors.CheckIn,
+                enabled = !hasCheckedIn,
+                onClick = onCheckIn,
+                modifier = Modifier.weight(1f)
+            )
+            
+            ActionButton(
+                label = "Check Out",
+                icon = Icons.Default.Logout,
+                color = MaxmarColors.CheckOut,
+                enabled = hasCheckedIn && !hasCheckedOut,
+                onClick = onCheckOut,
+                modifier = Modifier.weight(1f)
+            )
+        }
         
-        ActionButton(
-            label = "Check Out",
-            icon = Icons.Default.Logout,
-            color = MaxmarColors.CheckOut,
-            enabled = hasCheckedIn && !hasCheckedOut,
-            onClick = onCheckOut,
-            modifier = Modifier.width(100.dp)
-        )
-        
-        ActionButton(
-            label = "Izin",
-            icon = Icons.Default.EventBusy,
-            color = MaxmarColors.Absent,
-            enabled = true,
-            onClick = onAbsent,
-            modifier = Modifier.width(100.dp)
-        )
-        
-        ActionButton(
-            label = "Perdin",
-            icon = Icons.Default.FlightTakeoff,
-            color = MaxmarColors.Primary,
-            enabled = true,
-            onClick = onBusinessTrip,
-            modifier = Modifier.width(100.dp)
-        )
-        
-        ActionButton(
-            label = "Approval",
-            icon = Icons.Default.Approval,
-            color = MaxmarColors.Warning,
-            enabled = true,
-            onClick = onApproval,
-            modifier = Modifier.width(100.dp)
-        )
+        // Second row: Izin, Perdin
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ActionButton(
+                label = "Izin",
+                icon = Icons.Default.EventBusy,
+                color = MaxmarColors.Absent,
+                enabled = true,
+                onClick = onAbsent,
+                modifier = Modifier.weight(1f)
+            )
+            
+            ActionButton(
+                label = "Perdin",
+                icon = Icons.Default.FlightTakeoff,
+                color = MaxmarColors.Primary,
+                enabled = true,
+                onClick = onBusinessTrip,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
@@ -562,10 +562,23 @@ private fun BottomNavBar(
             )
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-            label = { Text("Profile") },
+            icon = { Icon(Icons.Default.Approval, contentDescription = "Approval") },
+            label = { Text("Approval") },
             selected = selectedIndex == 2,
             onClick = { onItemSelected(2) },
+            colors = NavigationBarItemDefaults.colors(
+                selectedIconColor = MaxmarColors.Primary,
+                selectedTextColor = MaxmarColors.Primary,
+                indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
+                unselectedIconColor = appColors.textSecondary,
+                unselectedTextColor = appColors.textSecondary
+            )
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+            label = { Text("Profile") },
+            selected = selectedIndex == 3,
+            onClick = { onItemSelected(3) },
             colors = NavigationBarItemDefaults.colors(
                 selectedIconColor = MaxmarColors.Primary,
                 selectedTextColor = MaxmarColors.Primary,

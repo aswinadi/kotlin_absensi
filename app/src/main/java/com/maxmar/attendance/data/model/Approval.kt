@@ -31,6 +31,7 @@ data class Approval(
     val dateDisplay: String,
     val notes: String?,
     val status: String,
+    val category: String? = "izin", // izin, perdin
     @SerializedName("acknowledged_by")
     val acknowledgedBy: String?,
     @SerializedName("acknowledged_date")

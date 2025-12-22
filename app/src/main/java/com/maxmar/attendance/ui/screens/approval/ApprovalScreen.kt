@@ -130,11 +130,17 @@ fun ApprovalScreen(
                     )
                 )
         ) {
-            // Filter chips
+            // Status filter chips (Menunggu / Selesai)
             FilterChipsRow(
                 selectedFilter = state.selectedFilter,
                 pendingCount = state.pendingItems.size,
                 onFilterSelected = { viewModel.setFilter(it) }
+            )
+            
+            // Category tabs (Semua / Izin / Perdin)
+            CategoryTabsRow(
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = { viewModel.setCategory(it) }
             )
             
             // List
@@ -146,10 +152,18 @@ fun ApprovalScreen(
                     CircularProgressIndicator(color = MaxmarColors.Primary)
                 }
             } else {
-                val items = if (state.selectedFilter == "pending") {
+                // Filter by status first
+                val statusItems = if (state.selectedFilter == "pending") {
                     state.pendingItems
                 } else {
                     state.processedItems
+                }
+                
+                // Then filter by category
+                val items = when (state.selectedCategory) {
+                    "izin" -> statusItems.filter { it.category == "izin" || it.category == null }
+                    "perdin" -> statusItems.filter { it.category == "perdin" }
+                    else -> statusItems // "all" - show all
                 }
                 
                 if (items.isEmpty()) {
@@ -274,6 +288,58 @@ private fun FilterChipsRow(
             label = { Text("Selesai") },
             colors = FilterChipDefaults.filterChipColors(
                 selectedContainerColor = MaxmarColors.Success,
+                selectedLabelColor = Color.White,
+                containerColor = appColors.cardBackground,
+                labelColor = appColors.textSecondary
+            )
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryTabsRow(
+    selectedCategory: String,
+    onCategorySelected: (String) -> Unit
+) {
+    val appColors = LocalAppColors.current
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        FilterChip(
+            selected = selectedCategory == "all",
+            onClick = { onCategorySelected("all") },
+            label = { Text("Semua") },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaxmarColors.Primary,
+                selectedLabelColor = Color.White,
+                containerColor = appColors.cardBackground,
+                labelColor = appColors.textSecondary
+            )
+        )
+        
+        FilterChip(
+            selected = selectedCategory == "izin",
+            onClick = { onCategorySelected("izin") },
+            label = { Text("Izin/Cuti") },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaxmarColors.Absent,
+                selectedLabelColor = Color.White,
+                containerColor = appColors.cardBackground,
+                labelColor = appColors.textSecondary
+            )
+        )
+        
+        FilterChip(
+            selected = selectedCategory == "perdin",
+            onClick = { onCategorySelected("perdin") },
+            label = { Text("Perdin") },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaxmarColors.Primary,
                 selectedLabelColor = Color.White,
                 containerColor = appColors.cardBackground,
                 labelColor = appColors.textSecondary

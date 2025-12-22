@@ -20,6 +20,7 @@ data class ApprovalListState(
     val pendingItems: List<Approval> = emptyList(),
     val processedItems: List<Approval> = emptyList(),
     val selectedFilter: String = "pending", // pending, processed
+    val selectedCategory: String = "all", // all, izin, perdin
     val error: String? = null,
     val actionSuccess: String? = null,
     val actionError: String? = null
@@ -70,6 +71,13 @@ class ApprovalViewModel @Inject constructor(
      */
     fun setFilter(filter: String) {
         _state.value = _state.value.copy(selectedFilter = filter)
+    }
+    
+    /**
+     * Set category filter (all, izin, perdin).
+     */
+    fun setCategory(category: String) {
+        _state.value = _state.value.copy(selectedCategory = category)
     }
     
     /**
