@@ -92,11 +92,11 @@ class BusinessTripViewModel @Inject constructor(
     }
     
     /**
-     * Fetch allowance based on destination type.
+     * Fetch allowance based on destination ID.
      */
-    fun fetchAllowance(destinationType: String) {
+    fun fetchAllowance(destinationId: Int) {
         viewModelScope.launch {
-            when (val result = repository.fetchAllowance(destinationType)) {
+            when (val result = repository.fetchAllowance(destinationId)) {
                 is AuthResult.Success -> {
                     _formState.value = _formState.value.copy(
                         allowancePerDay = result.data?.allowancePerDay ?: 0.0

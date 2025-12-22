@@ -62,11 +62,11 @@ class BusinessTripRepository @Inject constructor(
     }
     
     /**
-     * Fetch allowance based on destination type.
+     * Fetch allowance based on destination ID.
      */
-    suspend fun fetchAllowance(destinationType: String): AuthResult<AllowanceData?> {
+    suspend fun fetchAllowance(destinationId: Int): AuthResult<AllowanceData?> {
         return try {
-            val response = businessTripApi.getEmployeeAllowance(destinationType)
+            val response = businessTripApi.getEmployeeAllowance(destinationId)
             AuthResult.Success(response.data)
         } catch (e: Exception) {
             AuthResult.Error("Terjadi kesalahan: ${e.message}")

@@ -115,9 +115,9 @@ fun BusinessTripFormScreen(
     }
     
     // Fetch allowance when destination changes
-    LaunchedEffect(selectedDestinationCode) {
-        if (selectedDestinationCode.isNotEmpty()) {
-            viewModel.fetchAllowance(selectedDestinationCode)
+    LaunchedEffect(selectedDestinationId) {
+        if (selectedDestinationId > 0) {
+            viewModel.fetchAllowance(selectedDestinationId)
         }
     }
     

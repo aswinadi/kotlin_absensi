@@ -40,7 +40,7 @@ interface BusinessTripApi {
     
     @GET("business-trips/allowance")
     suspend fun getEmployeeAllowance(
-        @Query("destination_type") destinationType: String
+        @Query("destination_id") destinationId: Int
     ): AllowanceResponse
     
     @FormUrlEncoded
