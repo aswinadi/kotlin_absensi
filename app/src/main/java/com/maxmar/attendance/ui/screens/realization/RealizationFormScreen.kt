@@ -384,7 +384,7 @@ private fun TripInfoCard(trip: com.maxmar.attendance.data.model.BusinessTrip) {
                 color = appColors.textPrimary
             )
             Spacer(modifier = Modifier.height(8.dp))
-            trip.purposeName?.let {
+            trip.purpose?.let {
                 Text(text = it, color = appColors.textSecondary, fontSize = 14.sp)
             }
             Text(
