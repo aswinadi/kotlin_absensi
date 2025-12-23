@@ -5,10 +5,18 @@ import com.maxmar.attendance.data.model.AssignableUsersResponse
 import com.maxmar.attendance.data.model.BusinessTripDetailResponse
 import com.maxmar.attendance.data.model.BusinessTripListResponse
 import com.maxmar.attendance.data.model.MasterDataResponse
+import com.maxmar.attendance.data.model.RealizationResponse
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import retrofit2.http.DELETE
 import retrofit2.http.Field
 import retrofit2.http.FormUrlEncoded
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.PUT
+import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -58,7 +66,35 @@ interface BusinessTripApi {
         @Field("cash_advance") cashAdvance: Double?,
         @Field("notes") notes: String?
     ): BusinessTripDetailResponse
+    
+    // Realization endpoints
+    @GET("business-trips/pending-realization")
+    suspend fun getTripsNeedingRealization(): BusinessTripListResponse
+    
+    @GET("business-trips/{tripId}/realization")
+    suspend fun getRealization(
+        @Path("tripId") tripId: Int
+    ): RealizationResponse
+    
+    @Multipart
+    @POST("business-trips/{tripId}/realization")
+    suspend fun createRealization(
+        @Path("tripId") tripId: Int,
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part documents: List<MultipartBody.Part>?
+    ): RealizationResponse
+    
+    @Multipart
+    @PUT("business-trips/{tripId}/realization")
+    suspend fun updateRealization(
+        @Path("tripId") tripId: Int,
+        @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
+        @Part documents: List<MultipartBody.Part>?
+    ): RealizationResponse
+    
+    @DELETE("business-trips/{tripId}/realization/documents/{documentId}")
+    suspend fun deleteRealizationDocument(
+        @Path("tripId") tripId: Int,
+        @Path("documentId") documentId: Int
+    ): RealizationResponse
 }
-
-
-

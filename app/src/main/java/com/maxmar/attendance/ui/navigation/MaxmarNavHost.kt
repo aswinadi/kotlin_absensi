@@ -340,5 +340,30 @@ fun MaxmarNavHost(
         composable(Routes.MAP) {
             // TODO: MapScreen
         }
+        
+        // Realization List Screen
+        composable(Routes.REALIZATION_LIST) {
+            com.maxmar.attendance.ui.screens.realization.RealizationListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onTripSelected = { tripId ->
+                    navController.navigate(Routes.realizationForm(tripId))
+                }
+            )
+        }
+        
+        // Realization Form Screen
+        composable(
+            route = Routes.REALIZATION_FORM,
+            arguments = listOf(navArgument("tripId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val tripId = backStackEntry.arguments?.getInt("tripId") ?: 0
+            com.maxmar.attendance.ui.screens.realization.RealizationFormScreen(
+                tripId = tripId,
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { 
+                    navController.popBackStack(Routes.REALIZATION_LIST, inclusive = false)
+                }
+            )
+        }
     }
 }

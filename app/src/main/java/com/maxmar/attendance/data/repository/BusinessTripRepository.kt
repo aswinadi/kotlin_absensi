@@ -4,6 +4,7 @@ import com.maxmar.attendance.data.api.BusinessTripApi
 import com.maxmar.attendance.data.model.AllowanceData
 import com.maxmar.attendance.data.model.AssignableUser
 import com.maxmar.attendance.data.model.BusinessTrip
+import com.maxmar.attendance.data.model.BusinessTripRealization
 import com.maxmar.attendance.data.model.MasterDataItem
 import com.maxmar.attendance.data.model.PaginationMeta
 import javax.inject.Inject
@@ -147,7 +148,104 @@ class BusinessTripRepository @Inject constructor(
             AuthResult.Error("Terjadi kesalahan: ${e.message}")
         }
     }
+    
+    /**
+     * Get trips that need realization (approved + past end date + no realization).
+     */
+    suspend fun fetchTripsNeedingRealization(): AuthResult<List<BusinessTrip>> {
+        return try {
+            val response = businessTripApi.getTripsNeedingRealization()
+            AuthResult.Success(response.data)
+        } catch (e: retrofit2.HttpException) {
+            AuthResult.Error("Error: ${e.code()}")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
+     * Get realization for a trip.
+     */
+    suspend fun fetchRealization(tripId: Int): AuthResult<BusinessTripRealization?> {
+        return try {
+            val response = businessTripApi.getRealization(tripId)
+            if (response.success) {
+                AuthResult.Success(response.data)
+            } else {
+                AuthResult.Error(response.message ?: "Realisasi tidak ditemukan")
+            }
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 404) {
+                AuthResult.Success(null)
+            } else {
+                AuthResult.Error("Error: ${e.code()}")
+            }
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
+     * Create realization for a trip.
+     */
+    suspend fun createRealization(
+        tripId: Int,
+        data: Map<String, okhttp3.RequestBody>,
+        documents: List<okhttp3.MultipartBody.Part>?
+    ): AuthResult<BusinessTripRealization> {
+        return try {
+            val response = businessTripApi.createRealization(tripId, data, documents)
+            if (response.success && response.data != null) {
+                AuthResult.Success(response.data)
+            } else {
+                AuthResult.Error(response.message ?: "Gagal membuat realisasi")
+            }
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            AuthResult.Error("Error: ${e.code()} - $errorBody")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
+     * Update realization for a trip.
+     */
+    suspend fun updateRealization(
+        tripId: Int,
+        data: Map<String, okhttp3.RequestBody>,
+        documents: List<okhttp3.MultipartBody.Part>?
+    ): AuthResult<BusinessTripRealization> {
+        return try {
+            val response = businessTripApi.updateRealization(tripId, data, documents)
+            if (response.success && response.data != null) {
+                AuthResult.Success(response.data)
+            } else {
+                AuthResult.Error(response.message ?: "Gagal mengupdate realisasi")
+            }
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            AuthResult.Error("Error: ${e.code()} - $errorBody")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
+     * Delete a document from realization.
+     */
+    suspend fun deleteRealizationDocument(tripId: Int, documentId: Int): AuthResult<Unit> {
+        return try {
+            val response = businessTripApi.deleteRealizationDocument(tripId, documentId)
+            if (response.success) {
+                AuthResult.Success(Unit)
+            } else {
+                AuthResult.Error(response.message ?: "Gagal menghapus dokumen")
+            }
+        } catch (e: retrofit2.HttpException) {
+            AuthResult.Error("Error: ${e.code()}")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
 }
-
-
-

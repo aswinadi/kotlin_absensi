@@ -24,10 +24,15 @@ object Routes {
     const val APPROVAL = "approval"
     const val NOTIFICATIONS = "notifications"
     
+    // Realization routes
+    const val REALIZATION_LIST = "realization"
+    const val REALIZATION_FORM = "realization/{tripId}"
+    
     // Helper function for routes with arguments
     fun absentEdit(absentId: Int) = "absent/$absentId"
     fun businessTripDetail(tripId: String) = "business_trip/$tripId"
     fun businessTripEdit(tripId: Int) = "business_trip_edit/$tripId"
+    fun realizationForm(tripId: Int) = "realization/$tripId"
     
     fun geolocationMap(
         userLat: Double,
