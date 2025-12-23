@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.google.services)
+    // alias(libs.plugins.google.services) // TODO: Enable after adding google-services.json
 }
 
 android {
@@ -20,8 +20,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // API Base URL
-        buildConfigField("String", "BASE_URL", "\"https://filament-absensi.test/api/v1/\"")
+        // API Base URL - Using ngrok tunnel for external access
+        buildConfigField("String", "BASE_URL", "\"https://biogeographic-raylan-interdentally.ngrok-free.dev/api/v1/\"")
     }
 
     buildTypes {
@@ -101,10 +101,11 @@ dependencies {
     implementation(libs.play.services.location)
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
+    implementation(libs.osmdroid)
 
-    // Firebase
-    implementation(platform(libs.firebase.bom))
-    implementation(libs.firebase.messaging)
+    // Firebase - TODO: Enable after adding google-services.json
+    // implementation(platform(libs.firebase.bom))
+    // implementation(libs.firebase.messaging)
 
     // Image Loading
     implementation(libs.coil.compose)

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +20,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,16 +32,18 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.maxmar.attendance.ui.theme.DarkColors
+import com.maxmar.attendance.R
+import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 import kotlinx.coroutines.delay
 
 /**
  * Splash screen with animated logo and loading indicator.
- * Checks auth status and navigates accordingly.
+ * Navigates to login after a brief delay.
  */
 @Composable
 fun SplashScreen(
@@ -51,6 +53,7 @@ fun SplashScreen(
     // Animation values
     val fadeAnim = remember { Animatable(0f) }
     val scaleAnim = remember { Animatable(0.8f) }
+    val appColors = LocalAppColors.current
     
     // Glow animation
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
@@ -76,11 +79,9 @@ fun SplashScreen(
         )
     }
     
-    // Check auth and navigate after delay
+    // Navigate to login after delay (simplified - skip auth check for now)
     LaunchedEffect(Unit) {
         delay(2500)
-        // TODO: Check if user is logged in
-        // For now, always go to login
         onNavigateToLogin()
     }
     
@@ -91,8 +92,8 @@ fun SplashScreen(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        DarkColors.BackgroundGradientStart,
-                        DarkColors.BackgroundGradientEnd
+                        appColors.backgroundGradientStart,
+                        appColors.backgroundGradientEnd
                     )
                 )
             ),
@@ -105,7 +106,7 @@ fun SplashScreen(
                 .alpha(fadeAnim.value)
                 .scale(scaleAnim.value)
         ) {
-            // Logo with glow effect
+            // Logo image with glow effect
             Box(
                 modifier = Modifier
                     .shadow(
@@ -115,16 +116,14 @@ fun SplashScreen(
                         shape = RoundedCornerShape(16.dp)
                     )
             ) {
-                Text(
-                    text = "MAXMAR",
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                    letterSpacing = 4.sp
+                Image(
+                    painter = painterResource(id = R.drawable.maxmar_logo),
+                    contentDescription = "Maxmar Logo",
+                    modifier = Modifier.size(200.dp)
                 )
             }
             
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             Text(
                 text = "ATTENDANCE",
@@ -143,7 +142,7 @@ fun SplashScreen(
                     .height(2.dp)
                     .clip(RoundedCornerShape(1.dp)),
                 color = MaxmarColors.Primary,
-                trackColor = DarkColors.GlassBackground
+                trackColor = appColors.surfaceVariant
             )
         }
         

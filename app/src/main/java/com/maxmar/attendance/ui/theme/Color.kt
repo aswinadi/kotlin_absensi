@@ -1,5 +1,7 @@
 package com.maxmar.attendance.ui.theme
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 
 /**
@@ -74,3 +76,42 @@ object LightColors {
     val TextSecondary = Color(0xFF6B7280)
     val TextTertiary = Color(0xFF9CA3AF)
 }
+
+/**
+ * App-specific colors that adapt to theme.
+ */
+data class AppColors(
+    val backgroundGradientStart: Color,
+    val backgroundGradientEnd: Color,
+    val surface: Color,
+    val surfaceVariant: Color,
+    val cardBackground: Color,
+    val textPrimary: Color,
+    val textSecondary: Color,
+    val textTertiary: Color
+)
+
+val DarkAppColors = AppColors(
+    backgroundGradientStart = DarkColors.BackgroundGradientStart,
+    backgroundGradientEnd = DarkColors.BackgroundGradientEnd,
+    surface = DarkColors.Surface,
+    surfaceVariant = DarkColors.SurfaceVariant,
+    cardBackground = DarkColors.SurfaceVariant,
+    textPrimary = DarkColors.TextPrimary,
+    textSecondary = DarkColors.TextSecondary,
+    textTertiary = DarkColors.TextTertiary
+)
+
+val LightAppColors = AppColors(
+    backgroundGradientStart = LightColors.BackgroundGradientStart,
+    backgroundGradientEnd = LightColors.BackgroundGradientEnd,
+    surface = LightColors.Surface,
+    surfaceVariant = LightColors.SurfaceVariant,
+    cardBackground = LightColors.Surface,
+    textPrimary = LightColors.TextPrimary,
+    textSecondary = LightColors.TextSecondary,
+    textTertiary = LightColors.TextTertiary
+)
+
+val LocalAppColors = staticCompositionLocalOf { DarkAppColors }
+

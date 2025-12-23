@@ -6,6 +6,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
@@ -78,6 +80,7 @@ fun MaxmarTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val appColors = if (darkTheme) DarkAppColors else LightAppColors
     
     // Update status bar color based on theme
     val view = LocalView.current
@@ -89,9 +92,21 @@ fun MaxmarTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = MaxmarTypography,
-        content = content
-    )
+    CompositionLocalProvider(LocalAppColors provides appColors) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = MaxmarTypography,
+            content = content
+        )
+    }
+}
+
+/**
+ * Access app-specific colors from MaterialTheme.
+ */
+object MaxmarThemeColors {
+    val appColors: AppColors
+        @Composable
+        @ReadOnlyComposable
+        get() = LocalAppColors.current
 }
