@@ -147,6 +147,12 @@ fun ApprovalScreen(
                 onFilterSelected = { viewModel.setFilter(it) }
             )
             
+            // Category tabs (Semua / Izin / Perdin / Realisasi)
+            CategoryTabsRow(
+                selectedCategory = state.selectedCategory,
+                onCategorySelected = { viewModel.setCategory(it) }
+            )
+            
             // List
             if (state.isLoading) {
                 Box(
@@ -466,6 +472,25 @@ private fun ApprovalCard(
                         fontWeight = FontWeight.Medium
                     )
                 }
+            }
+            
+            // Category badge
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+                horizontalArrangement = Arrangement.Start
+            ) {
+                Text(
+                    text = approval.categoryDisplay,
+                    color = MaxmarColors.Primary,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaxmarColors.Primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 8.dp, vertical = 2.dp)
+                )
             }
             
             Spacer(modifier = Modifier.height(12.dp))

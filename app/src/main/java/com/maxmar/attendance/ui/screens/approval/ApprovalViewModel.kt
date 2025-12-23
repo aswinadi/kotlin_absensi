@@ -69,7 +69,7 @@ class ApprovalViewModel @Inject constructor(
     }
     
     /**
-     * Set filter tab.
+     * Set status filter tab (pending/processed).
      */
     fun setFilter(filter: String) {
         _state.value = _state.value.copy(selectedFilter = filter)
