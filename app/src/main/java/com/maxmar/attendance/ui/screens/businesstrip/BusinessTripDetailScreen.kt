@@ -20,10 +20,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -63,6 +66,7 @@ import java.util.Locale
 fun BusinessTripDetailScreen(
     tripId: Int,
     onNavigateBack: () -> Unit = {},
+    onNavigateToEdit: (Int) -> Unit = {},
     viewModel: BusinessTripViewModel = hiltViewModel()
 ) {
     val state by viewModel.detailState.collectAsState()
@@ -120,7 +124,10 @@ fun BusinessTripDetailScreen(
                     )
                 }
                 state.trip != null -> {
-                    TripDetailContent(trip = state.trip!!)
+                    TripDetailContent(
+                        trip = state.trip!!,
+                        onEdit = { onNavigateToEdit(tripId) }
+                    )
                 }
             }
         }
@@ -128,7 +135,10 @@ fun BusinessTripDetailScreen(
 }
 
 @Composable
-private fun TripDetailContent(trip: BusinessTrip) {
+private fun TripDetailContent(
+    trip: BusinessTrip,
+    onEdit: () -> Unit
+) {
     val appColors = LocalAppColors.current
     val currencyFormat = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
     
@@ -367,6 +377,31 @@ private fun TripDetailContent(trip: BusinessTrip) {
                 ApprovalRow(
                     label = "Disetujui oleh",
                     approver = trip.approvedBy ?: "Menunggu"
+                )
+            }
+        }
+        
+        // Edit button (only shown when canEdit is true)
+        if (trip.canEdit) {
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            Button(
+                onClick = onEdit,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaxmarColors.Primary
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Edit Perjalanan Dinas",
+                    fontWeight = FontWeight.SemiBold
                 )
             }
         }

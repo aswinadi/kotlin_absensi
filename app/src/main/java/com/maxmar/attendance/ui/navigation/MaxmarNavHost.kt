@@ -246,8 +246,21 @@ fun MaxmarNavHost(
             )
         }
         
-        // Absent Screen
+        // Absent Screen (Create new)
         composable(Routes.ABSENT) {
+            AbsentScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // Absent Screen (Edit)
+        composable(
+            route = Routes.ABSENT_EDIT,
+            arguments = listOf(navArgument("absentId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val absentId = backStackEntry.arguments?.getInt("absentId") ?: 0
+            // TODO: Pass absentId to AbsentScreen for editing
+            // For now, navigate to regular AbsentScreen
             AbsentScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
@@ -282,14 +295,37 @@ fun MaxmarNavHost(
             val tripId = backStackEntry.arguments?.getString("tripId")?.toIntOrNull() ?: 0
             BusinessTripDetailScreen(
                 tripId = tripId,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { id ->
+                    navController.navigate(Routes.businessTripEdit(id))
+                }
+            )
+        }
+        
+        // Business Trip Edit Screen
+        composable(
+            route = Routes.BUSINESS_TRIP_EDIT,
+            arguments = listOf(navArgument("tripId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val tripId = backStackEntry.arguments?.getInt("tripId") ?: 0
+            // TODO: Implement BusinessTripFormScreen with edit mode
+            // For now, just navigate back to form screen
+            com.maxmar.attendance.ui.screens.businesstrip.BusinessTripFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
             )
         }
         
         // Approval Screen
         composable(Routes.APPROVAL) {
             ApprovalScreen(
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToEdit = { category, id ->
+                    when (category) {
+                        "izin" -> navController.navigate(Routes.absentEdit(id))
+                        "perdin" -> navController.navigate(Routes.businessTripEdit(id))
+                    }
+                }
             )
         }
         

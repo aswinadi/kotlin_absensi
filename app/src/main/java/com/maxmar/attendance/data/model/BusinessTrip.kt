@@ -1,6 +1,9 @@
 package com.maxmar.attendance.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Business Trip model.
@@ -39,7 +42,40 @@ data class BusinessTrip(
     val acknowledgedBy: String? = null,
     @SerializedName("approved_by")
     val approvedBy: String? = null
-)
+) {
+    /**
+     * Check if user can edit this business trip.
+     * User can edit if:
+     * 1. Start date is in the future (not today or past)
+     * 2. No acknowledgement has been given yet
+     */
+    val canEdit: Boolean
+        get() {
+            // Can only edit if not acknowledged yet
+            if (!acknowledgedBy.isNullOrEmpty()) return false
+            
+            // Check if start date is in the future
+            return try {
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val departureDate = dateFormat.parse(startDate ?: return false)
+                val today = dateFormat.parse(dateFormat.format(Date()))
+                departureDate != null && today != null && departureDate.after(today)
+            } catch (e: Exception) {
+                false
+            }
+        }
+    
+    /**
+     * Status display text in Indonesian.
+     */
+    val statusDisplay: String
+        get() = when (status.lowercase()) {
+            "approved" -> "Disetujui"
+            "pending" -> "Menunggu"
+            "rejected" -> "Ditolak"
+            else -> status
+        }
+}
 
 /**
  * Business Trip List Response.

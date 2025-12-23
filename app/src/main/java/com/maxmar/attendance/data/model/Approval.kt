@@ -1,6 +1,9 @@
 package com.maxmar.attendance.data.model
 
 import com.google.gson.annotations.SerializedName
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 /**
  * Employee info for approval.
@@ -59,6 +62,28 @@ data class Approval(
     
     val isApproved: Boolean
         get() = status == "approved"
+    
+    /**
+     * Check if user can edit this approval.
+     * User can edit if:
+     * 1. Start date is in the future (not today or past)
+     * 2. No acknowledgement or approval has been given yet
+     */
+    val canEdit: Boolean
+        get() {
+            // Can only edit if still pending acknowledgement (no ack or approval)
+            if (!isPendingAcknowledgement) return false
+            
+            // Check if start date is in the future
+            return try {
+                val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val startDate = dateFormat.parse(date)
+                val today = dateFormat.parse(dateFormat.format(Date()))
+                startDate != null && today != null && startDate.after(today)
+            } catch (e: Exception) {
+                false
+            }
+        }
 }
 
 /**
@@ -66,7 +91,9 @@ data class Approval(
  */
 data class ApprovalListData(
     val pending: List<Approval>,
-    val processed: List<Approval>
+    val processed: List<Approval>,
+    @SerializedName("is_manager")
+    val isManager: Boolean = false
 )
 
 /**

@@ -16,14 +16,18 @@ object Routes {
     const val HISTORY = "history"
     const val PROFILE = "profile"
     const val ABSENT = "absent"
+    const val ABSENT_EDIT = "absent/{absentId}"
     const val BUSINESS_TRIP = "business_trip"
     const val BUSINESS_TRIP_DETAIL = "business_trip/{tripId}"
     const val BUSINESS_TRIP_CREATE = "business_trip_create"
+    const val BUSINESS_TRIP_EDIT = "business_trip_edit/{tripId}"
     const val APPROVAL = "approval"
     const val NOTIFICATIONS = "notifications"
     
     // Helper function for routes with arguments
+    fun absentEdit(absentId: Int) = "absent/$absentId"
     fun businessTripDetail(tripId: String) = "business_trip/$tripId"
+    fun businessTripEdit(tripId: Int) = "business_trip_edit/$tripId"
     
     fun geolocationMap(
         userLat: Double,

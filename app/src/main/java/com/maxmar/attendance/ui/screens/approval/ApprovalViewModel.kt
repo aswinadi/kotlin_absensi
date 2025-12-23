@@ -21,6 +21,7 @@ data class ApprovalListState(
     val processedItems: List<Approval> = emptyList(),
     val selectedFilter: String = "pending", // pending, processed
     val selectedCategory: String = "all", // all, izin, perdin
+    val isManager: Boolean = false, // Only managers can approve/reject
     val error: String? = null,
     val actionSuccess: String? = null,
     val actionError: String? = null
@@ -53,7 +54,8 @@ class ApprovalViewModel @Inject constructor(
                     _state.value = _state.value.copy(
                         isLoading = false,
                         pendingItems = result.data.pending,
-                        processedItems = result.data.processed
+                        processedItems = result.data.processed,
+                        isManager = result.data.isManager
                     )
                 }
                 is AuthResult.Error -> {

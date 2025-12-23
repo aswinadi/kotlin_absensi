@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.Person
@@ -75,6 +76,7 @@ import com.maxmar.attendance.ui.theme.MaxmarColors
 @Composable
 fun ApprovalScreen(
     onNavigateBack: () -> Unit = {},
+    onNavigateToEdit: (category: String, id: Int) -> Unit = { _, _ -> },
     viewModel: ApprovalViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -198,9 +200,16 @@ fun ApprovalScreen(
                         items(items, key = { "${it.category ?: "izin"}_${it.id}" }) { approval ->
                             ApprovalCard(
                                 approval = approval,
+                                isManager = state.isManager,
                                 onAcknowledge = { viewModel.acknowledge(approval) },
                                 onApprove = { viewModel.approve(approval) },
-                                onReject = { showRejectDialog = approval }
+                                onReject = { showRejectDialog = approval },
+                                onEdit = { 
+                                    onNavigateToEdit(
+                                        approval.category ?: "izin",
+                                        approval.id
+                                    )
+                                }
                             )
                         }
                     }
@@ -353,9 +362,11 @@ private fun CategoryTabsRow(
 @Composable
 private fun ApprovalCard(
     approval: Approval,
+    isManager: Boolean,
     onAcknowledge: () -> Unit,
     onApprove: () -> Unit,
-    onReject: () -> Unit
+    onReject: () -> Unit,
+    onEdit: () -> Unit
 ) {
     val appColors = LocalAppColors.current
     
@@ -486,8 +497,10 @@ private fun ApprovalCard(
                 )
             }
             
-            // Action buttons (for pending items only)
-            if (approval.isPendingAcknowledgement || approval.isPendingApproval) {
+            // Action buttons section
+            // Managers: can acknowledge/approve/reject pending items
+            // Staff: can only edit their own data if canEdit is true
+            if (isManager && (approval.isPendingAcknowledgement || approval.isPendingApproval)) {
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 Row(
@@ -532,6 +545,25 @@ private fun ApprovalCard(
                             if (approval.isPendingAcknowledgement) "Ketahui" else "Setujui"
                         )
                     }
+                }
+            } else if (!isManager && approval.canEdit) {
+                // Staff can edit their own data if conditions are met
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                OutlinedButton(
+                    onClick = onEdit,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaxmarColors.Primary
+                    )
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Edit Pengajuan")
                 }
             }
             
