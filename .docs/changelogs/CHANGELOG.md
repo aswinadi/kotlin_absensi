@@ -2,6 +2,29 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2024-12-23
+
+### Added - Approval Role-Based Validation
+- `canEdit` property to `Approval.kt` - Allows staff to edit own data if date is in future and not acknowledged
+- `canEdit` property to `BusinessTrip.kt` - Same edit logic for business trips
+- Role-based button visibility in `ApprovalScreen.kt`:
+  - Managers (level ≤2): See Acknowledge/Approve/Reject buttons
+  - Staff (level >2): See Edit button if editable, else view-only
+- Edit button in `BusinessTripDetailScreen.kt` when trip is editable
+
+### Added - Edit Routes
+- `ABSENT_EDIT` route in `Routes.kt` for editing absent attendance
+- `BUSINESS_TRIP_EDIT` route in `Routes.kt` for editing business trips
+- Route handlers in `MaxmarNavHost.kt` for both edit screens
+
+### Changed - Navigation
+- Bottom navigation bar now has 5 items: Home, Perdin, History, Approval, Profile
+- Moved "Perdin" (Business Trip) from action buttons to bottom nav
+- Simplified home action buttons to: Check In, Check Out, Pengajuan Izin/Cuti
+- Business Trip list screen accessible via bottom nav with FAB for creating new trips
+
+---
+
 ## [0.2.0] - 2024-12-21
 
 ### Added - Profile Screen
