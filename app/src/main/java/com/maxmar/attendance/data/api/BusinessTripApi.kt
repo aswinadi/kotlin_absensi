@@ -55,6 +55,7 @@ interface BusinessTripApi {
         @Field("arrival_date") arrivalDate: String,
         @Field("arrival_time") arrivalTime: String?,
         @Field("assigned_by") assignedBy: Int,
+        @Field("cash_advance") cashAdvance: Double?,
         @Field("notes") notes: String?
     ): BusinessTripDetailResponse
 }

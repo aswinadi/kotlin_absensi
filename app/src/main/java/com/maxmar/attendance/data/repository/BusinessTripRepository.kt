@@ -122,6 +122,7 @@ class BusinessTripRepository @Inject constructor(
         arrivalDate: String,
         arrivalTime: String?,
         assignedBy: Int,
+        cashAdvance: Double?,
         notes: String?
     ): AuthResult<BusinessTrip> {
         return try {
@@ -135,6 +136,7 @@ class BusinessTripRepository @Inject constructor(
                 arrivalDate = arrivalDate,
                 arrivalTime = arrivalTime,
                 assignedBy = assignedBy,
+                cashAdvance = cashAdvance,
                 notes = notes
             )
             AuthResult.Success(response.data)

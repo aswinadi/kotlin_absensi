@@ -94,6 +94,7 @@ fun BusinessTripFormScreen(
     var selectedAssignedById by remember { mutableIntStateOf(0) }
     var selectedAssignedByName by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }
+    var cashAdvance by remember { mutableStateOf("") }
     
     // Calculate trip days
     val tripDays = remember(departureDate, arrivalDate) {
@@ -106,20 +107,12 @@ fun BusinessTripFormScreen(
         } else 0
     }
     
-    // Total allowance
-    val totalAllowance = formState.allowancePerDay * tripDays
-    
     // Load master data on first composition
     LaunchedEffect(Unit) {
         viewModel.loadFormData()
     }
     
-    // Fetch allowance when destination changes
-    LaunchedEffect(selectedDestinationId) {
-        if (selectedDestinationId > 0) {
-            viewModel.fetchAllowance(selectedDestinationId)
-        }
-    }
+    // Note: Allowance fetching removed - cash advance is now manual input
     
     // Handle success
     LaunchedEffect(formState.isSuccess) {
@@ -279,14 +272,22 @@ fun BusinessTripFormScreen(
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                // Allowance info card
-                if (formState.allowancePerDay > 0 && tripDays > 0) {
-                    AllowanceInfoCard(
-                        allowancePerDay = formState.allowancePerDay,
-                        days = tripDays,
-                        totalAllowance = totalAllowance
+                // Cash advance input (optional)
+                CurrencyField(
+                    label = "Uang Muka (Opsional)",
+                    value = cashAdvance,
+                    onValueChange = { cashAdvance = it },
+                    placeholder = "0"
+                )
+                
+                // Trip days info
+                if (tripDays > 0) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Durasi: $tripDays hari",
+                        color = appColors.textSecondary,
+                        fontSize = 14.sp
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
                 
                 // Notes field
@@ -313,6 +314,7 @@ fun BusinessTripFormScreen(
                             arrivalDate = arrivalDate,
                             arrivalTime = arrivalTime.ifEmpty { null },
                             assignedBy = selectedAssignedById,
+                            cashAdvance = cashAdvance.replace(".", "").replace(",", "").toDoubleOrNull() ?: 0.0,
                             notes = notes.ifEmpty { null }
                         )
                     },
@@ -355,40 +357,44 @@ fun BusinessTripFormScreen(
 }
 
 @Composable
-private fun AllowanceInfoCard(
-    allowancePerDay: Double,
-    days: Int,
-    totalAllowance: Double
+private fun CurrencyField(
+    label: String,
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
 ) {
     val appColors = LocalAppColors.current
-    val formatter = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
     
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaxmarColors.Primary.copy(alpha = 0.1f)),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = "Informasi Tunjangan",
-                fontWeight = FontWeight.Bold,
-                color = MaxmarColors.Primary
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text("Tunjangan/Hari:", color = appColors.textSecondary, modifier = Modifier.weight(1f))
-                Text(formatter.format(allowancePerDay), fontWeight = FontWeight.Medium, color = appColors.textPrimary)
-            }
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text("Jumlah Hari:", color = appColors.textSecondary, modifier = Modifier.weight(1f))
-                Text("$days hari", fontWeight = FontWeight.Medium, color = appColors.textPrimary)
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Row(modifier = Modifier.fillMaxWidth()) {
-                Text("Total Tunjangan:", color = appColors.textSecondary, fontSize = 14.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
-                Text(formatter.format(totalAllowance), fontWeight = FontWeight.Bold, color = MaxmarColors.Primary, fontSize = 16.sp)
-            }
-        }
+    Column {
+        Text(text = label, color = appColors.textPrimary, fontWeight = FontWeight.Medium)
+        Spacer(modifier = Modifier.height(8.dp))
+        OutlinedTextField(
+            value = value,
+            onValueChange = { newValue ->
+                // Only allow digits
+                val filtered = newValue.filter { it.isDigit() }
+                // Format with thousand separators
+                val formatted = if (filtered.isNotEmpty()) {
+                    NumberFormat.getNumberInstance(Locale("id", "ID")).format(filtered.toLong())
+                } else ""
+                onValueChange(formatted)
+            },
+            placeholder = { Text(text = "Rp $placeholder", color = appColors.textSecondary) },
+            modifier = Modifier.fillMaxWidth(),
+            leadingIcon = {
+                Text("Rp", color = appColors.textSecondary, fontWeight = FontWeight.Medium)
+            },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedBorderColor = MaxmarColors.Primary,
+                unfocusedBorderColor = appColors.textSecondary.copy(alpha = 0.3f),
+                focusedContainerColor = appColors.cardBackground,
+                unfocusedContainerColor = appColors.cardBackground,
+                focusedTextColor = appColors.textPrimary,
+                unfocusedTextColor = appColors.textPrimary
+            ),
+            shape = RoundedCornerShape(12.dp),
+            singleLine = true
+        )
     }
 }
 

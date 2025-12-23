@@ -218,6 +218,7 @@ class BusinessTripViewModel @Inject constructor(
         arrivalDate: String,
         arrivalTime: String?,
         assignedBy: Int,
+        cashAdvance: Double = 0.0,
         notes: String?
     ) {
         viewModelScope.launch {
@@ -233,6 +234,7 @@ class BusinessTripViewModel @Inject constructor(
                 arrivalDate = arrivalDate,
                 arrivalTime = arrivalTime,
                 assignedBy = assignedBy,
+                cashAdvance = if (cashAdvance > 0) cashAdvance else null,
                 notes = notes
             )) {
                 is AuthResult.Success -> {
