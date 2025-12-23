@@ -34,7 +34,8 @@ data class Approval(
     val dateDisplay: String,
     val notes: String?,
     val status: String,
-    val category: String? = "izin", // izin, perdin
+    // Category: "izin", "perdin"
+    val category: String = "izin",
     @SerializedName("acknowledged_by")
     val acknowledgedBy: String?,
     @SerializedName("acknowledged_date")
@@ -44,9 +45,7 @@ data class Approval(
     @SerializedName("approved_date")
     val approvedDate: String?,
     @SerializedName("created_at")
-    val createdAt: String?,
-    // Category: "absent", "business_trip", "realization"
-    val category: String = "absent"
+    val createdAt: String?
 ) {
     val statusDisplay: String
         get() = when (status) {
