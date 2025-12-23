@@ -147,12 +147,6 @@ fun ApprovalScreen(
                 onFilterSelected = { viewModel.setFilter(it) }
             )
             
-            // Category tabs (Semua / Izin / Perdin / Realisasi)
-            CategoryTabsRow(
-                selectedCategory = state.selectedCategory,
-                onCategorySelected = { viewModel.setCategory(it) }
-            )
-            
             // List
             if (state.isLoading) {
                 Box(
