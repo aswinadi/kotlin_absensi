@@ -209,9 +209,9 @@ private fun TripNeedingRealizationCard(
             Spacer(modifier = Modifier.height(12.dp))
             
             // Purpose
-            trip.purposeName?.let { purpose ->
+            trip.purpose?.let { purposeText ->
                 Text(
-                    text = purpose,
+                    text = purposeText,
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = appColors.textPrimary
