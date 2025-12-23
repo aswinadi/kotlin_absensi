@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -28,6 +30,9 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.FlightTakeoff
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Pending
+import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -39,6 +44,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults.SecondaryIndicator
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -48,6 +58,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,11 +69,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxmar.attendance.data.model.BusinessTrip
+import com.maxmar.attendance.ui.screens.realization.BusinessTripRealizationViewModel
 import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
 
 /**
- * Business Trip list screen.
+ * Business Trip screen with tabs for Trips and Realizations.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,26 +85,21 @@ fun BusinessTripScreen(
     onNavigateBack: () -> Unit = {},
     onNavigateToDetail: (Int) -> Unit = {},
     onNavigateToCreate: () -> Unit = {},
-    viewModel: BusinessTripViewModel = hiltViewModel()
+    onNavigateToRealizationForm: (Int) -> Unit = {},
+    viewModel: BusinessTripViewModel = hiltViewModel(),
+    realizationViewModel: BusinessTripRealizationViewModel = hiltViewModel()
 ) {
     val state by viewModel.listState.collectAsState()
+    val realizationState by realizationViewModel.listState.collectAsState()
     val appColors = LocalAppColors.current
-    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     
-    // Pagination trigger - only fires when near end of list AND list has items
-    val shouldLoadMore by remember {
-        derivedStateOf {
-            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
-            val totalItems = state.trips.size
-            // Only trigger when: list has items, near end of list, has more data, not loading
-            totalItems > 0 && lastVisibleItem >= totalItems - 3 && state.hasMore && !state.isLoading
-        }
-    }
+    val pagerState = rememberPagerState(pageCount = { 2 })
+    val tabs = listOf("Perdin", "Realisasi")
     
-    LaunchedEffect(shouldLoadMore) {
-        if (shouldLoadMore) {
-            viewModel.loadMore()
-        }
+    // Load data
+    LaunchedEffect(Unit) {
+        realizationViewModel.loadTripsNeedingRealization()
     }
     
     Scaffold(
@@ -112,15 +122,18 @@ fun BusinessTripScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = onNavigateToCreate,
-                containerColor = MaxmarColors.Primary,
-                contentColor = Color.White
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Buat Perjalanan Dinas"
-                )
+            // Only show FAB on Perdin tab
+            if (pagerState.currentPage == 0) {
+                FloatingActionButton(
+                    onClick = onNavigateToCreate,
+                    containerColor = MaxmarColors.Primary,
+                    contentColor = Color.White
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = "Buat Perjalanan Dinas"
+                    )
+                }
             }
         }
     ) { paddingValues ->
@@ -137,68 +150,333 @@ fun BusinessTripScreen(
                     )
                 )
         ) {
-            // Filter chips
-            FilterChipsRow(
-                selectedFilter = state.selectedFilter,
-                onFilterSelected = { viewModel.setFilter(it) }
-            )
-            
-            // List
-            if (state.isLoading && state.trips.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = MaxmarColors.Primary)
+            // Tab Row
+            TabRow(
+                selectedTabIndex = pagerState.currentPage,
+                containerColor = appColors.surface,
+                contentColor = appColors.textPrimary,
+                indicator = { tabPositions ->
+                    SecondaryIndicator(
+                        modifier = Modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                        color = MaxmarColors.Primary
+                    )
                 }
-            } else if (state.trips.isEmpty()) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.FlightTakeoff,
-                            contentDescription = null,
-                            tint = appColors.textSecondary,
-                            modifier = Modifier.size(64.dp)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "Belum ada perjalanan dinas",
-                            color = appColors.textSecondary
-                        )
-                    }
-                }
-            } else {
-                LazyColumn(
-                    state = listState,
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    items(state.trips, key = { it.id }) { trip ->
-                        BusinessTripCard(
-                            trip = trip,
-                            onClick = { onNavigateToDetail(trip.id) }
-                        )
-                    }
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    val isRealizationTab = index == 1
+                    val badgeCount = if (isRealizationTab) realizationState.tripsNeedingRealization.size else 0
                     
-                    if (state.isLoading) {
-                        item {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(24.dp),
-                                    color = MaxmarColors.Primary,
-                                    strokeWidth = 2.dp
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            scope.launch { pagerState.animateScrollToPage(index) }
+                        },
+                        text = {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Text(
+                                    text = title,
+                                    fontWeight = if (pagerState.currentPage == index) FontWeight.Bold else FontWeight.Normal
                                 )
+                                if (badgeCount > 0) {
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Badge(
+                                        containerColor = MaxmarColors.Warning,
+                                        contentColor = Color.White
+                                    ) {
+                                        Text(
+                                            text = badgeCount.toString(),
+                                            fontSize = 10.sp
+                                        )
+                                    }
+                                }
                             }
+                        },
+                        selectedContentColor = MaxmarColors.Primary,
+                        unselectedContentColor = appColors.textSecondary
+                    )
+                }
+            }
+            
+            // Pager Content
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> PerdinTabContent(
+                        state = state,
+                        viewModel = viewModel,
+                        onNavigateToDetail = onNavigateToDetail
+                    )
+                    1 -> RealisasiTabContent(
+                        state = realizationState,
+                        onRefresh = { realizationViewModel.loadTripsNeedingRealization() },
+                        onTripSelected = onNavigateToRealizationForm
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PerdinTabContent(
+    state: BusinessTripListState,
+    viewModel: BusinessTripViewModel,
+    onNavigateToDetail: (Int) -> Unit
+) {
+    val listState = rememberLazyListState()
+    
+    // Pagination trigger
+    val shouldLoadMore by remember {
+        derivedStateOf {
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = state.trips.size
+            totalItems > 0 && lastVisibleItem >= totalItems - 3 && state.hasMore && !state.isLoading
+        }
+    }
+    
+    LaunchedEffect(shouldLoadMore) {
+        if (shouldLoadMore) {
+            viewModel.loadMore()
+        }
+    }
+    
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Filter chips
+        FilterChipsRow(
+            selectedFilter = state.selectedFilter,
+            onFilterSelected = { viewModel.setFilter(it) }
+        )
+        
+        // List
+        if (state.isLoading && state.trips.isEmpty()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = MaxmarColors.Primary)
+            }
+        } else if (state.trips.isEmpty()) {
+            EmptyState(
+                icon = Icons.Default.FlightTakeoff,
+                message = "Belum ada perjalanan dinas"
+            )
+        } else {
+            LazyColumn(
+                state = listState,
+                contentPadding = PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(state.trips, key = { it.id }) { trip ->
+                    BusinessTripCard(
+                        trip = trip,
+                        onClick = { onNavigateToDetail(trip.id) }
+                    )
+                }
+                
+                if (state.isLoading) {
+                    item {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaxmarColors.Primary,
+                                strokeWidth = 2.dp
+                            )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun RealisasiTabContent(
+    state: com.maxmar.attendance.ui.screens.realization.RealizationListState,
+    onRefresh: () -> Unit,
+    onTripSelected: (Int) -> Unit
+) {
+    val appColors = LocalAppColors.current
+    val formatter = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+    
+    LaunchedEffect(Unit) {
+        onRefresh()
+    }
+    
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = MaxmarColors.Primary)
+        }
+    } else if (state.tripsNeedingRealization.isEmpty()) {
+        EmptyState(
+            icon = Icons.Default.Receipt,
+            message = "Tidak ada perdin yang perlu direalisasi"
+        )
+    } else {
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            item {
+                Text(
+                    text = "Perlu Realisasi (${state.tripsNeedingRealization.size})",
+                    fontWeight = FontWeight.Bold,
+                    color = appColors.textPrimary,
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
+            
+            items(state.tripsNeedingRealization, key = { it.id }) { trip ->
+                RealizationTripCard(
+                    trip = trip,
+                    onClick = { onTripSelected(trip.id) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyState(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    message: String
+) {
+    val appColors = LocalAppColors.current
+    
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = appColors.textSecondary,
+                modifier = Modifier.size(64.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = message,
+                color = appColors.textSecondary
+            )
+        }
+    }
+}
+
+@Composable
+private fun RealizationTripCard(
+    trip: BusinessTrip,
+    onClick: () -> Unit
+) {
+    val appColors = LocalAppColors.current
+    val formatter = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = appColors.cardBackground),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = trip.transactionCode,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = appColors.textPrimary
+                )
+                Surface(
+                    color = MaxmarColors.Warning.copy(alpha = 0.15f),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = "Perlu Realisasi",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaxmarColors.Warning
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            trip.purposeName?.let { purpose ->
+                Text(
+                    text = purpose,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = appColors.textPrimary
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = appColors.textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${trip.location} - ${trip.destinationCity ?: ""}",
+                    fontSize = 13.sp,
+                    color = appColors.textSecondary
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = null,
+                    tint = appColors.textSecondary,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "${trip.startDate ?: ""} - ${trip.endDate ?: ""} (${trip.days} hari)",
+                    fontSize = 13.sp,
+                    color = appColors.textSecondary
+                )
+            }
+            
+            if ((trip.cashAdvance ?: 0.0) > 0) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "Uang Muka:",
+                        fontSize = 13.sp,
+                        color = appColors.textSecondary
+                    )
+                    Text(
+                        text = formatter.format(trip.cashAdvance ?: 0.0),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = MaxmarColors.Primary
+                    )
                 }
             }
         }
@@ -272,7 +550,6 @@ private fun BusinessTripCard(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Header: Code + Status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -312,7 +589,6 @@ private fun BusinessTripCard(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Purpose
             Text(
                 text = trip.purpose ?: "-",
                 style = MaterialTheme.typography.bodyLarge,
@@ -321,7 +597,6 @@ private fun BusinessTripCard(
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            // Location
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.LocationOn,
@@ -339,7 +614,6 @@ private fun BusinessTripCard(
             
             Spacer(modifier = Modifier.height(4.dp))
             
-            // Dates
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.CalendarMonth,

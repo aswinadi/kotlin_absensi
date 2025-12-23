@@ -275,6 +275,9 @@ fun MaxmarNavHost(
                 },
                 onNavigateToCreate = {
                     navController.navigate(Routes.BUSINESS_TRIP_CREATE)
+                },
+                onNavigateToRealizationForm = { tripId ->
+                    navController.navigate(Routes.realizationForm(tripId))
                 }
             )
         }
