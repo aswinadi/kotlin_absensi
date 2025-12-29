@@ -13,6 +13,19 @@ data class Office(
 )
 
 /**
+ * Position with level for role-based access.
+ * Level: 1 = Director, 2 = Manager, 3+ = Staff
+ */
+data class Position(
+    val id: Int? = null,
+    val name: String = "",
+    val level: Int = 99
+) {
+    /** Check if this position is a manager level (level <= 2) */
+    val isManager: Boolean get() = level <= 2
+}
+
+/**
  * Employee profile from API response.
  */
 data class Employee(
@@ -23,7 +36,7 @@ data class Employee(
     val fullName: String,
     val email: String?,
     val phone: String?,
-    val position: String?,
+    val position: Position?,
     val department: String?,
     val company: String?,
     @SerializedName("sub_department")
@@ -77,3 +90,4 @@ data class LeaveQuota(
     @SerializedName("period_end")
     val periodEnd: String?
 )
+

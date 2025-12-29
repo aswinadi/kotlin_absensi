@@ -200,7 +200,7 @@ private fun ProfileContent(
         state.employee?.position?.let { position ->
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = position,
+                text = position.name,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaxmarColors.Primary
             )
@@ -280,7 +280,7 @@ private fun ProfileContent(
                     ProfileInfoRow(
                         icon = Icons.Default.Work,
                         label = "Jabatan",
-                        value = it
+                        value = it.name
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }

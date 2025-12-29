@@ -2,6 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.5.0] - 2024-12-24
+
+### Changed - Position Model Structure
+- `Employee.kt` - Updated `position` from `String?` to `Position?` object
+- Added `Position` data class with:
+  - `id: Int?` - Position ID
+  - `name: String` - Position name
+  - `level: Int` - Hierarchy level (1=Director, 2=Manager, 3+=Staff)
+  - `isManager: Boolean` - Computed property for role-based access
+
+### Updated - ProfileScreen
+- Updated display to use `position.name` instead of position string
+- Compatible with both String and Object API responses via Gson deserialization
+
+---
+
+## [0.4.0] - 2024-12-24
+
+### Added - Business Trip Realization
+- `RealizationFormScreen.kt` - Form for entering expense realization
+- `RealizationListScreen.kt` - List of trips needing realization
+- `BusinessTripRealizationViewModel.kt` - State management for realization
+- Document upload support for receipts/invoices
+- Summary card with expense calculation (Cash Advance - Total = Difference)
+
+### Added - Business Trip Tabs
+- Perdin/Realisasi tab navigation in `BusinessTripScreen.kt`
+- Filter chips for trip status (All, Pending, Approved, Completed)
+- Realization status badge on trip cards
+
+### Changed - Cash Advance
+- Changed from automatic allowance calculation to manual cash advance input
+- Cash advance field now editable in business trip form
+
+### Fixed
+- `purpose` property name alignment across all screens (was `purposeName`)
+- Duplicate `category` property removed from `Approval.kt`
+- Duplicate `CategoryTabsRow` removed from `ApprovalScreen.kt`
+
+---
+
 ## [0.3.0] - 2024-12-23
 
 ### Added - Approval Role-Based Validation
