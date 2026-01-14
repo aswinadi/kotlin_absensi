@@ -36,7 +36,7 @@ data class Employee(
     val fullName: String,
     val email: String?,
     val phone: String?,
-    val position: Position?,
+    val position: String?,  // API returns position_name as string
     val department: String?,
     val company: String?,
     @SerializedName("sub_department")

@@ -275,17 +275,18 @@ fun CheckInScreen(
                 
                 // Capture/Submit button - enabled only when:
                 // 1. Face detected
-                // 2. Face validated (matches employee photo)
+                // 2. Face validated (matches employee photo) OR no photo registered
                 // 3. Location is valid (has coordinates, no error, within radius)
-                // 4. Employee has a photo registered
                 val isLocationValid = state.locationState.userLatitude != null && 
                     state.locationState.userLongitude != null &&
                     state.locationState.error == null &&
                     state.locationState.isWithinRadius
                 
+                // Face validation is optional if no employee photo is registered
+                val isFaceOk = state.isFaceValid || !state.hasEmployeePhoto
+                
                 val canSubmit = state.isFaceDetected && 
-                    state.isFaceValid && 
-                    state.hasEmployeePhoto &&
+                    isFaceOk && 
                     isLocationValid && 
                     !state.isSubmitting
                 
