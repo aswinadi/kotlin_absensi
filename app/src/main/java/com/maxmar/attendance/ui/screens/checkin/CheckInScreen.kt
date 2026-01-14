@@ -248,7 +248,8 @@ fun CheckInScreen(
                                 loc.officeName ?: "Kantor"
                             )
                         }
-                    }
+                    },
+                    onRetry = { viewModel.loadLocationData() }
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -262,9 +263,14 @@ fun CheckInScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Capture/Submit button
+                // Capture/Submit button - enabled only when face detected AND location is valid
+                val isLocationValid = state.locationState.userLatitude != null && 
+                    state.locationState.userLongitude != null &&
+                    state.locationState.error == null &&
+                    state.locationState.isWithinRadius
+                
                 CaptureButton(
-                    enabled = state.isFaceDetected && !state.isSubmitting,
+                    enabled = state.isFaceDetected && isLocationValid && !state.isSubmitting,
                     isLoading = state.isSubmitting,
                     checkType = state.checkType,
                     onClick = { viewModel.submit() }
@@ -305,7 +311,8 @@ private fun FaceStatusBadge(isFaceDetected: Boolean) {
 @Composable
 private fun LocationStatusCard(
     locationState: LocationState,
-    onViewMap: () -> Unit
+    onViewMap: () -> Unit,
+    onRetry: () -> Unit = {}
 ) {
     val backgroundColor = when {
         locationState.isLoading -> Color.Gray
@@ -365,9 +372,24 @@ private fun LocationStatusCard(
             }
         }
         
-        // View map button
-        if (!locationState.isLoading && !locationState.isWithinRadius && 
-            locationState.officeLatitude != null) {
+        // Retry button when there's an error
+        if (!locationState.isLoading && locationState.error != null) {
+            IconButton(
+                onClick = onRetry,
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.2f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MyLocation,
+                    contentDescription = "Retry location",
+                    tint = Color.White
+                )
+            }
+        }
+        // View map button when out of radius
+        else if (!locationState.isLoading && !locationState.isWithinRadius && 
+            locationState.officeLatitude != null && locationState.error == null) {
             IconButton(
                 onClick = onViewMap,
                 modifier = Modifier
