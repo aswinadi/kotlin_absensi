@@ -163,7 +163,8 @@ fun CheckInScreen(
         // Camera Preview
         if (hasCameraPermission) {
             CameraPreviewView(
-                onFaceDetected = { detected -> viewModel.setFaceDetected(detected) }
+                onFaceDetected = { detected -> viewModel.setFaceDetected(detected) },
+                onFaceBitmapCaptured = { bitmap -> viewModel.validateFace(bitmap) }
             )
         } else {
             // Permission denied
@@ -471,7 +472,8 @@ private fun CaptureButton(
 
 @Composable
 private fun CameraPreviewView(
-    onFaceDetected: (Boolean) -> Unit
+    onFaceDetected: (Boolean) -> Unit,
+    onFaceBitmapCaptured: ((android.graphics.Bitmap) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -502,6 +504,7 @@ private fun CameraPreviewView(
                 
                 val analyzer = FaceDetectorAnalyzer(
                     onFaceDetected = { faces -> onFaceDetected(faces.isNotEmpty()) },
+                    onFaceBitmapCaptured = onFaceBitmapCaptured,
                     onError = { /* ignore */ }
                 )
                 faceAnalyzer = analyzer
