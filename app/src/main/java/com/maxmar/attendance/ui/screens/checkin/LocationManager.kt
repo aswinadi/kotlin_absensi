@@ -8,6 +8,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlin.math.atan2
@@ -24,25 +25,62 @@ class LocationManager(context: Context) {
         LocationServices.getFusedLocationProviderClient(context)
     
     /**
-     * Get current location.
+     * Get current location with timeout and fallback to last known location.
      */
     @SuppressLint("MissingPermission")
     suspend fun getCurrentLocation(): Location? {
-        return suspendCancellableCoroutine { continuation ->
-            val cancellationToken = CancellationTokenSource()
-            
-            fusedLocationClient.getCurrentLocation(
-                Priority.PRIORITY_HIGH_ACCURACY,
-                cancellationToken.token
-            ).addOnSuccessListener { location ->
-                continuation.resume(location)
-            }.addOnFailureListener { exception ->
-                continuation.resumeWithException(exception)
+        return try {
+            // Try to get current location with timeout
+            withTimeoutOrNull(10000L) {
+                suspendCancellableCoroutine { continuation ->
+                    val cancellationToken = CancellationTokenSource()
+                    
+                    fusedLocationClient.getCurrentLocation(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        cancellationToken.token
+                    ).addOnSuccessListener { location ->
+                        if (continuation.isActive) {
+                            continuation.resume(location)
+                        }
+                    }.addOnFailureListener { exception ->
+                        if (continuation.isActive) {
+                            // Return null instead of throwing exception
+                            continuation.resume(null)
+                        }
+                    }
+                    
+                    continuation.invokeOnCancellation {
+                        cancellationToken.cancel()
+                    }
+                }
+            } ?: getLastKnownLocation() // Fallback to last known location
+        } catch (e: Exception) {
+            // Fallback to last known location on any error
+            getLastKnownLocation()
+        }
+    }
+    
+    /**
+     * Get last known location as fallback.
+     */
+    @SuppressLint("MissingPermission")
+    private suspend fun getLastKnownLocation(): Location? {
+        return try {
+            suspendCancellableCoroutine { continuation ->
+                fusedLocationClient.lastLocation
+                    .addOnSuccessListener { location ->
+                        if (continuation.isActive) {
+                            continuation.resume(location)
+                        }
+                    }
+                    .addOnFailureListener {
+                        if (continuation.isActive) {
+                            continuation.resume(null)
+                        }
+                    }
             }
-            
-            continuation.invokeOnCancellation {
-                cancellationToken.cancel()
-            }
+        } catch (e: Exception) {
+            null
         }
     }
     
