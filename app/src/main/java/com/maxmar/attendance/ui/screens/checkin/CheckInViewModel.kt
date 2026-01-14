@@ -2,20 +2,24 @@ package com.maxmar.attendance.ui.screens.checkin
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.location.Location
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.maxmar.attendance.data.repository.AttendanceRepository
 import com.maxmar.attendance.data.repository.AuthResult
 import com.maxmar.attendance.data.repository.EmployeeRepository
+import com.maxmar.attendance.util.FaceNetHelper
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
+import kotlinx.coroutines.withContext
+import java.net.URL
 import javax.inject.Inject
 
 /**
@@ -49,6 +53,12 @@ data class CheckInState(
     val checkType: CheckType = CheckType.CHECK_IN,
     val locationState: LocationState = LocationState(),
     val isFaceDetected: Boolean = false,
+    // Face validation
+    val isFaceValid: Boolean = false,
+    val faceValidationError: String? = null,
+    val hasEmployeePhoto: Boolean = true,
+    val isLoadingFace: Boolean = false,
+    // Submit state
     val capturedPhoto: Bitmap? = null,
     val isSubmitting: Boolean = false,
     val isSuccess: Boolean = false,
@@ -66,10 +76,23 @@ class CheckInViewModel @Inject constructor(
     private val employeeRepository: EmployeeRepository
 ) : ViewModel() {
     
+    companion object {
+        private const val TAG = "CheckInViewModel"
+    }
+    
     private val _state = MutableStateFlow(CheckInState())
     val state: StateFlow<CheckInState> = _state.asStateFlow()
     
     private val locationManager = LocationManager(context)
+    private val faceNetHelper = FaceNetHelper(context)
+    
+    // Store employee's face embedding for comparison
+    private var employeeEmbedding: FloatArray? = null
+    
+    override fun onCleared() {
+        super.onCleared()
+        faceNetHelper.close()
+    }
     
     /**
      * Set check type.
@@ -158,6 +181,122 @@ class CheckInViewModel @Inject constructor(
                 )
             }
         }
+    }
+    
+    /**
+     * Load employee face embedding for validation.
+     * Call this after location data is loaded.
+     */
+    fun loadEmployeeFaceData() {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isLoadingFace = true)
+            
+            try {
+                when (val result = employeeRepository.fetchFullProfile()) {
+                    is AuthResult.Success -> {
+                        val employee = result.data.employee
+                        
+                        // Check if employee has a photo
+                        if (employee.photoUrl.isNullOrEmpty()) {
+                            Log.w(TAG, "Employee has no photo")
+                            _state.value = _state.value.copy(
+                                isLoadingFace = false,
+                                hasEmployeePhoto = false,
+                                faceValidationError = "Foto karyawan belum terdaftar. Hubungi HRD untuk memperbarui foto."
+                            )
+                            return@launch
+                        }
+                        
+                        // Check if we have stored embedding, otherwise generate from photo
+                        val embedding = employee.faceEmbedding
+                        if (embedding != null && embedding.isNotEmpty()) {
+                            employeeEmbedding = embedding.toFloatArray()
+                            Log.d(TAG, "Loaded stored face embedding")
+                        } else {
+                            // Generate embedding from photo URL
+                            generateEmbeddingFromPhotoUrl(employee.photoUrl)
+                        }
+                        
+                        _state.value = _state.value.copy(
+                            isLoadingFace = false,
+                            hasEmployeePhoto = true
+                        )
+                    }
+                    is AuthResult.Error -> {
+                        _state.value = _state.value.copy(
+                            isLoadingFace = false,
+                            faceValidationError = "Gagal memuat data wajah: ${result.message}"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error loading face data: ${e.message}")
+                _state.value = _state.value.copy(
+                    isLoadingFace = false,
+                    faceValidationError = "Error: ${e.message}"
+                )
+            }
+        }
+    }
+    
+    /**
+     * Generate face embedding from employee's photo URL.
+     */
+    private suspend fun generateEmbeddingFromPhotoUrl(photoUrl: String) {
+        try {
+            val bitmap = withContext(Dispatchers.IO) {
+                val url = URL(photoUrl)
+                val connection = url.openConnection()
+                connection.connect()
+                val inputStream = connection.getInputStream()
+                BitmapFactory.decodeStream(inputStream)
+            }
+            
+            if (bitmap != null) {
+                employeeEmbedding = faceNetHelper.generateEmbedding(bitmap)
+                Log.d(TAG, "Generated embedding from photo URL")
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to load employee photo: ${e.message}")
+        }
+    }
+    
+    /**
+     * Validate captured face against employee's face embedding.
+     * @param faceBitmap Cropped face bitmap from camera
+     * @return true if face matches
+     */
+    fun validateFace(faceBitmap: Bitmap): Boolean {
+        if (employeeEmbedding == null) {
+            Log.w(TAG, "No employee embedding to compare against")
+            _state.value = _state.value.copy(
+                isFaceValid = false,
+                faceValidationError = "Data wajah belum dimuat"
+            )
+            return false
+        }
+        
+        val capturedEmbedding = faceNetHelper.generateEmbedding(faceBitmap)
+        if (capturedEmbedding == null) {
+            Log.w(TAG, "Failed to generate embedding from captured face")
+            _state.value = _state.value.copy(
+                isFaceValid = false,
+                faceValidationError = "Gagal memproses wajah"
+            )
+            return false
+        }
+        
+        val isMatch = faceNetHelper.isFaceMatch(capturedEmbedding, employeeEmbedding!!)
+        val similarity = faceNetHelper.cosineSimilarity(capturedEmbedding, employeeEmbedding!!)
+        
+        Log.d(TAG, "Face match: $isMatch, similarity: $similarity")
+        
+        _state.value = _state.value.copy(
+            isFaceValid = isMatch,
+            faceValidationError = if (!isMatch) "Wajah tidak dikenali" else null
+        )
+        
+        return isMatch
     }
     
     /**

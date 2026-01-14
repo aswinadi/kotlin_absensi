@@ -96,6 +96,8 @@ dependencies {
     implementation(libs.camerax.lifecycle)
     implementation(libs.camerax.view)
     implementation(libs.mlkit.face)
+    implementation(libs.tflite)
+    implementation(libs.tflite.support)
 
     // Location & Maps
     implementation(libs.play.services.location)

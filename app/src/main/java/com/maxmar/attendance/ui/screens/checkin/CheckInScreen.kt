@@ -123,6 +123,8 @@ fun CheckInScreen(
             )
         } else {
             viewModel.loadLocationData()
+            // Also load face data for validation
+            viewModel.loadEmployeeFaceData()
         }
     }
     
@@ -143,6 +145,13 @@ fun CheckInScreen(
         state.error?.let { error ->
             Toast.makeText(context, error, Toast.LENGTH_LONG).show()
             viewModel.clearError()
+        }
+    }
+    
+    // Handle face validation error (show toast for no photo case)
+    LaunchedEffect(state.faceValidationError, state.hasEmployeePhoto) {
+        if (!state.hasEmployeePhoto && state.faceValidationError != null) {
+            Toast.makeText(context, state.faceValidationError, Toast.LENGTH_LONG).show()
         }
     }
     
@@ -263,14 +272,24 @@ fun CheckInScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // Capture/Submit button - enabled only when face detected AND location is valid
+                // Capture/Submit button - enabled only when:
+                // 1. Face detected
+                // 2. Face validated (matches employee photo)
+                // 3. Location is valid (has coordinates, no error, within radius)
+                // 4. Employee has a photo registered
                 val isLocationValid = state.locationState.userLatitude != null && 
                     state.locationState.userLongitude != null &&
                     state.locationState.error == null &&
                     state.locationState.isWithinRadius
                 
+                val canSubmit = state.isFaceDetected && 
+                    state.isFaceValid && 
+                    state.hasEmployeePhoto &&
+                    isLocationValid && 
+                    !state.isSubmitting
+                
                 CaptureButton(
-                    enabled = state.isFaceDetected && isLocationValid && !state.isSubmitting,
+                    enabled = canSubmit,
                     isLoading = state.isSubmitting,
                     checkType = state.checkType,
                     onClick = { viewModel.submit() }

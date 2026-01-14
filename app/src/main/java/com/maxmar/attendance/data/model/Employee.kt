@@ -41,7 +41,14 @@ data class Employee(
     val company: String?,
     @SerializedName("sub_department")
     val subDepartment: String?,
-    val office: Office?
+    val office: Office?,
+    @SerializedName("employee_type")
+    val employeeType: String? = null,
+    // Face validation fields
+    @SerializedName("photo_url")
+    val photoUrl: String? = null,
+    @SerializedName("face_embedding")
+    val faceEmbedding: List<Float>? = null
 )
 
 /**

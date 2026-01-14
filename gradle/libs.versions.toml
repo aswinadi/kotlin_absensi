@@ -23,6 +23,7 @@ coil = "2.7.0"
 serialization = "1.7.3"
 googleServices = "4.4.2"
 osmdroid = "6.1.18"
+tflite = "2.14.0"
 
 [libraries]
 # Core
@@ -66,6 +67,8 @@ camerax-camera2 = { group = "androidx.camera", name = "camera-camera2", version.
 camerax-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
 camerax-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
 mlkit-face = { group = "com.google.mlkit", name = "face-detection", version.ref = "mlkit" }
+tflite = { group = "org.tensorflow", name = "tensorflow-lite", version.ref = "tflite" }
+tflite-support = { group = "org.tensorflow", name = "tensorflow-lite-support", version.ref = "tflite" }
 
 # Location & Maps
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
