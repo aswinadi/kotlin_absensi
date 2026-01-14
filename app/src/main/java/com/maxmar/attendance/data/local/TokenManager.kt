@@ -24,6 +24,7 @@ class TokenManager @Inject constructor(
 ) {
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
+        private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token")
     }
     
     /**
@@ -58,5 +59,23 @@ class TokenManager @Inject constructor(
      */
     suspend fun hasToken(): Boolean {
         return getToken() != null
+    }
+    
+    /**
+     * Save FCM token for push notifications.
+     */
+    suspend fun saveFcmToken(token: String) {
+        context.dataStore.edit { preferences ->
+            preferences[FCM_TOKEN_KEY] = token
+        }
+    }
+    
+    /**
+     * Get stored FCM token or null if not exists.
+     */
+    suspend fun getFcmToken(): String? {
+        return context.dataStore.data
+            .map { preferences -> preferences[FCM_TOKEN_KEY] }
+            .first()
     }
 }

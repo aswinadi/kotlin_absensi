@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-    // alias(libs.plugins.google.services) // TODO: Enable after adding google-services.json
+    alias(libs.plugins.google.services)
 }
 
 android {
@@ -103,9 +103,9 @@ dependencies {
     implementation(libs.maps.compose)
     implementation(libs.osmdroid)
 
-    // Firebase - TODO: Enable after adding google-services.json
-    // implementation(platform(libs.firebase.bom))
-    // implementation(libs.firebase.messaging)
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.messaging)
 
     // Image Loading
     implementation(libs.coil.compose)
