@@ -32,6 +32,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -54,6 +55,7 @@ fun SplashScreen(
     val fadeAnim = remember { Animatable(0f) }
     val scaleAnim = remember { Animatable(0.8f) }
     val appColors = LocalAppColors.current
+    val isLight = appColors.backgroundGradientStart.luminance() > 0.5f
     
     // Glow animation
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
@@ -129,7 +131,7 @@ fun SplashScreen(
                 text = "ATTENDANCE",
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Medium,
-                color = Color.White.copy(alpha = 0.7f),
+                color = if (isLight) MaxmarColors.Primary else Color.White.copy(alpha = 0.7f),
                 letterSpacing = 8.sp
             )
             
