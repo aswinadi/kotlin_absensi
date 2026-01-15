@@ -15,7 +15,20 @@ buildTypes {
 }
 ```
 
-## 2. Generate Release Keystore
+## 2. Add App Icon
+
+1.  Open Android Studio.
+2.  In the Project view (left side), right-click on the `app/src/main/res` folder.
+3.  Select **New** > **Image Asset**.
+4.  In the **Icon Type** dropdown, keep "Launcher Icons (Adaptive and Legacy)".
+5.  In the **Source Asset** section:
+    *   **Path**: Click the folder icon and select your image file.
+6.  Use the **Scaling** slider to adjust the size.
+7.  Click **Background Layer** tab to set a background color or image if needed.
+8.  Click **Next**, then **Finish**.
+    *   This will automatically resize your image into all necessary resolutions (`mipmap-*` folders).
+
+## 3. Generate Release Keystore
 
 You need a cryptographic key to sign your app. **Keep this file secure and never commit it to Git.**
 
