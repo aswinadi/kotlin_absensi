@@ -19,9 +19,13 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
 
-        // API Base URL - Using ngrok tunnel for external access
-        buildConfigField("String", "BASE_URL", "\"https://biogeographic-raylan-interdentally.ngrok-free.dev/api/v1/\"")
+    signingConfigs {
+        create("release") {
+            // Load keystore properties from local.properties or environment variables
+            // These will be configured in PRODUCTION_GUIDE.md
+        }
     }
 
     buildTypes {
@@ -32,9 +36,14 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Production API URL - Change this to your production server
+            buildConfigField("String", "BASE_URL", "\"https://attendance.maxmar.net/api/v1/\"")
+            // signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isMinifyEnabled = false
+            // Debug API URL - Using ngrok tunnel
+            buildConfigField("String", "BASE_URL", "\"https://biogeographic-raylan-interdentally.ngrok-free.dev/api/v1/\"")
         }
     }
 

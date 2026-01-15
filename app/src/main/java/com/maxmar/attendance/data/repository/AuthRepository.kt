@@ -28,9 +28,9 @@ class AuthRepository @Inject constructor(
      * Login with username and password.
      * Saves token on success.
      */
-    suspend fun login(name: String, password: String): AuthResult<User> {
+    suspend fun login(username: String, password: String): AuthResult<User> {
         return try {
-            val response = authApi.login(LoginRequest(name, password))
+            val response = authApi.login(LoginRequest(username, password))
             
             if (response.success && response.data != null) {
                 tokenManager.saveToken(response.data.token)
