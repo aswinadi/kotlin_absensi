@@ -55,6 +55,7 @@ data class CheckInState(
     val isFaceDetected: Boolean = false,
     // Face validation
     val isFaceValid: Boolean = false,
+    val faceSimilarity: Float = 0f,  // Add similarity score for debugging
     val faceValidationError: String? = null,
     val hasEmployeePhoto: Boolean = true,
     val isLoadingFace: Boolean = false,
@@ -196,9 +197,14 @@ class CheckInViewModel @Inject constructor(
                     is AuthResult.Success -> {
                         val employee = result.data.employee
                         
+                        // Debug logging
+                        Log.d(TAG, "Employee loaded: ${employee.fullName}")
+                        Log.d(TAG, "Photo URL: '${employee.photoUrl}'")
+                        Log.d(TAG, "Face embedding size: ${employee.faceEmbedding?.size ?: 0}")
+                        
                         // Check if employee has a photo
                         if (employee.photoUrl.isNullOrEmpty()) {
-                            Log.w(TAG, "Employee has no photo")
+                            Log.w(TAG, "Employee has no photo - photoUrl is null or empty")
                             _state.value = _state.value.copy(
                                 isLoadingFace = false,
                                 hasEmployeePhoto = false,
@@ -211,8 +217,9 @@ class CheckInViewModel @Inject constructor(
                         val embedding = employee.faceEmbedding
                         if (embedding != null && embedding.isNotEmpty()) {
                             employeeEmbedding = embedding.toFloatArray()
-                            Log.d(TAG, "Loaded stored face embedding")
+                            Log.d(TAG, "Loaded stored face embedding with ${embedding.size} dimensions")
                         } else {
+                            Log.d(TAG, "No stored embedding, generating from photo URL...")
                             // Generate embedding from photo URL
                             generateEmbeddingFromPhotoUrl(employee.photoUrl)
                         }
@@ -243,10 +250,15 @@ class CheckInViewModel @Inject constructor(
      * Generate face embedding from employee's photo URL.
      */
     private suspend fun generateEmbeddingFromPhotoUrl(photoUrl: String) {
+        Log.d(TAG, "Loading employee photo from URL: $photoUrl")
+        
         try {
             val bitmap = withContext(Dispatchers.IO) {
                 val url = URL(photoUrl)
+                Log.d(TAG, "Connecting to: ${url.host}:${url.port}")
                 val connection = url.openConnection()
+                connection.connectTimeout = 10000
+                connection.readTimeout = 10000
                 connection.connect()
                 val inputStream = connection.getInputStream()
                 BitmapFactory.decodeStream(inputStream)
@@ -254,10 +266,25 @@ class CheckInViewModel @Inject constructor(
             
             if (bitmap != null) {
                 employeeEmbedding = faceNetHelper.generateEmbedding(bitmap)
-                Log.d(TAG, "Generated embedding from photo URL")
+                if (employeeEmbedding != null) {
+                    Log.d(TAG, "Generated embedding from photo URL successfully")
+                } else {
+                    Log.e(TAG, "Failed to generate embedding - FaceNet returned null")
+                    _state.value = _state.value.copy(
+                        faceValidationError = "Gagal memproses foto karyawan"
+                    )
+                }
+            } else {
+                Log.e(TAG, "Failed to decode bitmap from photo URL")
+                _state.value = _state.value.copy(
+                    faceValidationError = "Foto karyawan tidak dapat dimuat"
+                )
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Failed to load employee photo: ${e.message}")
+            Log.e(TAG, "Failed to load employee photo: ${e.javaClass.simpleName}: ${e.message}")
+            _state.value = _state.value.copy(
+                faceValidationError = "Gagal memuat foto: ${e.message}"
+            )
         }
     }
     
@@ -271,6 +298,7 @@ class CheckInViewModel @Inject constructor(
             Log.w(TAG, "No employee embedding to compare against")
             _state.value = _state.value.copy(
                 isFaceValid = false,
+                faceSimilarity = 0f,
                 faceValidationError = "Data wajah belum dimuat"
             )
             return false
@@ -281,19 +309,22 @@ class CheckInViewModel @Inject constructor(
             Log.w(TAG, "Failed to generate embedding from captured face")
             _state.value = _state.value.copy(
                 isFaceValid = false,
+                faceSimilarity = 0f,
                 faceValidationError = "Gagal memproses wajah"
             )
             return false
         }
         
-        val isMatch = faceNetHelper.isFaceMatch(capturedEmbedding, employeeEmbedding!!)
         val similarity = faceNetHelper.cosineSimilarity(capturedEmbedding, employeeEmbedding!!)
+        // Use lower threshold (0.5 = 50%) for more lenient matching
+        val isMatch = similarity >= 0.5f
         
         Log.d(TAG, "Face match: $isMatch, similarity: $similarity")
         
         _state.value = _state.value.copy(
             isFaceValid = isMatch,
-            faceValidationError = if (!isMatch) "Wajah tidak dikenali" else null
+            faceSimilarity = similarity,
+            faceValidationError = if (!isMatch) "Wajah tidak dikenali (${(similarity * 100).toInt()}%)" else null
         )
         
         return isMatch

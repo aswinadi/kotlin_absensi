@@ -35,6 +35,7 @@ import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +44,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -65,10 +67,12 @@ import com.maxmar.attendance.data.model.AttendanceSummary
 import com.maxmar.attendance.data.model.Shift
 import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
+import com.maxmar.attendance.util.TimeUtils
 
 /**
  * Home screen with dashboard, attendance actions, and navigation.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onNavigateToHistory: () -> Unit = {},
@@ -91,6 +95,20 @@ fun HomeScreen(
         selectedNavIndex = 0
     }
     
+    // Refresh data when screen becomes visible (returning from check-in/out)
+    val lifecycleOwner = androidx.compose.ui.platform.LocalLifecycleOwner.current
+    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
+        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
+            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+                viewModel.loadData()
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+    
     Scaffold(
         bottomBar = {
             BottomNavBar(
@@ -107,7 +125,9 @@ fun HomeScreen(
             )
         }
     ) { paddingValues ->
-        Box(
+        PullToRefreshBox(
+            isRefreshing = state.isLoading,
+            onRefresh = { viewModel.loadData() },
             modifier = Modifier
                 .fillMaxSize()
                 .background(
@@ -120,60 +140,48 @@ fun HomeScreen(
                 )
                 .padding(paddingValues)
         ) {
-            if (state.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.align(Alignment.Center),
-                    color = MaxmarColors.Primary
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp)
+            ) {
+                // Header
+                HeaderSection(
+                    greeting = viewModel.getGreeting(),
+                    employeeName = state.employee?.fullName ?: "User",
+                    notificationCount = state.unreadNotificationCount,
+                    onNotificationClick = onNavigateToNotifications
                 )
-            } else {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(24.dp)
-                ) {
-                    // Header
-                    HeaderSection(
-                        greeting = viewModel.getGreeting(),
-                        employeeName = state.employee?.fullName ?: "User",
-                        notificationCount = state.unreadNotificationCount,
-                        onNotificationClick = onNavigateToNotifications
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Today's Shift Card
-                    ShiftCard(
-                        isWorkday = state.isWorkday,
-                        shift = state.shift
-                    )
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    // Today's Attendance Card
-                    TodayAttendanceCard(
-                        hasCheckedIn = state.hasCheckedIn,
-                        hasCheckedOut = state.hasCheckedOut,
-                        checkInTime = state.checkInTime,
-                        checkOutTime = state.checkOutTime
-                    )
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Action Buttons
-                    ActionButtonsRow(
-                        hasCheckedIn = state.hasCheckedIn,
-                        hasCheckedOut = state.hasCheckedOut,
-                        onCheckIn = onNavigateToCheckIn,
-                        onCheckOut = onNavigateToCheckOut,
-                        onAbsent = onNavigateToAbsent
-                    )
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                    
-                    // Monthly Summary
-                    MonthlySummaryCard(summary = state.summary)
-                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Today's Shift Card
+                ShiftCard(
+                    isWorkday = state.isWorkday,
+                    shift = state.shift
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Today's Attendance Card
+                TodayAttendanceCard(
+                    hasCheckedIn = state.hasCheckedIn,
+                    hasCheckedOut = state.hasCheckedOut,
+                    checkInTime = state.checkInTime,
+                    checkOutTime = state.checkOutTime
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Action Buttons
+                ActionButtonsRow(
+                    hasCheckedIn = state.hasCheckedIn,
+                    hasCheckedOut = state.hasCheckedOut,
+                    onCheckIn = onNavigateToCheckIn,
+                    onCheckOut = onNavigateToCheckOut,
+                    onAbsent = onNavigateToAbsent
+                )
             }
         }
     }
@@ -336,6 +344,11 @@ private fun TodayAttendanceCard(
     checkOutTime: String?
 ) {
     val appColors = LocalAppColors.current
+    
+    // Convert UTC times to local timezone
+    val localCheckInTime = TimeUtils.convertUtcToLocal(checkInTime)
+    val localCheckOutTime = TimeUtils.convertUtcToLocal(checkOutTime)
+    
     val currentDate = remember {
         java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", java.util.Locale("id", "ID"))
             .format(java.util.Date())
@@ -419,7 +432,7 @@ private fun TodayAttendanceCard(
                         color = appColors.textSecondary
                     )
                     Text(
-                        text = checkInTime ?: "--:--",
+                        text = localCheckInTime ?: "--:--",
                         style = MaterialTheme.typography.titleMedium,
                         color = if (hasCheckedIn) MaxmarColors.CheckIn else appColors.textSecondary,
                         fontWeight = FontWeight.Bold
@@ -451,7 +464,7 @@ private fun TodayAttendanceCard(
                         color = appColors.textSecondary
                     )
                     Text(
-                        text = checkOutTime ?: "--:--",
+                        text = localCheckOutTime ?: "--:--",
                         style = MaterialTheme.typography.titleMedium,
                         color = if (hasCheckedOut) MaxmarColors.CheckOut else appColors.textSecondary,
                         fontWeight = FontWeight.Bold
@@ -564,98 +577,6 @@ private fun ActionButton(
     }
 }
 
-@Composable
-private fun MonthlySummaryCard(summary: AttendanceSummary?) {
-    val appColors = LocalAppColors.current
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = appColors.surface),
-        shape = RoundedCornerShape(24.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-        ) {
-            Text(
-                text = "Ringkasan ${summary?.monthName ?: "Bulan Ini"}",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = appColors.textPrimary
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // First row: Hadir, Terlambat, Tidak Hadir
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                StatItem(
-                    label = "Hadir",
-                    value = summary?.present?.toString() ?: "-",
-                    color = MaxmarColors.CheckIn
-                )
-                StatItem(
-                    label = "Terlambat",
-                    value = summary?.late?.toString() ?: "-",
-                    color = MaxmarColors.Warning
-                )
-                StatItem(
-                    label = "Tidak Hadir",
-                    value = summary?.absent?.toString() ?: "-",
-                    color = MaxmarColors.CheckOut
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Second row: Sakit, Cuti
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatItem(
-                    label = "Sakit",
-                    value = summary?.sick?.toString() ?: "-",
-                    color = MaxmarColors.Error
-                )
-                StatItem(
-                    label = "Cuti",
-                    value = summary?.leave?.toString() ?: "-",
-                    color = MaxmarColors.Primary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatItem(
-    label: String,
-    value: String,
-    color: Color
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontWeight = FontWeight.SemiBold
-            ),
-            color = color
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold
-            ),
-            color = color
-        )
-    }
-}
 
 @Composable
 private fun BottomNavBar(

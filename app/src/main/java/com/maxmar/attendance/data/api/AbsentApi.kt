@@ -23,6 +23,8 @@ interface AbsentApi {
     suspend fun getAbsentAttendances(
         @Query("start_date") startDate: String? = null,
         @Query("end_date") endDate: String? = null,
+        @Query("year") year: Int? = null,
+        @Query("month") month: Int? = null,
         @Query("page") page: Int = 1
     ): AbsentAttendanceListResponse
     

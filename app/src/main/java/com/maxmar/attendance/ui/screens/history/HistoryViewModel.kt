@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.maxmar.attendance.data.model.AbsentAttendance
+import com.maxmar.attendance.data.model.AttendanceSummary
+import com.maxmar.attendance.data.repository.AbsentRepository
 import javax.inject.Inject
 
 /**
@@ -26,7 +29,14 @@ data class HistoryState(
     val isLoadingMore: Boolean = false,
     val error: String? = null,
     val startDate: LocalDate? = null,
-    val endDate: LocalDate? = null
+    val endDate: LocalDate? = null,
+    val selectedYear: Int = LocalDate.now().year,
+    val selectedMonth: Int = LocalDate.now().monthValue,
+    val absents: List<AbsentAttendance> = emptyList(),
+    val summary: AttendanceSummary? = null,
+    val isLoadingAbsents: Boolean = false,
+    val summaryError: String? = null,
+    val selectedTab: Int = 0 // 0: Attendance, 1: Absences, 2: Summary
 )
 
 /**
@@ -34,7 +44,8 @@ data class HistoryState(
  */
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
-    private val attendanceRepository: AttendanceRepository
+    private val attendanceRepository: AttendanceRepository,
+    private val absentRepository: AbsentRepository
 ) : ViewModel() {
     
     private val _historyState = MutableStateFlow(HistoryState())
@@ -43,7 +54,9 @@ class HistoryViewModel @Inject constructor(
     private val dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
     
     init {
-        loadHistory()
+        // Initialize with filtering by current month
+        val now = LocalDate.now()
+        setMonthYear(now.year, now.monthValue)
     }
     
     /**
@@ -113,6 +126,91 @@ class HistoryViewModel @Inject constructor(
                 }
             }
         }
+    }
+    
+    /**
+     * Set month and year filter and reload all data.
+     */
+    fun setMonthYear(year: Int, month: Int) {
+        val startDate = LocalDate.of(year, month, 1)
+        val endDate = startDate.plusMonths(1).minusDays(1)
+        
+        _historyState.value = _historyState.value.copy(
+            selectedYear = year,
+            selectedMonth = month,
+            startDate = startDate,
+            endDate = endDate
+        )
+        
+        loadHistory()
+        loadAbsents()
+        loadSummary()
+    }
+    
+    /**
+     * Load absent attendance records.
+     */
+    fun loadAbsents() {
+        val state = _historyState.value
+        
+        viewModelScope.launch {
+            _historyState.value = _historyState.value.copy(isLoadingAbsents = true)
+            
+            when (val result = absentRepository.fetchAbsentsByMonth(state.selectedYear, state.selectedMonth)) {
+                is AuthResult.Success -> {
+                    _historyState.value = _historyState.value.copy(
+                        absents = result.data.absents,
+                        isLoadingAbsents = false
+                    )
+                }
+                is AuthResult.Error -> {
+                    _historyState.value = _historyState.value.copy(
+                        isLoadingAbsents = false
+                        // Don't show error for absents to avoid disrupting other views
+                    )
+                }
+            }
+        }
+    }
+    
+    /**
+     * Load attendance summary.
+     */
+    fun loadSummary() {
+         // Note: The existing fetchSummary API returns summary for the CURRENT month/year as per API implementation
+         // If the API supports filtering summary by month/year, we should use that. 
+         // For now, we'll use the existing call, but ideally attendanceRepository.fetchSummary needs parameters.
+         // Wait, the regular fetchSummary might only return "this month".
+         // Let's assume for now we use the existing one, but I should check if I can filter it.
+         // Based on previous files, fetching summary didn't seem to take params. 
+         // I'll stick to calling it for now.
+         
+        viewModelScope.launch {
+            when (val result = attendanceRepository.fetchSummary(
+                year = _historyState.value.selectedYear,
+                month = _historyState.value.selectedMonth
+            )) {
+                 is AuthResult.Success -> {
+                    _historyState.value = _historyState.value.copy(
+                        summary = result.data,
+                        summaryError = null
+                    )
+                }
+                is AuthResult.Error -> {
+                    _historyState.value = _historyState.value.copy(
+                        summary = null,
+                        summaryError = result.message
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Set selected tab.
+     */
+    fun setTab(index: Int) {
+        _historyState.value = _historyState.value.copy(selectedTab = index)
     }
     
     /**

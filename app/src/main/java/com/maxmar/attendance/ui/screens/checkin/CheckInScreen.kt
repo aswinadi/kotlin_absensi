@@ -181,6 +181,14 @@ fun CheckInScreen(
         }
         
         // Face overlay guide
+        // Color logic: green if valid, red if detected but not valid, white if not detected
+        val isFaceOk = state.isFaceValid || !state.hasEmployeePhoto
+        val faceOvalColor = when {
+            state.isFaceDetected && isFaceOk -> MaxmarColors.Success  // Face detected and valid
+            state.isFaceDetected && !isFaceOk -> MaxmarColors.Error   // Face detected but not matching
+            else -> Color.White.copy(alpha = 0.4f)                    // No face detected
+        }
+        
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center
@@ -191,7 +199,7 @@ fun CheckInScreen(
                     .clip(RoundedCornerShape(140.dp))
                     .border(
                         width = 3.dp,
-                        color = if (state.isFaceDetected) MaxmarColors.Success else Color.White.copy(alpha = 0.4f),
+                        color = faceOvalColor,
                         shape = RoundedCornerShape(140.dp)
                     )
             )
@@ -222,8 +230,20 @@ fun CheckInScreen(
                     )
                 }
                 
-                // Status badge
-                FaceStatusBadge(isFaceDetected = state.isFaceDetected)
+                // Status badges
+                Column(
+                    horizontalAlignment = Alignment.End,
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    FaceStatusBadge(isFaceDetected = state.isFaceDetected)
+                    // Show validation status only when face detected and employee has photo
+                    if (state.isFaceDetected && state.hasEmployeePhoto) {
+                        FaceValidationBadge(
+                            isFaceValid = state.isFaceValid,
+                            similarity = state.faceSimilarity
+                        )
+                    }
+                }
             }
         }
         
@@ -264,11 +284,28 @@ fun CheckInScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
+                // Dynamic helper text based on current state
+                val helperText = when {
+                    !state.isFaceDetected -> "Posisikan wajah Anda di dalam lingkaran"
+                    state.hasEmployeePhoto && !state.isFaceValid -> "Wajah tidak dikenali, pastikan wajah Anda terlihat jelas"
+                    !state.locationState.isWithinRadius && state.locationState.error == null -> "Anda berada di luar jangkauan kantor"
+                    state.locationState.error != null -> "Tidak dapat mengambil lokasi"
+                    else -> "Wajah terverifikasi, siap untuk submit"
+                }
+                
+                val helperColor = when {
+                    !state.isFaceDetected -> Color.White.copy(alpha = 0.8f)
+                    state.hasEmployeePhoto && !state.isFaceValid -> MaxmarColors.Error
+                    !state.locationState.isWithinRadius || state.locationState.error != null -> MaxmarColors.Warning
+                    else -> MaxmarColors.Success
+                }
+                
                 Text(
-                    text = "Posisikan wajah Anda di dalam lingkaran",
-                    color = Color.White.copy(alpha = 0.8f),
+                    text = helperText,
+                    color = helperColor,
                     fontSize = 14.sp,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontWeight = if (state.hasEmployeePhoto && !state.isFaceValid && state.isFaceDetected) FontWeight.SemiBold else FontWeight.Normal
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -325,6 +362,35 @@ private fun FaceStatusBadge(isFaceDetected: Boolean) {
             color = Color.White,
             fontWeight = FontWeight.SemiBold,
             fontSize = 13.sp
+        )
+    }
+}
+
+@Composable
+private fun FaceValidationBadge(isFaceValid: Boolean, similarity: Float = 0f) {
+    val backgroundColor = if (isFaceValid) MaxmarColors.Success else MaxmarColors.Error
+    val similarityPercent = (similarity * 100).toInt()
+    val text = if (isFaceValid) "Wajah Dikenali ($similarityPercent%)" else "Tidak Dikenali ($similarityPercent%)"
+    val icon = if (isFaceValid) Icons.Default.Check else Icons.Default.Close
+    
+    Row(
+        modifier = Modifier
+            .background(backgroundColor.copy(alpha = 0.9f), RoundedCornerShape(24.dp))
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(14.dp)
+        )
+        Spacer(modifier = Modifier.width(6.dp))
+        Text(
+            text = text,
+            color = Color.White,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 11.sp
         )
     }
 }

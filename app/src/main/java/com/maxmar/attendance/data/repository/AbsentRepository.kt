@@ -75,6 +75,37 @@ class AbsentRepository @Inject constructor(
     }
     
     /**
+     * Fetch absent attendance history by month.
+     */
+    suspend fun fetchAbsentsByMonth(
+        year: Int,
+        month: Int,
+        page: Int = 1
+    ): AuthResult<AbsentAttendanceListResult> {
+        return try {
+            val response = absentApi.getAbsentAttendances(
+                year = year,
+                month = month,
+                page = page
+            )
+            if (response.success) {
+                AuthResult.Success(
+                    AbsentAttendanceListResult(
+                        absents = response.data,
+                        meta = response.meta
+                    )
+                )
+            } else {
+                AuthResult.Error("Gagal mengambil riwayat ketidakhadiran")
+            }
+        } catch (e: retrofit2.HttpException) {
+            AuthResult.Error("Error: ${e.code()}")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+    
+    /**
      * Create absent attendance request.
      */
     suspend fun createAbsentAttendance(

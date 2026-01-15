@@ -96,8 +96,8 @@ class HomeViewModel @Inject constructor(
                 is AuthResult.Success -> {
                     val today = todayResult.data
                     _homeState.value = _homeState.value.copy(
-                        hasCheckedIn = today?.checkIn != null,
-                        hasCheckedOut = today?.checkOut != null,
+                        hasCheckedIn = today?.checkIn?.time != null,
+                        hasCheckedOut = today?.checkOut?.time != null,
                         checkInTime = today?.checkIn?.time,
                         checkOutTime = today?.checkOut?.time
                     )
