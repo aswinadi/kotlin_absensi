@@ -53,13 +53,13 @@ class AuthViewModel @Inject constructor(
     }
     
     /**
-     * Login with email and password.
+     * Login with username and password.
      */
-    fun login(email: String, password: String) {
+    fun login(name: String, password: String) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             
-            when (val result = authRepository.login(email, password)) {
+            when (val result = authRepository.login(name, password)) {
                 is AuthResult.Success -> {
                     _authState.value = AuthState.Authenticated(result.data)
                 }

@@ -20,8 +20,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Visibility
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
@@ -68,7 +68,7 @@ import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 
 /**
- * Login screen with email/password authentication.
+ * Login screen with username/password authentication.
  */
 @Composable
 fun LoginScreen(
@@ -81,13 +81,13 @@ fun LoginScreen(
     val appColors = LocalAppColors.current
     
     // Form state
-    var email by rememberSaveable { mutableStateOf("") }
+    var username by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var isPasswordVisible by rememberSaveable { mutableStateOf(false) }
     var rememberMe by rememberSaveable { mutableStateOf(false) }
     
     // Validation state
-    var emailError by remember { mutableStateOf<String?>(null) }
+    var usernameError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
     
     val isLoading = authState is AuthState.Loading
@@ -108,16 +108,12 @@ fun LoginScreen(
     
     fun validateAndLogin() {
         // Reset errors
-        emailError = null
+        usernameError = null
         passwordError = null
         
-        // Validate email
-        if (email.isBlank()) {
-            emailError = "Email tidak boleh kosong"
-            return
-        }
-        if (!email.contains("@")) {
-            emailError = "Masukkan email yang valid"
+        // Validate username
+        if (username.isBlank()) {
+            usernameError = "Username tidak boleh kosong"
             return
         }
         
@@ -129,7 +125,7 @@ fun LoginScreen(
         
         // Proceed with login
         focusManager.clearFocus()
-        viewModel.login(email, password)
+        viewModel.login(username, password)
     }
     
     Scaffold(
@@ -169,12 +165,12 @@ fun LoginScreen(
                 
                 // Login Form
                 LoginForm(
-                    email = email,
-                    onEmailChange = { 
-                        email = it
-                        emailError = null
+                    username = username,
+                    onUsernameChange = { 
+                        username = it
+                        usernameError = null
                     },
-                    emailError = emailError,
+                    usernameError = usernameError,
                     password = password,
                     onPasswordChange = { 
                         password = it
@@ -183,7 +179,7 @@ fun LoginScreen(
                     passwordError = passwordError,
                     isPasswordVisible = isPasswordVisible,
                     onTogglePasswordVisibility = { isPasswordVisible = !isPasswordVisible },
-                    onEmailDone = { focusManager.moveFocus(FocusDirection.Down) },
+                    onUsernameDone = { focusManager.moveFocus(FocusDirection.Down) },
                     onPasswordDone = { validateAndLogin() }
                 )
                 
@@ -251,15 +247,15 @@ private fun HeaderSection() {
 
 @Composable
 private fun LoginForm(
-    email: String,
-    onEmailChange: (String) -> Unit,
-    emailError: String?,
+    username: String,
+    onUsernameChange: (String) -> Unit,
+    usernameError: String?,
     password: String,
     onPasswordChange: (String) -> Unit,
     passwordError: String?,
     isPasswordVisible: Boolean,
     onTogglePasswordVisibility: () -> Unit,
-    onEmailDone: () -> Unit,
+    onUsernameDone: () -> Unit,
     onPasswordDone: () -> Unit
 ) {
     val appColors = LocalAppColors.current
@@ -282,27 +278,27 @@ private fun LoginForm(
     )
     
     Column(modifier = Modifier.fillMaxWidth()) {
-        // Email field
+        // Username field
         OutlinedTextField(
-            value = email,
-            onValueChange = onEmailChange,
-            label = { Text("Email") },
-            placeholder = { Text("Masukkan email") },
+            value = username,
+            onValueChange = onUsernameChange,
+            label = { Text("Username") },
+            placeholder = { Text("Masukkan username") },
             leadingIcon = {
                 Icon(
-                    imageVector = Icons.Outlined.Email,
+                    imageVector = Icons.Outlined.Person,
                     contentDescription = null
                 )
             },
-            isError = emailError != null,
-            supportingText = emailError?.let {
+            isError = usernameError != null,
+            supportingText = usernameError?.let {
                 { Text(it, color = MaxmarColors.Error) }
             },
             keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
+                keyboardType = KeyboardType.Text,
                 imeAction = ImeAction.Next
             ),
-            keyboardActions = KeyboardActions(onNext = { onEmailDone() }),
+            keyboardActions = KeyboardActions(onNext = { onUsernameDone() }),
             singleLine = true,
             shape = RoundedCornerShape(12.dp),
             colors = textFieldColors,

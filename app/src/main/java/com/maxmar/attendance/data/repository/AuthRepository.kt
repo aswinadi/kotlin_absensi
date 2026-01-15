@@ -25,12 +25,12 @@ class AuthRepository @Inject constructor(
 ) {
     
     /**
-     * Login with email and password.
+     * Login with username and password.
      * Saves token on success.
      */
-    suspend fun login(email: String, password: String): AuthResult<User> {
+    suspend fun login(name: String, password: String): AuthResult<User> {
         return try {
-            val response = authApi.login(LoginRequest(email, password))
+            val response = authApi.login(LoginRequest(name, password))
             
             if (response.success && response.data != null) {
                 tokenManager.saveToken(response.data.token)
@@ -126,7 +126,7 @@ class AuthRepository @Inject constructor(
     
     private fun getHttpErrorMessage(code: Int): String {
         return when (code) {
-            401 -> "Email atau password salah"
+            401 -> "Username atau password salah"
             403 -> "Akses ditolak"
             404 -> "Tidak ditemukan"
             422 -> "Data tidak valid"
