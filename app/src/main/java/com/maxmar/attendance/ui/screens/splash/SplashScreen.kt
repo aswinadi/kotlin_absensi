@@ -152,7 +152,7 @@ fun SplashScreen(
         Text(
             text = "v1.0.0",
             fontSize = 12.sp,
-            color = Color.White.copy(alpha = 0.4f),
+            color = if (isLight) MaxmarColors.Primary else Color.White.copy(alpha = 0.4f),
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(bottom = 32.dp)

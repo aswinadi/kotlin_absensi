@@ -28,6 +28,21 @@ android {
         }
     }
 
+    flavorDimensions += "environment"
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            resValue("string", "app_name", "Attendance (Dev)")
+            buildConfigField("String", "BASE_URL", "\"https://biogeographic-raylan-interdentally.ngrok-free.dev/api/v1/\"")
+        }
+        create("prod") {
+            dimension = "environment"
+            resValue("string", "app_name", "Attendance")
+            buildConfigField("String", "BASE_URL", "\"https://attendance.maxmar.net/api/v1/\"")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -36,14 +51,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            // Production API URL - Change this to your production server
-            buildConfigField("String", "BASE_URL", "\"https://attendance.maxmar.net/api/v1/\"")
             // signingConfig = signingConfigs.getByName("release")
         }
         debug {
             isMinifyEnabled = false
-            // Debug API URL - Using ngrok tunnel
-            buildConfigField("String", "BASE_URL", "\"https://biogeographic-raylan-interdentally.ngrok-free.dev/api/v1/\"")
         }
     }
 

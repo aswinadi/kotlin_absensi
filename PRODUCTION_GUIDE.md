@@ -2,18 +2,23 @@
 
 This guide details the steps to prepare and build your Android application for production release.
 
-## 1. Configure Production API URL
+## 1. Environment Flavors
 
-In `app/build.gradle.kts`, update the `release` build type with your production API URL:
+The app uses **Product Flavors** to switch between Development and Production environments. This allows you to have both versions installed on your device simultaneously.
 
-```kotlin
-buildTypes {
-    release {
-        // ...
-        buildConfigField("String", "BASE_URL", "\"https://api.yourdomain.com/api/v1/\"")
-    }
-}
-```
+### Available Flavors
+
+| Flavor | Variant Name | Server URL | App Name | Application ID |
+| :--- | :--- | :--- | :--- | :--- |
+| **dev** | `devDebug` / `devRelease` | `...ngrok-free.dev...` | Attendance (Dev) | `com.maxmar.attendance.dev` |
+| **prod** | `prodDebug` / `prodRelease` | `...maxmar.net...` | Attendance | `com.maxmar.attendance` |
+
+### Switching Environments
+1. Open **Build Variants** tool window in Android Studio (bottom-left).
+2. Click the cell under **Active Build Variant** for the `app` module.
+3. Select desired variant (e.g. `devDebug` or `prodRelease`).
+
+> **Note:** You can install both `dev` and `prod` versions on the same device side-by-side.
 
 ## 2. Add App Icon
 
@@ -95,12 +100,12 @@ import java.util.Properties
 
 ### Generate Signed Bundle (Recommended for Play Store)
 ```bash
-./gradlew bundleRelease
+./gradlew bundleProdRelease
 ```
-Output: `app/build/outputs/bundle/release/app-release.aab`
+Output: `app/build/outputs/bundle/prodRelease/app-prod-release.aab`
 
 ### Generate Signed APK (For direct distribution)
 ```bash
-./gradlew assembleRelease
+./gradlew assembleProdRelease
 ```
-Output: `app/build/outputs/apk/release/app-release.apk`
+Output: `app/build/outputs/apk/prodRelease/app-prod-release.apk`
