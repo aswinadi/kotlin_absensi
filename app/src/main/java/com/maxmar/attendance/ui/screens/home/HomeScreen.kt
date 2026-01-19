@@ -375,9 +375,9 @@ private fun TodayAttendanceCard(
 ) {
     val appColors = LocalAppColors.current
     
-    // Convert ISO 8601 timestamps to readable local format
-    val localCheckInTime = com.maxmar.attendance.util.DateTimeUtil.formatToDDMMYYYYHHmm(checkInTime)
-    val localCheckOutTime = com.maxmar.attendance.util.DateTimeUtil.formatToDDMMYYYYHHmm(checkOutTime)
+    // Convert ISO 8601 timestamps to readable local format (HH:mm only)
+    val localCheckInTime = com.maxmar.attendance.util.DateTimeUtil.formatToHHmm(checkInTime)
+    val localCheckOutTime = com.maxmar.attendance.util.DateTimeUtil.formatToHHmm(checkOutTime)
     
     val currentDate = remember {
         java.text.SimpleDateFormat("EEEE, dd MMMM yyyy", java.util.Locale("id", "ID"))

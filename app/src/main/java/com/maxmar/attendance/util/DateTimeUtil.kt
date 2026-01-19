@@ -15,6 +15,23 @@ object DateTimeUtil {
     private val localDateFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.getDefault())
     private val localDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm", Locale.getDefault())
     private val customDateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", Locale.getDefault())
+    private val shortTimeFormatter = DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault())
+    
+    /**
+     * Format ISO 8601 string to local time (HH:mm).
+     * Example: "2026-01-19T03:15:53+00:00" -> "10:15" (in UTC+7)
+     */
+    fun formatToHHmm(iso8601String: String?): String {
+        if (iso8601String.isNullOrEmpty()) return "--:--"
+        
+        return try {
+            val zonedDateTime = ZonedDateTime.parse(iso8601String)
+            val localDateTime = zonedDateTime.withZoneSameInstant(java.time.ZoneId.systemDefault())
+            localDateTime.format(shortTimeFormatter)
+        } catch (e: DateTimeParseException) {
+            iso8601String
+        }
+    }
     
     /**
      * Format ISO 8601 string to local time (HH:mm:ss).
