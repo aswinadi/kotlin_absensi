@@ -9,3 +9,12 @@ All notable changes to this project will be documented in this file.
   - Added `MonthYearScrollablePicker` composable using `LazyColumn` for efficient month selection.
   - Integrated `ModalBottomSheet` for a better user experience on mobile.
   - Supported a date range from 5 years past to 1 year future.
+
+### Fixed
+- **Face Recognition**: Resolved "0% Match" issue by ensuring correct photo URL accessibility via `ngrok` for development builds.
+- **Timezone Display**:
+  - Updated Backend API to return ISO 8601 timestamps (UTC) instead of formatted strings.
+  - Updated Android App to parse ISO dates and display them in the user's Local Timezone.
+- **UI Improvements**:
+  - Changed date/time format on Home Screen to simplified `dd-MM-yyyy HH:mm` for better readability.
+  - Added "Dev" and "Debug" indicators in app footer for non-production builds.

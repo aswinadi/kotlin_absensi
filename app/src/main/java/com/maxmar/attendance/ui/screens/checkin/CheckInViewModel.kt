@@ -388,7 +388,7 @@ class CheckInViewModel @Inject constructor(
                     _state.value = _state.value.copy(
                         isSubmitting = false,
                         isSuccess = true,
-                        checkTime = result.data.time
+                        checkTime = com.maxmar.attendance.util.DateTimeUtil.formatToDDMMYYYYHHmm(result.data.time)
                     )
                 }
                 is AuthResult.Error -> {

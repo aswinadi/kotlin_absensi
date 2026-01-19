@@ -440,8 +440,11 @@ private fun TimeColumn(
                     style = MaterialTheme.typography.labelSmall,
                     color = appColors.textSecondary
                 )
-                // Convert UTC time to local timezone
-                val localTime = TimeUtils.convertUtcToLocalShort(time)
+                val localTime = if (time != null) {
+                    com.maxmar.attendance.util.DateTimeUtil.formatToLocalTime(time).take(5)
+                } else {
+                    "--:--"
+                }
                 Text(
                     text = localTime ?: "--:--",
                     style = MaterialTheme.typography.titleMedium.copy(

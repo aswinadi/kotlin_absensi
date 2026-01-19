@@ -420,8 +420,11 @@ private fun ProfileContent(
         Spacer(modifier = Modifier.height(16.dp))
         
         // App Version
+        val appName = androidx.compose.ui.res.stringResource(id = com.maxmar.attendance.R.string.app_name)
+        val versionName = com.maxmar.attendance.BuildConfig.VERSION_NAME
+        val buildType = if (com.maxmar.attendance.BuildConfig.DEBUG) "Debug" else "Release"
         Text(
-            text = "Maxmar Attendance v1.0.0",
+            text = "$appName v$versionName ($buildType)",
             style = MaterialTheme.typography.bodySmall,
             color = appColors.textTertiary
         )

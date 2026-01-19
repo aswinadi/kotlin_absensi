@@ -443,6 +443,9 @@ private fun LoginButton(
 @Composable
 private fun FooterSection() {
     val appColors = LocalAppColors.current
+    val appName = androidx.compose.ui.res.stringResource(id = R.string.app_name)
+    val versionName = com.maxmar.attendance.BuildConfig.VERSION_NAME
+    val buildType = if (com.maxmar.attendance.BuildConfig.DEBUG) "Debug" else "Release"
     
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Row(
@@ -455,7 +458,7 @@ private fun FooterSection() {
             )
             
             Text(
-                text = "Maxmar Attendance",
+                text = appName,
                 style = MaterialTheme.typography.bodySmall.copy(
                     color = appColors.textTertiary
                 ),
@@ -471,10 +474,11 @@ private fun FooterSection() {
         Spacer(modifier = Modifier.height(16.dp))
         
         Text(
-            text = "v1.0.0",
+            text = "v$versionName ($buildType)",
             style = MaterialTheme.typography.bodySmall.copy(
                 color = appColors.textTertiary
             )
         )
     }
 }
+

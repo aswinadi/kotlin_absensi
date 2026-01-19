@@ -1,0 +1,29 @@
+{
+    "project_info": {
+        "project_number": "1061744201270",
+        "project_id": "maxmar-attendance",
+        "storage_bucket": "maxmar-attendance.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:1061744201270:android:d550ac2a5a47a3c9fc5297",
+                "android_client_info": {
+                    "package_name": "com.maxmar.attendance.dev"
+                }
+            },
+            "oauth_client": [],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyByhf7WYjvQjfOBUJJxndv4od6iSB5EuC4"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": []
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}
