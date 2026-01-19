@@ -60,9 +60,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import com.maxmar.attendance.data.model.AttendanceSummary
 import com.maxmar.attendance.data.model.Shift
 import com.maxmar.attendance.ui.theme.LocalAppColors
@@ -89,6 +95,30 @@ fun HomeScreen(
     // Always reset to Home (index 0) when this screen is displayed
     var selectedNavIndex by rememberSaveable { mutableIntStateOf(0) }
     val appColors = LocalAppColors.current
+
+    // Request permissions on entry
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { 
+        // Permissions handled
+    }
+
+    LaunchedEffect(Unit) {
+        val permissions = arrayOf(
+            Manifest.permission.CAMERA,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+        
+        val permissionsToRequest = permissions.filter {
+            ContextCompat.checkSelfPermission(context, it) != PackageManager.PERMISSION_GRANTED
+        }
+        
+        if (permissionsToRequest.isNotEmpty()) {
+            permissionLauncher.launch(permissionsToRequest.toTypedArray())
+        }
+    }
     
     // Reset to Home tab when screen recomposes (coming back from other screens)
     LaunchedEffect(Unit) {
