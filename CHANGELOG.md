@@ -4,17 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-01-19
+
 ### Added
-- **History Screen**: Implemented a new scrollable Month/Year picker in a bottom sheet to replace the arrow-based navigation.
-  - Added `MonthYearScrollablePicker` composable using `LazyColumn` for efficient month selection.
-  - Integrated `ModalBottomSheet` for a better user experience on mobile.
-  - Supported a date range from 5 years past to 1 year future.
+- **Permissions**: Request Camera and Location permissions immediately on Home Screen entry.
+- **History Screen**: Implemented a new scrollable Month/Year picker in a bottom sheet.
+- **Privacy**: Face data is now cropped locally from downloaded reference photos to ensure privacy and matching accuracy.
 
 ### Fixed
-- **Face Recognition**: Resolved "0% Match" issue by ensuring correct photo URL accessibility via `ngrok` for development builds.
+- **Face Recognition**:
+  - Implemented **Local Face Cropping** for downloaded photos using ML Kit. This fixes 0% match issues with uncropped profile photos.
+  - Resolved "0% Match" issue by ensuring correct photo URL accessibility via `ngrok` for development builds.
 - **Timezone Display**:
-  - Updated Backend API to return ISO 8601 timestamps (UTC) instead of formatted strings.
-  - Updated Android App to parse ISO dates and display them in the user's Local Timezone.
+  - Updated Backend API to return ISO 8601 timestamps (UTC).
+  - Updated Android App to parse ISO dates and display them in Local Timezone.
 - **UI Improvements**:
-  - Changed date/time format on Home Screen to simplified `dd-MM-yyyy HH:mm` for better readability.
-  - Added "Dev" and "Debug" indicators in app footer for non-production builds.
+  - **Today Card**: Simplified check-in/out display to HH:mm (removed date).
+  - Changed date/time format on Home/History to readable `dd-MM-yyyy HH:mm`.
+  - Added "Dev" and "Debug" indicators in app footer.
