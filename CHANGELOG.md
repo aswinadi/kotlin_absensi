@@ -15,6 +15,9 @@ All notable changes to this project will be documented in this file.
 - **Face Recognition**:
   - Implemented **Local Face Cropping** for downloaded photos using ML Kit. This fixes 0% match issues with uncropped profile photos.
   - Resolved "0% Match" issue by ensuring correct photo URL accessibility via `ngrok` for development builds.
+- **Firebase Notifications**:
+  - Fixed payload key mismatch for device token registration (`token` instead of `fcm_token`).
+  - Added repository logic to sync token on login.
 - **Timezone Display**:
   - Updated Backend API to return ISO 8601 timestamps (UTC).
   - Updated Android App to parse ISO dates and display them in Local Timezone.

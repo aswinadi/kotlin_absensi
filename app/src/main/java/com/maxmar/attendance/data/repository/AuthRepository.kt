@@ -140,7 +140,10 @@ class AuthRepository @Inject constructor(
      */
     suspend fun registerDeviceToken(token: String) {
         try {
-            val request = mapOf("fcm_token" to token)
+            val request = mapOf(
+                "token" to token,
+                "device_type" to "android"
+            )
             authApi.updateDeviceToken(request)
         } catch (e: Exception) {
             // Silently fail for token updates, main flow shouldn't be blocked
