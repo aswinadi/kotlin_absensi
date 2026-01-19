@@ -21,6 +21,12 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.net.URL
 import javax.inject.Inject
+import com.google.mlkit.vision.common.InputImage
+import com.google.mlkit.vision.face.FaceDetection
+import com.google.mlkit.vision.face.FaceDetectorOptions
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /**
  * Check type enum.
@@ -87,12 +93,21 @@ class CheckInViewModel @Inject constructor(
     private val locationManager = LocationManager(context)
     private val faceNetHelper = FaceNetHelper(context)
     
+    private val faceDetector = FaceDetection.getClient(
+        FaceDetectorOptions.Builder()
+            .setPerformanceMode(FaceDetectorOptions.PERFORMANCE_MODE_ACCURATE)
+            .setLandmarkMode(FaceDetectorOptions.LANDMARK_MODE_NONE)
+            .setClassificationMode(FaceDetectorOptions.CLASSIFICATION_MODE_NONE)
+            .build()
+    )
+    
     // Store employee's face embedding for comparison
     private var employeeEmbedding: FloatArray? = null
     
     override fun onCleared() {
         super.onCleared()
         faceNetHelper.close()
+        faceDetector.close()
     }
     
     /**
@@ -265,7 +280,18 @@ class CheckInViewModel @Inject constructor(
             }
             
             if (bitmap != null) {
-                employeeEmbedding = faceNetHelper.generateEmbedding(bitmap)
+                // Detect and crop face to improve embedding quality
+                val croppedFace = detectAndCropFace(bitmap)
+                val targetBitmap = croppedFace ?: bitmap
+                
+                if (croppedFace == null) {
+                    Log.w(TAG, "No face detected in employee photo, using full image as fallback")
+                } else {
+                    Log.d(TAG, "Face detected and cropped from employee photo")
+                }
+
+                employeeEmbedding = faceNetHelper.generateEmbedding(targetBitmap)
+                
                 if (employeeEmbedding != null) {
                     Log.d(TAG, "Generated embedding from photo URL successfully")
                 } else {
@@ -406,5 +432,56 @@ class CheckInViewModel @Inject constructor(
      */
     fun clearError() {
         _state.value = _state.value.copy(error = null)
+    }
+    
+    /**
+     * Detect face in bitmap and crop it.
+     */
+    private suspend fun detectAndCropFace(bitmap: Bitmap): Bitmap? = suspendCancellableCoroutine { continuation ->
+        val inputImage = InputImage.fromBitmap(bitmap, 0)
+        
+        faceDetector.process(inputImage)
+            .addOnSuccessListener { faces ->
+                if (faces.isEmpty()) {
+                    Log.w(TAG, "No face detected in downloaded photo")
+                    continuation.resume(null)
+                    return@addOnSuccessListener
+                }
+                
+                // Get largest face or the first one
+                val face = faces.maxByOrNull { it.boundingBox.width() * it.boundingBox.height() } ?: faces[0]
+                
+                try {
+                    val cropped = cropFace(bitmap, face.boundingBox)
+                    continuation.resume(cropped)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error cropping face: ${e.message}")
+                    continuation.resume(null)
+                }
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Face detection failed: ${e.message}")
+                continuation.resumeWithException(e)
+            }
+    }
+    
+    /**
+     * Crop face from bitmap with padding.
+     */
+    private fun cropFace(bitmap: Bitmap, boundingBox: android.graphics.Rect): Bitmap {
+        // Add 20% padding around face
+        val padding = (boundingBox.width() * 0.2f).toInt()
+        
+        val left = kotlin.math.max(0, boundingBox.left - padding)
+        val top = kotlin.math.max(0, boundingBox.top - padding)
+        val right = kotlin.math.min(bitmap.width, boundingBox.right + padding)
+        val bottom = kotlin.math.min(bitmap.height, boundingBox.bottom + padding)
+        
+        val width = right - left
+        val height = bottom - top
+        
+        if (width <= 0 || height <= 0) return bitmap
+        
+        return Bitmap.createBitmap(bitmap, left, top, width, height)
     }
 }
