@@ -31,13 +31,15 @@ interface AttendanceApi {
     @POST(ApiEndpoints.CHECK_IN)
     suspend fun checkIn(
         @Field("latitude") latitude: Double,
-        @Field("longitude") longitude: Double
+        @Field("longitude") longitude: Double,
+        @Field("timestamp") timestamp: String? = null
     ): CheckInOutResponse
     
     @FormUrlEncoded
     @POST(ApiEndpoints.CHECK_OUT)
     suspend fun checkOut(
         @Field("latitude") latitude: Double,
-        @Field("longitude") longitude: Double
+        @Field("longitude") longitude: Double,
+        @Field("timestamp") timestamp: String? = null
     ): CheckInOutResponse
 }

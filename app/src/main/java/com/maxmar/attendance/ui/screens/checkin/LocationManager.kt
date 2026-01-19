@@ -29,6 +29,14 @@ class LocationManager(context: Context) {
      */
     @SuppressLint("MissingPermission")
     suspend fun getCurrentLocation(): Location? {
+        // Validation helper
+        fun validateLocation(location: Location): Location {
+            if (location.isFromMockProvider) {
+                throw SecurityException("Lokasi palsu terdeteksi! Mohon matikan aplikasi Fake GPS.")
+            }
+            return location
+        }
+
         return try {
             // Try to get current location with timeout
             withTimeoutOrNull(10000L) {
@@ -40,11 +48,19 @@ class LocationManager(context: Context) {
                         cancellationToken.token
                     ).addOnSuccessListener { location ->
                         if (continuation.isActive) {
-                            continuation.resume(location)
+                            try {
+                                if (location != null) {
+                                    validateLocation(location)
+                                    continuation.resume(location)
+                                } else {
+                                    continuation.resume(null)
+                                }
+                            } catch (e: SecurityException) {
+                                continuation.resumeWithException(e)
+                            }
                         }
                     }.addOnFailureListener { exception ->
                         if (continuation.isActive) {
-                            // Return null instead of throwing exception
                             continuation.resume(null)
                         }
                     }
@@ -54,8 +70,10 @@ class LocationManager(context: Context) {
                     }
                 }
             } ?: getLastKnownLocation() // Fallback to last known location
+        } catch (e: SecurityException) {
+            throw e // Re-throw security exceptions
         } catch (e: Exception) {
-            // Fallback to last known location on any error
+            // Fallback to last known location on generic error
             getLastKnownLocation()
         }
     }
@@ -70,7 +88,19 @@ class LocationManager(context: Context) {
                 fusedLocationClient.lastLocation
                     .addOnSuccessListener { location ->
                         if (continuation.isActive) {
-                            continuation.resume(location)
+                            try {
+                                if (location != null && location.isFromMockProvider) {
+                                    // If last known is mock, just ignore it (return null) rather than crash
+                                    // or strictly throw exception? 
+                                    // Better to be safe: throw if we rely on it, or just return null to force retry.
+                                    // Let's return null to avoid blocking valid usage if old mock data is stuck.
+                                    continuation.resume(null) 
+                                } else {
+                                    continuation.resume(location)
+                                }
+                            } catch (e: Exception) {
+                                continuation.resume(null)
+                            }
                         }
                     }
                     .addOnFailureListener {

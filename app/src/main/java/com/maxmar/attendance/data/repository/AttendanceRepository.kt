@@ -89,10 +89,11 @@ class AttendanceRepository @Inject constructor(
      */
     suspend fun checkIn(
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        timestamp: String? = null
     ): AuthResult<CheckInOutResult> {
         return try {
-            val response = attendanceApi.checkIn(latitude, longitude)
+            val response = attendanceApi.checkIn(latitude, longitude, timestamp)
             if (response.success && response.data != null) {
                 AuthResult.Success(response.data)
             } else {
@@ -117,10 +118,11 @@ class AttendanceRepository @Inject constructor(
      */
     suspend fun checkOut(
         latitude: Double,
-        longitude: Double
+        longitude: Double,
+        timestamp: String? = null
     ): AuthResult<CheckInOutResult> {
         return try {
-            val response = attendanceApi.checkOut(latitude, longitude)
+            val response = attendanceApi.checkOut(latitude, longitude, timestamp)
             if (response.success && response.data != null) {
                 AuthResult.Success(response.data)
             } else {

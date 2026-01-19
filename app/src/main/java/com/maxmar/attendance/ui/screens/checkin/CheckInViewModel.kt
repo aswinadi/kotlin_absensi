@@ -41,6 +41,7 @@ enum class CheckType {
  */
 data class LocationState(
     val isLoading: Boolean = false,
+    val location: Location? = null, // Store full location object
     val userLatitude: Double? = null,
     val userLongitude: Double? = null,
     val officeLatitude: Double? = null,
@@ -166,6 +167,7 @@ class CheckInViewModel @Inject constructor(
                         _state.value = _state.value.copy(
                             locationState = LocationState(
                                 isLoading = false,
+                                location = location, // Save full location
                                 userLatitude = location.latitude,
                                 userLongitude = location.longitude,
                                 officeLatitude = officeLat,
@@ -181,6 +183,7 @@ class CheckInViewModel @Inject constructor(
                         _state.value = _state.value.copy(
                             locationState = LocationState(
                                 isLoading = false,
+                                location = location, // Save full location even on error
                                 userLatitude = location.latitude,
                                 userLongitude = location.longitude,
                                 error = result.message
@@ -397,15 +400,26 @@ class CheckInViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isSubmitting = true, error = null)
             
+            // Format GPS time to ISO 8601
+            val timestamp = locationState.location?.time?.let { timeMillis ->
+                // Format to ISO 8601 string: yyyy-MM-dd'T'HH:mm:ss'Z'
+                val date = java.util.Date(timeMillis)
+                val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US)
+                format.timeZone = java.util.TimeZone.getTimeZone("UTC")
+                format.format(date)
+            }
+            
             val result = if (currentState.checkType == CheckType.CHECK_IN) {
                 attendanceRepository.checkIn(
                     latitude = locationState.userLatitude,
-                    longitude = locationState.userLongitude
+                    longitude = locationState.userLongitude,
+                    timestamp = timestamp
                 )
             } else {
                 attendanceRepository.checkOut(
                     latitude = locationState.userLatitude,
-                    longitude = locationState.userLongitude
+                    longitude = locationState.userLongitude,
+                    timestamp = timestamp
                 )
             }
             
