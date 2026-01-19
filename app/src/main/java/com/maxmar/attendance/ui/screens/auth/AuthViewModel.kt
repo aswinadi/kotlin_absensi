@@ -61,6 +61,10 @@ class AuthViewModel @Inject constructor(
             
             when (val result = authRepository.login(username, password)) {
                 is AuthResult.Success -> {
+                    // Update device token if available
+                    viewModelScope.launch {
+                        authRepository.registerCurrentDeviceToken()
+                    }
                     _authState.value = AuthState.Authenticated(result.data)
                 }
                 is AuthResult.Error -> {

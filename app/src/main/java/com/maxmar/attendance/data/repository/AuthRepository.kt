@@ -134,4 +134,26 @@ class AuthRepository @Inject constructor(
             else -> "Terjadi kesalahan (Error $code)"
         }
     }
+    
+    /**
+     * Register device FCM token.
+     */
+    suspend fun registerDeviceToken(token: String) {
+        try {
+            val request = mapOf("fcm_token" to token)
+            authApi.updateDeviceToken(request)
+        } catch (e: Exception) {
+            // Silently fail for token updates, main flow shouldn't be blocked
+        }
+    }
+    
+    /**
+     * Register currently stored FCM token if available.
+     */
+    suspend fun registerCurrentDeviceToken() {
+        val token = tokenManager.getFcmToken()
+        if (!token.isNullOrEmpty()) {
+            registerDeviceToken(token)
+        }
+    }
 }

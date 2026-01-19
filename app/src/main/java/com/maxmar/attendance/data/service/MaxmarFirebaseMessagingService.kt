@@ -11,6 +11,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.maxmar.attendance.R
 import com.maxmar.attendance.data.local.TokenManager
+import com.maxmar.attendance.data.repository.AuthRepository
 import com.maxmar.attendance.ui.MainActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +28,9 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
 
     @Inject
     lateinit var tokenManager: TokenManager
+    
+    @Inject
+    lateinit var authRepository: AuthRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -45,8 +49,10 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
         serviceScope.launch {
             tokenManager.saveFcmToken(token)
             
-            // TODO: Send token to server when user is logged in
-            // This should be done via the API to register the device token
+            // Sync with backend if user is logged in
+            if (tokenManager.hasToken()) {
+                 authRepository.registerDeviceToken(token)
+            }
         }
     }
 

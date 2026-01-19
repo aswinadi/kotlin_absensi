@@ -21,4 +21,7 @@ interface AuthApi {
     
     @GET(ApiEndpoints.ME)
     suspend fun me(): ApiResponse<User>
+    
+    @POST(ApiEndpoints.FCM_TOKEN)
+    suspend fun updateDeviceToken(@Body request: Map<String, String>): ApiResponse<Unit>
 }
