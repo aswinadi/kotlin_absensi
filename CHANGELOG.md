@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-01-19
+
+### Added
+- **Security Hardening**:
+  - **Fake GPS Detection**: Implemented strict validation to reject locations from mock providers.
+  - **Trusted Time**: Switched attendance timestamps to use high-accuracy GPS Time (`location.time`) instead of device system time to prevent date/time manipulation.
+
 ## [1.1.0] - 2026-01-19
 
 ### Added
