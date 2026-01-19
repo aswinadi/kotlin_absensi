@@ -18,7 +18,7 @@ interface NotificationApi {
     @GET(ApiEndpoints.NOTIFICATIONS_UNREAD_COUNT)
     suspend fun getUnreadCount(): UnreadCountResponse
     
-    @POST("notifications/{id}/read")
+    @POST("att/notifications/{id}/read")
     suspend fun markAsRead(@Path("id") id: String): NotificationActionResponse
     
     @POST(ApiEndpoints.NOTIFICATIONS_MARK_ALL_READ)

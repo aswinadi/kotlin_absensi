@@ -19,7 +19,7 @@ interface AbsentApi {
     @GET(ApiEndpoints.ABSENT_TYPES)
     suspend fun getAbsentTypes(): AbsentTypesResponse
     
-    @GET(ApiEndpoints.ABSENT_ATTENDANCE)
+    @GET(ApiEndpoints.ABSENT_ATTENDANCES)
     suspend fun getAbsentAttendances(
         @Query("start_date") startDate: String? = null,
         @Query("end_date") endDate: String? = null,
@@ -29,7 +29,7 @@ interface AbsentApi {
     ): AbsentAttendanceListResponse
     
     @Multipart
-    @POST(ApiEndpoints.ABSENT_ATTENDANCE)
+    @POST(ApiEndpoints.ABSENT_ATTENDANCES)
     suspend fun createAbsentAttendance(
         @Part("absent_type_id") absentTypeId: RequestBody,
         @Part("absent_date") absentDate: RequestBody,

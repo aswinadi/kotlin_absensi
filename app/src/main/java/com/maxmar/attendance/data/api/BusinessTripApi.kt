@@ -31,22 +31,22 @@ interface BusinessTripApi {
         @Query("status") status: String? = null
     ): BusinessTripListResponse
     
-    @GET("business-trips/{id}")
+    @GET("att/business-trips/{id}")
     suspend fun getBusinessTripDetail(
         @Path("id") id: Int
     ): BusinessTripDetailResponse
     
     // Master data endpoints
-    @GET("business-trip-purposes")
+    @GET(ApiEndpoints.BUSINESS_TRIP_PURPOSES)
     suspend fun getPurposes(): MasterDataResponse
     
-    @GET("business-trip-destinations")
+    @GET(ApiEndpoints.BUSINESS_TRIP_DESTINATIONS)
     suspend fun getDestinations(): MasterDataResponse
     
-    @GET("business-trips/assignable-users")
+    @GET(ApiEndpoints.BUSINESS_TRIP_ASSIGNABLE_USERS)
     suspend fun getAssignableUsers(): AssignableUsersResponse
     
-    @GET("business-trips/allowance")
+    @GET(ApiEndpoints.BUSINESS_TRIP_ALLOWANCE)
     suspend fun getEmployeeAllowance(
         @Query("destination_id") destinationId: Int
     ): AllowanceResponse
@@ -68,16 +68,16 @@ interface BusinessTripApi {
     ): BusinessTripDetailResponse
     
     // Realization endpoints
-    @GET("business-trips/pending-realization")
+    @GET("att/business-trips/pending-realization")
     suspend fun getTripsNeedingRealization(): BusinessTripListResponse
     
-    @GET("business-trips/{tripId}/realization")
+    @GET("att/business-trips/{tripId}/realization")
     suspend fun getRealization(
         @Path("tripId") tripId: Int
     ): RealizationResponse
     
     @Multipart
-    @POST("business-trips/{tripId}/realization")
+    @POST("att/business-trips/{tripId}/realization")
     suspend fun createRealization(
         @Path("tripId") tripId: Int,
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
@@ -85,14 +85,14 @@ interface BusinessTripApi {
     ): RealizationResponse
     
     @Multipart
-    @PUT("business-trips/{tripId}/realization")
+    @PUT("att/business-trips/{tripId}/realization")
     suspend fun updateRealization(
         @Path("tripId") tripId: Int,
         @PartMap data: Map<String, @JvmSuppressWildcards RequestBody>,
         @Part documents: List<MultipartBody.Part>?
     ): RealizationResponse
     
-    @DELETE("business-trips/{tripId}/realization/documents/{documentId}")
+    @DELETE("att/business-trips/{tripId}/realization/documents/{documentId}")
     suspend fun deleteRealizationDocument(
         @Path("tripId") tripId: Int,
         @Path("documentId") documentId: Int

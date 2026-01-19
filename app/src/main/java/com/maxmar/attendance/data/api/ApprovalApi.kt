@@ -16,14 +16,14 @@ interface ApprovalApi {
     @GET(ApiEndpoints.APPROVALS)
     suspend fun getApprovals(): ApprovalListResponse
     
-    @POST("approvals/{id}/acknowledge")
+    @POST("att/approvals/{id}/acknowledge")
     suspend fun acknowledge(@Path("id") id: Int): ApprovalActionResponse
     
-    @POST("approvals/{id}/approve")
+    @POST("att/approvals/{id}/approve")
     suspend fun approve(@Path("id") id: Int): ApprovalActionResponse
     
     @FormUrlEncoded
-    @POST("approvals/{id}/reject")
+    @POST("att/approvals/{id}/reject")
     suspend fun reject(
         @Path("id") id: Int,
         @Field("reason") reason: String?
