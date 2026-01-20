@@ -207,9 +207,14 @@ fun CompleteProfileScreen(
 
                 Button(
                     onClick = {
-                        if (phone.isBlank() || nik.length != 16 || permanentAddress.isBlank() || 
+                        if (phone.isBlank() || nik.isBlank() || permanentAddress.isBlank() || 
                             permanentCity.isBlank() || currentAddress.isBlank() || currentCity.isBlank()) {
-                            scope.launch { snackbarHostState.showSnackbar("Mohon lengkapi semua data dengan benar") }
+                            scope.launch { snackbarHostState.showSnackbar("Mohon lengkapi semua data") }
+                            return@Button
+                        }
+                        
+                        if (nik.length != 16) {
+                            scope.launch { snackbarHostState.showSnackbar("NIK harus 16 digit") }
                             return@Button
                         }
 
