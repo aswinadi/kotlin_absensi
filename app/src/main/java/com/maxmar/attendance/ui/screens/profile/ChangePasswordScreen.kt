@@ -14,7 +14,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.KeyboardType
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -32,6 +33,7 @@ fun ChangePasswordScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val appColors = LocalAppColors.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     
@@ -176,10 +178,8 @@ fun ChangePasswordScreen(
                             newPassword, 
                             confirmPassword,
                             onSuccess = {
-                                scope.launch { 
-                                    snackbarHostState.showSnackbar("Password berhasil diubah") 
+                                    Toast.makeText(context, "Password berhasil diubah", Toast.LENGTH_LONG).show()
                                     onNavigateBack()
-                                }
                             },
                             onError = { msg ->
                                 scope.launch { snackbarHostState.showSnackbar(msg) }
