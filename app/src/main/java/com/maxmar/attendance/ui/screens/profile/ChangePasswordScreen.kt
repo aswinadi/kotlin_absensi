@@ -62,8 +62,7 @@ fun ChangePasswordScreen(
                 )
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = appColors.background
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
