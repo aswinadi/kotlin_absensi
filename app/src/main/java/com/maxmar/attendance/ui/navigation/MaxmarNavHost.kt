@@ -70,6 +70,22 @@ fun MaxmarNavHost(
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
                     }
+                },
+                onRequiresProfileCompletion = {
+                    navController.navigate(Routes.COMPLETE_PROFILE) {
+                        popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        // Complete Profile Screen
+        composable(Routes.COMPLETE_PROFILE) {
+            com.maxmar.attendance.ui.screens.auth.CompleteProfileScreen(
+                onProfileCompleted = {
+                    navController.navigate(Routes.HOME) {
+                        popUpTo(Routes.COMPLETE_PROFILE) { inclusive = true }
+                    }
                 }
             )
         }
@@ -231,7 +247,7 @@ fun MaxmarNavHost(
                 }
             )
         }
-        
+
         // Profile Screen
         composable(Routes.PROFILE) {
             ProfileScreen(
@@ -242,7 +258,17 @@ fun MaxmarNavHost(
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(0) { inclusive = true }
                     }
+                },
+                onNavigateToChangePassword = {
+                    navController.navigate(Routes.CHANGE_PASSWORD)
                 }
+            )
+        }
+        
+        // Change Password Screen
+        composable(Routes.CHANGE_PASSWORD) {
+            com.maxmar.attendance.ui.screens.profile.ChangePasswordScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
         

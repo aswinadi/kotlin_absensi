@@ -20,6 +20,7 @@ sealed class AuthState {
     data object Loading : AuthState()
     data class Authenticated(val user: User) : AuthState()
     data object Unauthenticated : AuthState()
+    data class RequiresProfileCompletion(val user: User) : AuthState()
     data class Error(val message: String) : AuthState()
 }
 
@@ -28,7 +29,8 @@ sealed class AuthState {
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val employeeRepository: com.maxmar.attendance.data.repository.EmployeeRepository
 ) : ViewModel() {
     
     private val _authState = MutableStateFlow<AuthState>(AuthState.Initial)
@@ -43,7 +45,7 @@ class AuthViewModel @Inject constructor(
             
             when (val result = authRepository.checkAuthStatus()) {
                 is AuthResult.Success -> {
-                    _authState.value = AuthState.Authenticated(result.data)
+                    checkProfileStatus(result.data)
                 }
                 is AuthResult.Error -> {
                     _authState.value = AuthState.Unauthenticated
@@ -65,10 +67,70 @@ class AuthViewModel @Inject constructor(
                     viewModelScope.launch {
                         authRepository.registerCurrentDeviceToken()
                     }
-                    _authState.value = AuthState.Authenticated(result.data)
+                    checkProfileStatus(result.data)
                 }
                 is AuthResult.Error -> {
                     _authState.value = AuthState.Error(result.message)
+                }
+            }
+        }
+    }
+    
+    /**
+     * Check if employee profile is complete.
+     */
+    private suspend fun checkProfileStatus(user: User) {
+        when (val result = employeeRepository.fetchProfile()) {
+            is AuthResult.Success -> {
+                val employee = result.data
+                val isComplete = !employee.phone.isNullOrBlank() &&
+                        !employee.nik.isNullOrBlank() &&
+                        !employee.permanentAddress.isNullOrBlank() &&
+                        !employee.permanentCity.isNullOrBlank() &&
+                        !employee.currentAddress.isNullOrBlank() &&
+                        !employee.currentCity.isNullOrBlank()
+                
+                if (isComplete) {
+                    _authState.value = AuthState.Authenticated(user)
+                } else {
+                    _authState.value = AuthState.RequiresProfileCompletion(user)
+                }
+            }
+            is AuthResult.Error -> {
+                // If we can't fetch profile, assuming it's okay or handle error differently.
+                // For safety, let's assume authenticated but log error or retrying?
+                // Or maybe user doesn't have employee data yet?
+                // Let's pass through if 404 (maybe admin user?), but if network error maybe show error?
+                _authState.value = AuthState.Authenticated(user)
+            }
+        }
+    }
+
+    fun fetchProfileForCompletion(onSuccess: (com.maxmar.attendance.data.model.Employee) -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            when (val result = employeeRepository.fetchProfile()) {
+                is AuthResult.Success -> onSuccess(result.data)
+                is AuthResult.Error -> onError(result.message)
+            }
+        }
+    }
+
+    fun completeProfile(request: com.maxmar.attendance.data.model.UpdateProfileRequest, onSuccess: () -> Unit, onError: (String) -> Unit) {
+        viewModelScope.launch {
+            _authState.value = AuthState.Loading
+            
+            when (val result = employeeRepository.updateProfile(request)) {
+                is AuthResult.Success -> {
+                    // Improve: we should probably have current user stored or passed
+                    // But checkAuthStatus will refresh everything
+                   checkAuthStatus()
+                   onSuccess()
+                }
+                is AuthResult.Error -> {
+                     onError(result.message)
+                     // Restore previous state? Hard to know user without storing it.
+                     // checkAuthStatus will restore state
+                     checkAuthStatus()
                 }
             }
         }

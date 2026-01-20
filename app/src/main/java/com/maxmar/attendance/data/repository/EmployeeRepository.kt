@@ -68,4 +68,22 @@ class EmployeeRepository @Inject constructor(
             AuthResult.Error("Terjadi kesalahan: ${e.message}")
         }
     }
+    
+    /**
+     * Update employee profile.
+     */
+    suspend fun updateProfile(request: com.maxmar.attendance.data.model.UpdateProfileRequest): AuthResult<Employee> {
+        return try {
+            val response = employeeApi.updateProfile(request)
+            if (response.success && response.data != null) {
+                AuthResult.Success(response.data)
+            } else {
+                AuthResult.Error(response.message ?: "Gagal memperbarui profil")
+            }
+        } catch (e: retrofit2.HttpException) {
+            AuthResult.Error("Error: ${e.code()}")
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
 }

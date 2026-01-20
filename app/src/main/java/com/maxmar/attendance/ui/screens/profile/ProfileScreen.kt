@@ -68,6 +68,7 @@ import com.maxmar.attendance.ui.theme.MaxmarColors
 fun ProfileScreen(
     onNavigateBack: () -> Unit = {},
     onLogout: () -> Unit = {},
+    onNavigateToChangePassword: () -> Unit = {},
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.profileState.collectAsState()
@@ -136,6 +137,7 @@ fun ProfileScreen(
                     state = state,
                     isDarkMode = isDarkMode,
                     onToggleDarkMode = { viewModel.toggleDarkMode() },
+                    onNavigateToChangePassword = onNavigateToChangePassword,
                     onLogout = { viewModel.logout() }
                 )
             }
@@ -148,6 +150,7 @@ private fun ProfileContent(
     state: ProfileState,
     isDarkMode: Boolean,
     onToggleDarkMode: () -> Unit,
+    onNavigateToChangePassword: () -> Unit,
     onLogout: () -> Unit
 ) {
     val appColors = LocalAppColors.current
@@ -375,6 +378,30 @@ private fun ProfileContent(
                             uncheckedThumbColor = appColors.textSecondary,
                             uncheckedTrackColor = appColors.surfaceVariant
                         )
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Change Password Button
+                Button(
+                    onClick = onNavigateToChangePassword,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaxmarColors.Primary.copy(alpha = 0.1f),
+                        contentColor = MaxmarColors.Primary
+                    ),
+                    modifier = Modifier.fillMaxWidth().height(50.dp),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Lock,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "Ganti Password",
+                        fontWeight = FontWeight.SemiBold
                     )
                 }
             }

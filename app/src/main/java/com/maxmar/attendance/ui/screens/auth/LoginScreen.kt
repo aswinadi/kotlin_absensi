@@ -73,6 +73,7 @@ import com.maxmar.attendance.ui.theme.MaxmarColors
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onRequiresProfileCompletion: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val authState by viewModel.authState.collectAsState()
@@ -97,6 +98,9 @@ fun LoginScreen(
         when (authState) {
             is AuthState.Authenticated -> {
                 onLoginSuccess()
+            }
+            is AuthState.RequiresProfileCompletion -> {
+                onRequiresProfileCompletion()
             }
             is AuthState.Error -> {
                 snackbarHostState.showSnackbar((authState as AuthState.Error).message)

@@ -14,6 +14,9 @@ interface EmployeeApi {
     @GET(ApiEndpoints.EMPLOYEE_PROFILE)
     suspend fun getProfile(): ApiResponse<EmployeeProfileData>
     
+    @POST(ApiEndpoints.EMPLOYEE_PROFILE)
+    suspend fun updateProfile(@Body request: UpdateProfileRequest): ApiResponse<Employee>
+    
     @GET(ApiEndpoints.TODAY_SHIFT)
     suspend fun getTodayShift(): ApiResponse<TodayShiftResponse>
 }

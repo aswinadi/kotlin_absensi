@@ -44,6 +44,16 @@ data class Employee(
     val office: Office?,
     @SerializedName("employee_type")
     val employeeType: String? = null,
+    // Contact & ID
+    val nik: String? = null,
+    @SerializedName("permanent_address")
+    val permanentAddress: String? = null,
+    @SerializedName("permanent_city")
+    val permanentCity: String? = null,
+    @SerializedName("current_address")
+    val currentAddress: String? = null,
+    @SerializedName("current_city")
+    val currentCity: String? = null,
     // Face validation fields
     @SerializedName("photo_url")
     val photoUrl: String? = null,

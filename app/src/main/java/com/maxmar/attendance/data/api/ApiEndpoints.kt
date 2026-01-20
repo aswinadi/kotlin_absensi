@@ -16,6 +16,7 @@ object ApiEndpoints {
     const val LOGIN = "auth/login"
     const val LOGOUT = "auth/logout"
     const val ME = "auth/me"
+    const val CHANGE_PASSWORD = "auth/change-password"
     const val FCM_TOKEN = "auth/fcm-token"
     
     // Employee endpoints

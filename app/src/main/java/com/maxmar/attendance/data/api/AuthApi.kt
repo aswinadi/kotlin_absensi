@@ -1,6 +1,7 @@
 package com.maxmar.attendance.data.api
 
 import com.maxmar.attendance.data.model.ApiResponse
+import com.maxmar.attendance.data.model.ChangePasswordRequest
 import com.maxmar.attendance.data.model.LoginRequest
 import com.maxmar.attendance.data.model.LoginResponse
 import com.maxmar.attendance.data.model.User
@@ -24,4 +25,7 @@ interface AuthApi {
     
     @POST(ApiEndpoints.FCM_TOKEN)
     suspend fun updateDeviceToken(@Body request: Map<String, String>): ApiResponse<Unit>
+    
+    @POST(ApiEndpoints.CHANGE_PASSWORD)
+    suspend fun changePassword(@Body request: ChangePasswordRequest): ApiResponse<Unit>
 }

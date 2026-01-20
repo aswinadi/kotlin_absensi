@@ -96,6 +96,39 @@ class ProfileViewModel @Inject constructor(
             _profileState.value = _profileState.value.copy(isLoggingOut = true)
             authRepository.logout()
             _logoutEvent.value = true
+            _logoutEvent.value = true
+        }
+    }
+    
+    /**
+     * Change password.
+     */
+    fun changePassword(
+        current: String,
+        new: String,
+        confirm: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        viewModelScope.launch {
+            _profileState.value = _profileState.value.copy(isLoading = true)
+            
+            val request = com.maxmar.attendance.data.model.ChangePasswordRequest(
+                currentPassword = current,
+                newPassword = new,
+                newPasswordConfirmation = confirm
+            )
+            
+            when (val result = authRepository.changePassword(request)) {
+                is AuthResult.Success -> {
+                    _profileState.value = _profileState.value.copy(isLoading = false)
+                    onSuccess()
+                }
+                is AuthResult.Error -> {
+                    _profileState.value = _profileState.value.copy(isLoading = false, error = result.message)
+                    onError(result.message)
+                }
+            }
         }
     }
 }

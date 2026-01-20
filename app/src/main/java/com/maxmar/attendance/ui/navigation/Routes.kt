@@ -23,6 +23,8 @@ object Routes {
     const val BUSINESS_TRIP_EDIT = "business_trip_edit/{tripId}"
     const val APPROVAL = "approval"
     const val NOTIFICATIONS = "notifications"
+    const val CHANGE_PASSWORD = "change_password"
+    const val COMPLETE_PROFILE = "complete_profile"
     
     // Realization routes
     const val REALIZATION_LIST = "realization"

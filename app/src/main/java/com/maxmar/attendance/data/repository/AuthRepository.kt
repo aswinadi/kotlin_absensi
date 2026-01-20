@@ -159,4 +159,24 @@ class AuthRepository @Inject constructor(
             registerDeviceToken(token)
         }
     }
+    
+    /**
+     * Change password.
+     */
+    suspend fun changePassword(request: com.maxmar.attendance.data.model.ChangePasswordRequest): AuthResult<Unit> {
+        return try {
+            val response = authApi.changePassword(request)
+            if (response.success) {
+                AuthResult.Success(Unit)
+            } else {
+                AuthResult.Error(response.message ?: "Gagal mengubah password")
+            }
+        } catch (e: retrofit2.HttpException) {
+            val errorBody = e.response()?.errorBody()?.string()
+            val message = parseErrorMessage(errorBody) ?: getHttpErrorMessage(e.code())
+            AuthResult.Error(message)
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
 }
