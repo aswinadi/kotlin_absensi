@@ -4,7 +4,10 @@ import com.maxmar.attendance.data.model.ApiResponse
 import com.maxmar.attendance.data.model.Employee
 import com.maxmar.attendance.data.model.EmployeeProfileData
 import com.maxmar.attendance.data.model.TodayShiftResponse
+import com.maxmar.attendance.data.model.UpdateProfileRequest
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 
 /**
  * Retrofit API interface for employee-related endpoints.
