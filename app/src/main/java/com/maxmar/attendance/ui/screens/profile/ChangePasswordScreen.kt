@@ -43,7 +43,8 @@ fun ChangePasswordScreen(
     var showNewPassword by remember { mutableStateOf(false) }
     var showConfirmPassword by remember { mutableStateOf(false) }
     
-    val isLoading by viewModel.isLoading.collectAsState()
+    val profileState by viewModel.profileState.collectAsState()
+    val isLoading = profileState.isLoading
     
     Scaffold(
         topBar = {
