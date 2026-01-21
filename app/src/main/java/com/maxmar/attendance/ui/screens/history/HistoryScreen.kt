@@ -79,6 +79,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import com.maxmar.attendance.util.TimeUtils
+import androidx.compose.material.icons.filled.FlightTakeoff
+import com.maxmar.attendance.data.model.FieldAttendance
 
 /**
  * History screen showing attendance records.
@@ -110,9 +112,10 @@ fun HistoryScreen(
         }
     }
 
-    // Initial load of absents and summary
+    // Initial load of absents, field attendances, and summary
     LaunchedEffect(Unit) {
         viewModel.loadAbsents()
+        viewModel.loadFieldAttendances()
         viewModel.loadSummary()
     }
     
@@ -185,7 +188,7 @@ fun HistoryScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 
                 // Tabs
-                val tabs = listOf("Kehadiran", "Izin/Cuti", "Ringkasan")
+                val tabs = listOf("Kehadiran", "Izin/Cuti", "Dinas Luar", "Ringkasan")
                 TabRow(
                     selectedTabIndex = state.selectedTab,
                     containerColor = Color.Transparent,
@@ -290,7 +293,31 @@ fun HistoryScreen(
                             }
                         }
                     }
-                    2 -> { // Summary
+                    2 -> { // Dinas Luar (Field Attendance)
+                        if (state.isLoadingFieldAttendances) {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(color = MaxmarColors.Primary)
+                            }
+                        } else if (state.fieldAttendances.isEmpty()) {
+                            EmptyContent(modifier = Modifier.fillMaxSize(), message = "Tidak ada data dinas luar")
+                        } else {
+                            LazyColumn(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(horizontal = 16.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                item { Spacer(modifier = Modifier.height(8.dp)) }
+                                
+                                items(state.fieldAttendances, key = { it.id }) { fieldAttendance ->
+                                    FieldAttendanceCard(fieldAttendance = fieldAttendance)
+                                }
+                                
+                                item { Spacer(modifier = Modifier.height(16.dp)) }
+                            }
+                        }
+                    }
+                    3 -> { // Summary
                         Column(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -885,5 +912,164 @@ private fun StatItem(
             ),
             color = color
         )
+    }
+}
+
+@Composable
+private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
+    val appColors = LocalAppColors.current
+    val displayDate = remember(fieldAttendance.date) {
+        try {
+            val date = LocalDate.parse(fieldAttendance.date)
+            date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID")))
+        } catch (e: Exception) {
+            fieldAttendance.date
+        }
+    }
+    
+    val statusColor = when(fieldAttendance.status) {
+        "completed" -> MaxmarColors.Success
+        else -> MaxmarColors.Warning
+    }
+    
+    val statusText = when(fieldAttendance.status) {
+        "completed" -> "Selesai"
+        else -> "Sedang Berlangsung"
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = appColors.surface),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            // Header: Date & Status Badge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.FlightTakeoff,
+                            contentDescription = null,
+                            tint = MaxmarColors.Primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = displayDate,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = appColors.textPrimary
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = statusColor
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Location & Purpose
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(MaxmarColors.Primary.copy(alpha = 0.1f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FlightTakeoff,
+                        contentDescription = null,
+                        tint = MaxmarColors.Primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                
+                Spacer(modifier = Modifier.width(12.dp))
+                
+                Column {
+                    Text(
+                        text = fieldAttendance.locationName,
+                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                        color = appColors.textPrimary
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = fieldAttendance.purpose,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = appColors.textSecondary,
+                        maxLines = 2
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(12.dp))
+            
+            // Arrival & Departure times
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Arrival
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Kedatangan",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = appColors.textSecondary
+                    )
+                    val arrivalTime = fieldAttendance.arrivalTime?.let {
+                        try {
+                            it.substringAfter("T").take(5)
+                        } catch (e: Exception) { "--:--" }
+                    } ?: "--:--"
+                    Text(
+                        text = arrivalTime,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaxmarColors.CheckIn
+                    )
+                }
+                
+                // Vertical divider
+                Box(
+                    modifier = Modifier
+                        .width(1.dp)
+                        .height(40.dp)
+                        .background(appColors.surfaceVariant)
+                )
+                
+                // Departure
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = "Kepulangan",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = appColors.textSecondary
+                    )
+                    val departureTime = fieldAttendance.departureTime?.let {
+                        try {
+                            it.substringAfter("T").take(5)
+                        } catch (e: Exception) { "--:--" }
+                    } ?: "--:--"
+                    Text(
+                        text = departureTime,
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = if (fieldAttendance.departureTime != null) MaxmarColors.CheckOut else appColors.textTertiary
+                    )
+                }
+            }
+        }
     }
 }

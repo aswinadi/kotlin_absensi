@@ -14,7 +14,9 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.maxmar.attendance.data.model.AbsentAttendance
 import com.maxmar.attendance.data.model.AttendanceSummary
+import com.maxmar.attendance.data.model.FieldAttendance
 import com.maxmar.attendance.data.repository.AbsentRepository
+import com.maxmar.attendance.data.repository.FieldAttendanceRepository
 import javax.inject.Inject
 
 /**
@@ -36,7 +38,9 @@ data class HistoryState(
     val summary: AttendanceSummary? = null,
     val isLoadingAbsents: Boolean = false,
     val summaryError: String? = null,
-    val selectedTab: Int = 0 // 0: Attendance, 1: Absences, 2: Summary
+    val selectedTab: Int = 0, // 0: Attendance, 1: Absences, 2: Dinas Luar, 3: Summary
+    val fieldAttendances: List<FieldAttendance> = emptyList(),
+    val isLoadingFieldAttendances: Boolean = false
 )
 
 /**
@@ -45,7 +49,8 @@ data class HistoryState(
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val attendanceRepository: AttendanceRepository,
-    private val absentRepository: AbsentRepository
+    private val absentRepository: AbsentRepository,
+    private val fieldAttendanceRepository: FieldAttendanceRepository
 ) : ViewModel() {
     
     private val _historyState = MutableStateFlow(HistoryState())
@@ -144,6 +149,7 @@ class HistoryViewModel @Inject constructor(
         
         loadHistory()
         loadAbsents()
+        loadFieldAttendances()
         loadSummary()
     }
     
@@ -167,6 +173,34 @@ class HistoryViewModel @Inject constructor(
                     _historyState.value = _historyState.value.copy(
                         isLoadingAbsents = false
                         // Don't show error for absents to avoid disrupting other views
+                    )
+                }
+            }
+        }
+    }
+
+    /**
+     * Load field attendance records (Dinas Luar).
+     */
+    fun loadFieldAttendances() {
+        val state = _historyState.value
+        
+        viewModelScope.launch {
+            _historyState.value = _historyState.value.copy(isLoadingFieldAttendances = true)
+            
+            val startDateStr = state.startDate?.format(dateFormatter)
+            val endDateStr = state.endDate?.format(dateFormatter)
+            
+            when (val result = fieldAttendanceRepository.fetchList(startDateStr, endDateStr)) {
+                is AuthResult.Success -> {
+                    _historyState.value = _historyState.value.copy(
+                        fieldAttendances = result.data.fieldAttendances,
+                        isLoadingFieldAttendances = false
+                    )
+                }
+                is AuthResult.Error -> {
+                    _historyState.value = _historyState.value.copy(
+                        isLoadingFieldAttendances = false
                     )
                 }
             }
