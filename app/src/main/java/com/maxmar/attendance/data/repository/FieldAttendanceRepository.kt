@@ -1,5 +1,7 @@
 package com.maxmar.attendance.data.repository
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import com.maxmar.attendance.data.api.FieldAttendanceApi
 import com.maxmar.attendance.data.model.FieldAttendance
 import com.maxmar.attendance.data.model.PaginationMeta
@@ -8,6 +10,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.io.File
+import java.io.FileOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,6 +29,51 @@ data class FieldAttendanceListResult(
 class FieldAttendanceRepository @Inject constructor(
     private val fieldAttendanceApi: FieldAttendanceApi
 ) {
+    
+    companion object {
+        private const val MAX_IMAGE_WIDTH = 1280
+        private const val MAX_IMAGE_HEIGHT = 960
+        private const val COMPRESSION_QUALITY = 80
+    }
+
+    /**
+     * Compress and resize image to reduce file size.
+     * Max dimensions: 1280x960, quality: 80%
+     */
+    private fun compressImage(file: File): File {
+        return try {
+            val options = BitmapFactory.Options().apply {
+                inJustDecodeBounds = true
+            }
+            BitmapFactory.decodeFile(file.absolutePath, options)
+            
+            // Calculate sample size
+            var sampleSize = 1
+            while (options.outWidth / sampleSize > MAX_IMAGE_WIDTH || 
+                   options.outHeight / sampleSize > MAX_IMAGE_HEIGHT) {
+                sampleSize *= 2
+            }
+            
+            // Decode with sample size
+            val decodeOptions = BitmapFactory.Options().apply {
+                inSampleSize = sampleSize
+            }
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath, decodeOptions)
+                ?: return file
+            
+            // Create compressed file
+            val compressedFile = File(file.parent, "compressed_${file.name}")
+            FileOutputStream(compressedFile).use { out ->
+                bitmap.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, out)
+            }
+            bitmap.recycle()
+            
+            compressedFile
+        } catch (e: Exception) {
+            // Return original file if compression fails
+            file
+        }
+    }
 
     /**
      * Fetch field attendance list with optional date filter.
@@ -90,8 +138,10 @@ class FieldAttendanceRepository @Inject constructor(
             val latitudeBody = arrivalLatitude.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val longitudeBody = arrivalLongitude.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val requestFile = photoFile.asRequestBody("image/*".toMediaTypeOrNull())
-            val photoPart = MultipartBody.Part.createFormData("arrival_photo", photoFile.name, requestFile)
+            // Compress image before upload
+            val compressedFile = compressImage(photoFile)
+            val requestFile = compressedFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val photoPart = MultipartBody.Part.createFormData("arrival_photo", compressedFile.name, requestFile)
 
             val response = fieldAttendanceApi.create(
                 date = dateBody,
@@ -134,8 +184,10 @@ class FieldAttendanceRepository @Inject constructor(
             val latitudeBody = departureLatitude.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val longitudeBody = departureLongitude.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
-            val requestFile = photoFile.asRequestBody("image/*".toMediaTypeOrNull())
-            val photoPart = MultipartBody.Part.createFormData("departure_photo", photoFile.name, requestFile)
+            // Compress image before upload
+            val compressedFile = compressImage(photoFile)
+            val requestFile = compressedFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val photoPart = MultipartBody.Part.createFormData("departure_photo", compressedFile.name, requestFile)
 
             val response = fieldAttendanceApi.recordDeparture(
                 id = id,
