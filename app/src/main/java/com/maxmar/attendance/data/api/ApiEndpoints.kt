@@ -77,4 +77,9 @@ object ApiEndpoints {
     // Holiday endpoints
     const val HOLIDAYS = "att/holidays"
     const val HOLIDAYS_UPCOMING = "att/holidays/upcoming"
+
+    // Field Attendance (Dinas Luar) endpoints
+    const val FIELD_ATTENDANCES = "att/field-attendances"
+    fun fieldAttendanceDetail(id: Int) = "att/field-attendances/$id"
+    fun fieldAttendanceDeparture(id: Int) = "att/field-attendances/$id/departure"
 }

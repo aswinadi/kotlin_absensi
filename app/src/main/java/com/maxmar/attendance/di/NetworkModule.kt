@@ -119,4 +119,10 @@ object NetworkModule {
     fun provideScheduleApi(retrofit: Retrofit): ScheduleApi {
         return retrofit.create(ScheduleApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun provideFieldAttendanceApi(retrofit: Retrofit): com.maxmar.attendance.data.api.FieldAttendanceApi {
+        return retrofit.create(com.maxmar.attendance.data.api.FieldAttendanceApi::class.java)
+    }
 }
