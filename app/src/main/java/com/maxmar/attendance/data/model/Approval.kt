@@ -45,7 +45,9 @@ data class Approval(
     @SerializedName("approved_date")
     val approvedDate: String?,
     @SerializedName("created_at")
-    val createdAt: String?
+    val createdAt: String?,
+    // Attachment photo URL for izin/sakit
+    val attachment: String? = null
 ) {
     val statusDisplay: String
         get() = when (status) {

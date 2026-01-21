@@ -68,6 +68,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxmar.attendance.data.model.Approval
 import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 
 /**
  * Approval list screen.
@@ -513,6 +515,31 @@ private fun ApprovalCard(
                     text = approval.notes,
                     style = MaterialTheme.typography.bodySmall,
                     color = appColors.textSecondary
+                )
+            }
+            
+            // Attachment photo (for izin/sakit with attachment)
+            if (!approval.attachment.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = appColors.surfaceVariant)
+                ) {
+                    AsyncImage(
+                        model = approval.attachment,
+                        contentDescription = "Lampiran",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
+                Text(
+                    text = "Lampiran",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = appColors.textSecondary,
+                    modifier = Modifier.padding(top = 4.dp)
                 )
             }
             
