@@ -130,6 +130,9 @@ fun MaxmarNavHost(
                 },
                 onNavigateToApproval = {
                     navController.navigate(Routes.APPROVAL)
+                },
+                onNavigateToFieldAttendance = {
+                    navController.navigate(Routes.FIELD_ATTENDANCE_FORM)
                 }
             )
         }
@@ -392,6 +395,41 @@ fun MaxmarNavHost(
                 onSuccess = { 
                     navController.popBackStack(Routes.REALIZATION_LIST, inclusive = false)
                 }
+            )
+        }
+
+        // Field Attendance Form Screen (Dinas Luar - Create arrival)
+        composable(
+            route = Routes.FIELD_ATTENDANCE_FORM,
+            enterTransition = {
+                slideIntoContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
+                    animationSpec = tween(300)
+                )
+            },
+            exitTransition = {
+                slideOutOfContainer(
+                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
+                    animationSpec = tween(300)
+                )
+            }
+        ) {
+            com.maxmar.attendance.ui.screens.fieldattendance.FieldAttendanceFormScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
+            )
+        }
+
+        // Field Attendance Departure Screen
+        composable(
+            route = Routes.FIELD_ATTENDANCE_DEPARTURE,
+            arguments = listOf(navArgument("fieldAttendanceId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val fieldAttendanceId = backStackEntry.arguments?.getInt("fieldAttendanceId") ?: 0
+            com.maxmar.attendance.ui.screens.fieldattendance.FieldAttendanceDepartureScreen(
+                fieldAttendanceId = fieldAttendanceId,
+                onNavigateBack = { navController.popBackStack() },
+                onSuccess = { navController.popBackStack() }
             )
         }
     }

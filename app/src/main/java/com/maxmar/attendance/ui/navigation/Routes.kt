@@ -44,4 +44,9 @@ object Routes {
         radius: Int,
         officeName: String
     ) = "geolocation_map/$userLat/$userLon/$officeLat/$officeLon/$radius/${officeName.replace("/", "_")}"
+
+    // Field Attendance (Dinas Luar)
+    const val FIELD_ATTENDANCE_FORM = "field_attendance_form"
+    const val FIELD_ATTENDANCE_DEPARTURE = "field_attendance_departure/{fieldAttendanceId}"
+    fun fieldAttendanceDeparture(id: Int) = "field_attendance_departure/$id"
 }

@@ -89,6 +89,7 @@ fun HomeScreen(
     onNavigateToCheckOut: () -> Unit = {},
     onNavigateToBusinessTrip: () -> Unit = {},
     onNavigateToApproval: () -> Unit = {},
+    onNavigateToFieldAttendance: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -210,7 +211,8 @@ fun HomeScreen(
                     hasCheckedOut = state.hasCheckedOut,
                     onCheckIn = onNavigateToCheckIn,
                     onCheckOut = onNavigateToCheckOut,
-                    onAbsent = onNavigateToAbsent
+                    onAbsent = onNavigateToAbsent,
+                    onFieldAttendance = onNavigateToFieldAttendance
                 )
             }
         }
@@ -511,7 +513,8 @@ private fun ActionButtonsRow(
     hasCheckedOut: Boolean,
     onCheckIn: () -> Unit,
     onCheckOut: () -> Unit,
-    onAbsent: () -> Unit
+    onAbsent: () -> Unit,
+    onFieldAttendance: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier.fillMaxWidth(),
@@ -541,15 +544,29 @@ private fun ActionButtonsRow(
             )
         }
         
-        // Second row: Izin (full width)
-        ActionButton(
-            label = "Pengajuan Izin/Cuti",
-            icon = Icons.Default.EventBusy,
-            color = MaxmarColors.Absent,
-            enabled = true,
-            onClick = onAbsent,
-            modifier = Modifier.fillMaxWidth()
-        )
+        // Second row: Izin, Dinas Luar
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            ActionButton(
+                label = "Pengajuan Izin",
+                icon = Icons.Default.EventBusy,
+                color = MaxmarColors.Absent,
+                enabled = true,
+                onClick = onAbsent,
+                modifier = Modifier.weight(1f)
+            )
+            
+            ActionButton(
+                label = "Dinas Luar",
+                icon = Icons.Default.FlightTakeoff,
+                color = MaxmarColors.Primary,
+                enabled = true,
+                onClick = onFieldAttendance,
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
