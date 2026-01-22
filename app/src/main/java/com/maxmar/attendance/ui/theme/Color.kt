@@ -13,6 +13,15 @@ object MaxmarColors {
     val Primary = Color(0xFF8D0B12)        // Maxmar Dark Red
     val PrimaryDark = Color(0xFF6D0810)    // Darker Red
     val PrimaryLight = Color(0xFFB71C1C)   // Lighter Red
+    val Secondary = Color(0xFF1976D2)      // Blue accent
+    
+    // Surface Colors (dark theme defaults)
+    val Background = Color(0xFF0D0D0D)
+    val Surface = Color(0xFF1E1E1E)
+    val SurfaceVariant = Color(0xFF2A2A2A)
+    val OnBackground = Color(0xFFFFFFFF)
+    val OnSurface = Color(0xFFFFFFFF)
+    val OnSurfaceVariant = Color(0xFFA0A0A0)
     
     // Semantic Colors
     val CheckIn = Color(0xFF2E7D32)        // Success Green
