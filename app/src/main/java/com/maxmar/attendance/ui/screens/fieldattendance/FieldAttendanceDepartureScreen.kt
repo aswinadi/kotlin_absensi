@@ -179,12 +179,12 @@ fun FieldAttendanceDepartureScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaxmarColors.Surface,
-                    titleContentColor = MaxmarColors.OnSurface
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         },
-        containerColor = MaxmarColors.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         if (state.isLoading && fieldAttendance == null) {
             Box(
@@ -206,7 +206,7 @@ fun FieldAttendanceDepartureScreen(
                 // Arrival info card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaxmarColors.Surface),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     shape = RoundedCornerShape(16.dp)
                 ) {
                     Column(
@@ -227,7 +227,7 @@ fun FieldAttendanceDepartureScreen(
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = formatDisplayDate(fieldAttendance.date),
-                                    color = MaxmarColors.OnSurface,
+                                    color = MaterialTheme.colorScheme.onSurface,
                                     fontWeight = FontWeight.Medium
                                 )
                             }
@@ -235,7 +235,7 @@ fun FieldAttendanceDepartureScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
                                     text = "Kedatangan:",
-                                    color = MaxmarColors.OnSurfaceVariant,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontSize = 12.sp
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
@@ -260,7 +260,7 @@ fun FieldAttendanceDepartureScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = fieldAttendance.locationName,
-                                color = MaxmarColors.OnSurface
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                         }
                         
@@ -279,7 +279,7 @@ fun FieldAttendanceDepartureScreen(
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = fieldAttendance.purpose,
-                                color = MaxmarColors.OnSurfaceVariant,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 fontSize = 14.sp
                             )
                         }
@@ -306,7 +306,7 @@ fun FieldAttendanceDepartureScreen(
                     text = "Foto Kepulangan",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 16.sp,
-                    color = MaxmarColors.OnSurface
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -317,7 +317,7 @@ fun FieldAttendanceDepartureScreen(
                         .fillMaxWidth()
                         .aspectRatio(1f)
                         .clip(RoundedCornerShape(16.dp))
-                        .background(MaxmarColors.Surface)
+                        .background(MaterialTheme.colorScheme.surface)
                         .border(
                             width = 2.dp,
                             brush = Brush.linearGradient(
@@ -374,7 +374,7 @@ fun FieldAttendanceDepartureScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
                                 text = "Tap untuk mengambil foto",
-                                color = MaxmarColors.OnSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -404,7 +404,7 @@ fun FieldAttendanceDepartureScreen(
                         } else {
                             "Mendapatkan lokasi..."
                         },
-                        color = MaxmarColors.OnSurfaceVariant,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 14.sp
                     )
                 }

@@ -203,12 +203,12 @@ fun FieldAttendanceFormScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaxmarColors.Surface,
-                    titleContentColor = MaxmarColors.OnSurface
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         },
-        containerColor = MaxmarColors.Background
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -230,10 +230,10 @@ fun FieldAttendanceFormScreen(
                     .clickable { showDatePicker = true },
                 enabled = false,
                 colors = OutlinedTextFieldDefaults.colors(
-                    disabledTextColor = MaxmarColors.OnSurface,
-                    disabledBorderColor = MaxmarColors.Primary.copy(alpha = 0.5f),
-                    disabledLabelColor = MaxmarColors.OnSurfaceVariant,
-                    disabledLeadingIconColor = MaxmarColors.Primary
+                    disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                    disabledBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                    disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    disabledLeadingIconColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(12.dp)
             )
@@ -251,9 +251,9 @@ fun FieldAttendanceFormScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaxmarColors.Primary,
-                    unfocusedBorderColor = MaxmarColors.OnSurface.copy(alpha = 0.3f),
-                    focusedLeadingIconColor = MaxmarColors.Primary
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                    focusedLeadingIconColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(12.dp),
                 singleLine = true
@@ -274,9 +274,9 @@ fun FieldAttendanceFormScreen(
                     .fillMaxWidth()
                     .height(120.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaxmarColors.Primary,
-                    unfocusedBorderColor = MaxmarColors.OnSurface.copy(alpha = 0.3f),
-                    focusedLeadingIconColor = MaxmarColors.Primary
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                    focusedLeadingIconColor = MaterialTheme.colorScheme.primary
                 ),
                 shape = RoundedCornerShape(12.dp),
                 maxLines = 4
@@ -289,7 +289,7 @@ fun FieldAttendanceFormScreen(
                 text = "Foto Kedatangan",
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 16.sp,
-                color = MaxmarColors.OnSurface
+                color = MaterialTheme.colorScheme.onSurface
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -300,7 +300,7 @@ fun FieldAttendanceFormScreen(
                     .fillMaxWidth()
                     .aspectRatio(1f)
                     .clip(RoundedCornerShape(16.dp))
-                    .background(MaxmarColors.Surface)
+                    .background(MaterialTheme.colorScheme.surface)
                     .border(
                         width = 2.dp,
                         brush = Brush.linearGradient(
@@ -360,7 +360,7 @@ fun FieldAttendanceFormScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             text = "Tap untuk mengambil foto",
-                            color = MaxmarColors.OnSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -390,7 +390,7 @@ fun FieldAttendanceFormScreen(
                     } else {
                         "Mendapatkan lokasi..."
                     },
-                    color = MaxmarColors.OnSurfaceVariant,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 14.sp
                 )
             }
