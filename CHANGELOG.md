@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-01-22
+
+### Added
+- **Approval Screen**:
+  - **Attachment Viewer**: Added full-screen dialog to view attachment images clearly with zoom support.
+  - **Notification Deep Linking**: Tapping leave request notifications now navigates directly to the Approval screen.
+  
+### Fixed
+- **Approval Screen**:
+  - **Type Badge**: Badge now shows actual type name (e.g., "Sakit", "Cuti Tahunan") instead of generic "Izin".
+  - **Attachment Thumbnail**: Reduced thumbnail size from 180dp to 80dp with "Lihat" button for better card layout.
+
 ## [1.3.0] - 2026-01-22
 
 ### Added
