@@ -16,6 +16,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,6 +34,7 @@ import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -87,6 +93,7 @@ fun ApprovalScreen(
     
     var showRejectDialog by remember { mutableStateOf<Approval?>(null) }
     var rejectReason by remember { mutableStateOf("") }
+    var showAttachmentUrl by remember { mutableStateOf<String?>(null) }
     
     // Handle action messages
     LaunchedEffect(state.actionSuccess) {
@@ -211,7 +218,8 @@ fun ApprovalScreen(
                                         approval.category ?: "izin",
                                         approval.id
                                     )
-                                }
+                                },
+                                onViewAttachment = { url -> showAttachmentUrl = url }
                             )
                         }
                     }
@@ -260,6 +268,14 @@ fun ApprovalScreen(
                     Text("Batal")
                 }
             }
+        )
+    }
+    
+    // Attachment viewer dialog
+    if (showAttachmentUrl != null) {
+        AttachmentViewerDialog(
+            imageUrl = showAttachmentUrl!!,
+            onDismiss = { showAttachmentUrl = null }
         )
     }
 }
@@ -368,7 +384,8 @@ private fun ApprovalCard(
     onAcknowledge: () -> Unit,
     onApprove: () -> Unit,
     onReject: () -> Unit,
-    onEdit: () -> Unit
+    onEdit: () -> Unit,
+    onViewAttachment: (String) -> Unit = {}
 ) {
     val appColors = LocalAppColors.current
     
@@ -521,26 +538,49 @@ private fun ApprovalCard(
             // Attachment photo (for izin/sakit with attachment)
             if (!approval.attachment.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(180.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(containerColor = appColors.surfaceVariant)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    AsyncImage(
-                        model = approval.attachment,
-                        contentDescription = "Lampiran",
-                        modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
-                    )
+                    // Small thumbnail
+                    Card(
+                        modifier = Modifier
+                            .size(80.dp)
+                            .clickable { onViewAttachment(approval.attachment!!) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = appColors.surfaceVariant)
+                    ) {
+                        AsyncImage(
+                            model = approval.attachment,
+                            contentDescription = "Lampiran",
+                            modifier = Modifier.fillMaxSize(),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    
+                    Column {
+                        Text(
+                            text = "Lampiran",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = appColors.textSecondary
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        OutlinedButton(
+                            onClick = { onViewAttachment(approval.attachment!!) },
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ZoomIn,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Lihat", fontSize = 12.sp)
+                        }
+                    }
                 }
-                Text(
-                    text = "Lampiran",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = appColors.textSecondary,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
             }
             
             // Action buttons section
@@ -647,6 +687,57 @@ private fun ApprovalCard(
                 }
             }
         }
+        }
+    }
+}
+
+/**
+ * Full-screen dialog to view attachment image.
+ */
+@Composable
+private fun AttachmentViewerDialog(
+    imageUrl: String,
+    onDismiss: () -> Unit
+) {
+    val appColors = LocalAppColors.current
+    
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .clickable { onDismiss() }
+        ) {
+            // Close button
+            IconButton(
+                onClick = onDismiss,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+                    .size(48.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), RoundedCornerShape(24.dp))
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Tutup",
+                    tint = Color.White
+                )
+            }
+            
+            // Full-screen image
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = "Lampiran",
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                contentScale = ContentScale.Fit
+            )
         }
     }
 }
