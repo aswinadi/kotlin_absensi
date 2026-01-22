@@ -82,7 +82,8 @@ data class CheckInState(
 class CheckInViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val attendanceRepository: AttendanceRepository,
-    private val employeeRepository: EmployeeRepository
+    private val employeeRepository: EmployeeRepository,
+    private val locationManager: LocationManager
 ) : ViewModel() {
     
     companion object {
@@ -92,7 +93,6 @@ class CheckInViewModel @Inject constructor(
     private val _state = MutableStateFlow(CheckInState())
     val state: StateFlow<CheckInState> = _state.asStateFlow()
     
-    private val locationManager = LocationManager(context)
     private val faceNetHelper = FaceNetHelper(context)
     
     private val faceDetector = FaceDetection.getClient(

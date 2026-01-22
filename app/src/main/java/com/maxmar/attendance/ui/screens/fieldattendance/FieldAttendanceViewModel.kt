@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.maxmar.attendance.data.model.FieldAttendance
 import com.maxmar.attendance.data.repository.AuthResult
 import com.maxmar.attendance.data.repository.FieldAttendanceRepository
-import com.maxmar.attendance.util.LocationManager
+import com.maxmar.attendance.ui.screens.checkin.LocationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
