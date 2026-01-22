@@ -2,6 +2,8 @@ package com.maxmar.attendance.ui.screens.fieldattendance
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Matrix
+import android.media.ExifInterface
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -36,6 +38,7 @@ import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -459,7 +462,36 @@ private fun CameraCaptureView(
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
-    var imageCapture: ImageCapture? by remember { mutableStateOf(null) }
+    
+    // Camera state
+    var cameraSelector by remember { mutableStateOf(CameraSelector.DEFAULT_BACK_CAMERA) }
+    
+    val preview = remember { Preview.Builder().build() }
+    val imageCapture = remember { 
+        ImageCapture.Builder()
+            .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+            .build() 
+    }
+    val previewView = remember { PreviewView(context).apply {
+        scaleType = PreviewView.ScaleType.FILL_CENTER
+    }}
+
+    // Bind camera when selector changes
+    LaunchedEffect(cameraSelector) {
+        val cameraProvider = ProcessCameraProvider.getInstance(context).get()
+        try {
+            cameraProvider.unbindAll()
+            preview.setSurfaceProvider(previewView.surfaceProvider)
+            cameraProvider.bindToLifecycle(
+                lifecycleOwner,
+                cameraSelector,
+                preview,
+                imageCapture
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
     
     Box(
         modifier = Modifier
@@ -467,40 +499,7 @@ private fun CameraCaptureView(
             .background(Color.Black)
     ) {
         AndroidView(
-            factory = { ctx ->
-                val previewView = PreviewView(ctx).apply {
-                    scaleType = PreviewView.ScaleType.FILL_CENTER
-                }
-                
-                val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
-                cameraProviderFuture.addListener({
-                    val cameraProvider = cameraProviderFuture.get()
-                    
-                    val preview = Preview.Builder().build().also {
-                        it.setSurfaceProvider(previewView.surfaceProvider)
-                    }
-                    
-                    imageCapture = ImageCapture.Builder()
-                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                        .build()
-                    
-                    val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-                    
-                    try {
-                        cameraProvider.unbindAll()
-                        cameraProvider.bindToLifecycle(
-                            lifecycleOwner,
-                            cameraSelector,
-                            preview,
-                            imageCapture
-                        )
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }, ContextCompat.getMainExecutor(ctx))
-                
-                previewView
-            },
+            factory = { previewView },
             modifier = Modifier.fillMaxSize()
         )
         
@@ -524,41 +523,86 @@ private fun CameraCaptureView(
             }
         }
         
-        // Capture button at bottom
+        // Camera Controls (Capture & Switch)
         Box(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .padding(32.dp)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
         ) {
+            // Switch Camera Button (Left)
             IconButton(
                 onClick = {
-                    imageCapture?.let { capture ->
-                        val outputOptions = ImageCapture.OutputFileOptions.Builder(
-                            java.io.File(context.cacheDir, "temp_capture.jpg")
-                        ).build()
-                        
-                        capture.takePicture(
-                            outputOptions,
-                            cameraExecutor,
-                            object : ImageCapture.OnImageSavedCallback {
-                                override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                                    val bitmap = android.graphics.BitmapFactory.decodeFile(
-                                        output.savedUri?.path ?: 
-                                        java.io.File(context.cacheDir, "temp_capture.jpg").absolutePath
-                                    )
-                                    if (bitmap != null) {
+                    cameraSelector = if (cameraSelector == CameraSelector.DEFAULT_BACK_CAMERA) {
+                        CameraSelector.DEFAULT_FRONT_CAMERA
+                    } else {
+                        CameraSelector.DEFAULT_BACK_CAMERA
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .size(48.dp)
+                    .background(Color.Black.copy(alpha = 0.5f), CircleShape)
+            ) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.Refresh,
+                    contentDescription = "Switch Camera",
+                    tint = Color.White
+                )
+            }
+
+            // Capture Button (Center)
+            IconButton(
+                onClick = {
+                    val outputOptions = ImageCapture.OutputFileOptions.Builder(
+                        java.io.File(context.cacheDir, "temp_capture.jpg")
+                    ).build()
+                    
+                    imageCapture.takePicture(
+                        outputOptions,
+                        cameraExecutor,
+                        object : ImageCapture.OnImageSavedCallback {
+                            override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+                                val path = output.savedUri?.path ?: java.io.File(context.cacheDir, "temp_capture.jpg").absolutePath
+                                val bitmap = android.graphics.BitmapFactory.decodeFile(path)
+                                
+                                if (bitmap != null) {
+                                    try {
+                                        val exifInterface = ExifInterface(path)
+                                        val orientation = exifInterface.getAttributeInt(
+                                            ExifInterface.TAG_ORIENTATION,
+                                            ExifInterface.ORIENTATION_UNDEFINED
+                                        )
+                                        
+                                        val matrix = Matrix()
+                                        when (orientation) {
+                                            ExifInterface.ORIENTATION_ROTATE_90 -> matrix.postRotate(90f)
+                                            ExifInterface.ORIENTATION_ROTATE_180 -> matrix.postRotate(180f)
+                                            ExifInterface.ORIENTATION_ROTATE_270 -> matrix.postRotate(270f)
+                                        }
+                                        
+                                        val rotatedBitmap = android.graphics.Bitmap.createBitmap(
+                                            bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true
+                                        )
+                                        
+                                        android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                            onPhotoCaptured(rotatedBitmap)
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
                                         android.os.Handler(android.os.Looper.getMainLooper()).post {
                                             onPhotoCaptured(bitmap)
                                         }
                                     }
                                 }
-                                
-                                override fun onError(exception: ImageCaptureException) {
-                                    exception.printStackTrace()
-                                }
                             }
-                        )
-                    }
+                            
+                            override fun onError(exception: ImageCaptureException) {
+                                exception.printStackTrace()
+                            }
+                        }
+                    )
                 },
                 modifier = Modifier
                     .size(80.dp)

@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.3.0] - 2026-01-22
+
+### Added
+- **Field Attendance**:
+  - **Front Camera Support**: Users can now use the front camera for taking photos during Check-In and Check-Out in Field Attendance (WFA) mode.
+  - **Camera Toggle**: Added a button to switch between front and back cameras.
+
+### Fixed
+- **Build & Theme**:
+  - **Dependency Injection**: Resolved Hilt/KSP dependency issues preventing build.
+  - **Theming**: Migrated hardcoded colors to `MaterialTheme` and `LocalAppColors` in Field Attendance screens (Departure & Form).
+  - **WFA Check**: Fixed validation logic for Work From Anywhere (WFA) check-in/out bypass.
+
 ## [1.2.0] - 2026-01-19
 
 ### Added
