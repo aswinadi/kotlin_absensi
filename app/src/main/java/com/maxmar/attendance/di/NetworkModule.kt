@@ -8,6 +8,7 @@ import com.maxmar.attendance.data.api.AuthApi
 import com.maxmar.attendance.data.api.AuthInterceptor
 import com.maxmar.attendance.data.api.BusinessTripApi
 import com.maxmar.attendance.data.api.EmployeeApi
+import com.maxmar.attendance.data.api.FieldAttendanceApi
 import com.maxmar.attendance.data.api.NotificationApi
 import com.maxmar.attendance.data.api.ScheduleApi
 import com.maxmar.attendance.data.local.TokenManager
@@ -122,7 +123,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideFieldAttendanceApi(retrofit: Retrofit): com.maxmar.attendance.data.api.FieldAttendanceApi {
-        return retrofit.create(com.maxmar.attendance.data.api.FieldAttendanceApi::class.java)
+    fun provideFieldAttendanceApi(retrofit: Retrofit): FieldAttendanceApi {
+        return retrofit.create(FieldAttendanceApi::class.java)
     }
 }
