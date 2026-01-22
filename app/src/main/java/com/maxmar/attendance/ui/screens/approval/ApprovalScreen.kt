@@ -487,7 +487,7 @@ private fun ApprovalCard(
                 }
             }
             
-            // Category badge
+            // Category badge - show actual type name (e.g., "Sakit", "Cuti Tahunan")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -495,7 +495,7 @@ private fun ApprovalCard(
                 horizontalArrangement = Arrangement.Start
             ) {
                 Text(
-                    text = approval.categoryDisplay,
+                    text = approval.type?.name ?: approval.categoryDisplay,
                     color = MaxmarColors.Primary,
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Medium,
