@@ -39,6 +39,11 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
         private const val CHANNEL_ID = "maxmar_notifications"
         private const val CHANNEL_NAME = "Maxmar Attendance"
         private const val CHANNEL_DESCRIPTION = "Notifications for attendance and business trips"
+        
+        // Deep link keys
+        const val EXTRA_NOTIFICATION_TYPE = "notification_type"
+        const val EXTRA_NOTIFICATION_ID = "notification_id"
+        const val EXTRA_NOTIFICATION_ACTION = "notification_action"
     }
 
     override fun onNewToken(token: String) {
@@ -64,13 +69,14 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
         message.notification?.let { notification ->
             showNotification(
                 title = notification.title ?: "Maxmar Attendance",
-                body = notification.body ?: ""
+                body = notification.body ?: "",
+                data = message.data
             )
         }
 
-        // Handle data payload
-        if (message.data.isNotEmpty()) {
-            Log.d(TAG, "Message data: ${message.data}")
+        // Handle data-only payload (when app is in foreground)
+        if (message.notification == null && message.data.isNotEmpty()) {
+            Log.d(TAG, "Data-only message: ${message.data}")
             handleDataMessage(message.data)
         }
     }
@@ -80,18 +86,13 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
         val title = data["title"] ?: "Maxmar Attendance"
         val body = data["body"] ?: ""
         
-        when (type) {
-            "attendance" -> showNotification(title, body, NotificationType.ATTENDANCE)
-            "business_trip" -> showNotification(title, body, NotificationType.BUSINESS_TRIP)
-            "approval" -> showNotification(title, body, NotificationType.APPROVAL)
-            else -> showNotification(title, body)
-        }
+        showNotification(title, body, data)
     }
 
     private fun showNotification(
         title: String,
         body: String,
-        type: NotificationType = NotificationType.GENERAL
+        data: Map<String, String> = emptyMap()
     ) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
 
@@ -109,15 +110,22 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // Create intent for notification tap
+        // Extract notification data for deep linking
+        val type = data["type"] ?: "general"
+        val id = data["id"] ?: ""
+        val action = data["action"] ?: ""
+
+        // Create intent for notification tap with deep link data
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            putExtra("notification_type", type.name)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra(EXTRA_NOTIFICATION_TYPE, type)
+            putExtra(EXTRA_NOTIFICATION_ID, id)
+            putExtra(EXTRA_NOTIFICATION_ACTION, action)
         }
 
         val pendingIntent = PendingIntent.getActivity(
             this,
-            0,
+            System.currentTimeMillis().toInt(), // Unique request code
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
@@ -136,11 +144,5 @@ class MaxmarFirebaseMessagingService : FirebaseMessagingService() {
         // Show notification with unique ID based on timestamp
         notificationManager.notify(System.currentTimeMillis().toInt(), notification)
     }
-
-    private enum class NotificationType {
-        GENERAL,
-        ATTENDANCE,
-        BUSINESS_TRIP,
-        APPROVAL
-    }
 }
+

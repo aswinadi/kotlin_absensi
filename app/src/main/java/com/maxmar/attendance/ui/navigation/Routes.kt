@@ -50,3 +50,13 @@ object Routes {
     const val FIELD_ATTENDANCE_DEPARTURE = "field_attendance_departure/{fieldAttendanceId}"
     fun fieldAttendanceDeparture(id: Int) = "field_attendance_departure/$id"
 }
+
+/**
+ * Data class for deep link information from push notifications.
+ */
+data class DeepLinkData(
+    val type: String,      // e.g., "leave_request", "approval", "business_trip"
+    val id: String,        // ID of the item to navigate to
+    val action: String     // e.g., "acknowledge", "approve"
+)
+

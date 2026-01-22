@@ -5,6 +5,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -30,8 +31,18 @@ import com.maxmar.attendance.ui.screens.splash.SplashScreen
  */
 @Composable
 fun MaxmarNavHost(
-    navController: NavHostController = rememberNavController()
+    navController: NavHostController = rememberNavController(),
+    deepLinkData: DeepLinkData? = null,
+    onDeepLinkHandled: () -> Unit = {}
 ) {
+    // Handle deep link navigation after splash/login
+    LaunchedEffect(deepLinkData) {
+        if (deepLinkData != null) {
+            // We'll handle this after the user is logged in (after splash screen)
+            // The deep link will be processed when navigating to home
+        }
+    }
+
     NavHost(
         navController = navController,
         startDestination = Routes.SPLASH,
@@ -54,6 +65,11 @@ fun MaxmarNavHost(
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.SPLASH) { inclusive = true }
                     }
+                    // Handle deep link after navigating to home
+                    if (deepLinkData != null && (deepLinkData.type == "leave_request" || deepLinkData.type == "approval")) {
+                        navController.navigate(Routes.APPROVAL)
+                        onDeepLinkHandled()
+                    }
                 }
             )
         }
@@ -69,6 +85,11 @@ fun MaxmarNavHost(
                 onLoginSuccess = {
                     navController.navigate(Routes.HOME) {
                         popUpTo(Routes.LOGIN) { inclusive = true }
+                    }
+                    // Handle deep link after login
+                    if (deepLinkData != null && (deepLinkData.type == "leave_request" || deepLinkData.type == "approval")) {
+                        navController.navigate(Routes.APPROVAL)
+                        onDeepLinkHandled()
                     }
                 },
                 onRequiresProfileCompletion = {
