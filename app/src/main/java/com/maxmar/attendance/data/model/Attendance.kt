@@ -35,19 +35,6 @@ data class AttendanceHistoryResponse(
 )
 
 /**
- * Pagination metadata.
- */
-data class PaginationMeta(
-    @SerializedName("current_page")
-    val currentPage: Int,
-    @SerializedName("last_page")
-    val lastPage: Int,
-    @SerializedName("per_page")
-    val perPage: Int,
-    val total: Int
-)
-
-/**
  * Monthly attendance summary.
  */
 data class AttendanceSummary(
