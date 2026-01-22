@@ -65,6 +65,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
@@ -319,7 +320,7 @@ fun FieldAttendanceFormScreen(
                 if (state.capturedPhoto != null) {
                     // Show captured photo
                     androidx.compose.foundation.Image(
-                        bitmap = androidx.compose.ui.graphics.asImageBitmap(state.capturedPhoto!!),
+                        bitmap = state.capturedPhoto!!.asImageBitmap(),
                         contentDescription = "Captured photo",
                         modifier = Modifier.fillMaxSize()
                     )
