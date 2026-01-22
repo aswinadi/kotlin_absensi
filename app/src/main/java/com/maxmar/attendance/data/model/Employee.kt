@@ -58,7 +58,10 @@ data class Employee(
     @SerializedName("photo_url")
     val photoUrl: String? = null,
     @SerializedName("face_embedding")
-    val faceEmbedding: List<Float>? = null
+    val faceEmbedding: List<Float>? = null,
+    // WFA status - when true, employee can check in/out without radius restriction
+    @SerializedName("is_wfa")
+    val isWfa: Boolean = false
 )
 
 /**

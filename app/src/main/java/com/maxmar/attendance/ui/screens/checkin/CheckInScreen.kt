@@ -433,10 +433,15 @@ private fun LocationStatusCard(
         Spacer(modifier = Modifier.width(12.dp))
         
         Column(modifier = Modifier.weight(1f)) {
+            // Show WFA mode if employee is WFA and would be outside radius
+            val actuallyOutsideRadius = locationState.distance != null && 
+                locationState.distance > locationState.officeRadius
+            
             Text(
                 text = when {
                     locationState.isLoading -> "Mengambil lokasi..."
                     locationState.error != null -> "Gagal mengambil lokasi"
+                    locationState.isWfa && actuallyOutsideRadius -> "Mode WFA"
                     locationState.isWithinRadius -> "Dalam Jangkauan"
                     else -> "Di Luar Jangkauan"
                 },

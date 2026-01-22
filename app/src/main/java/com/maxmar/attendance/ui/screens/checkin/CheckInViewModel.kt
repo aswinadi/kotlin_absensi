@@ -50,6 +50,7 @@ data class LocationState(
     val officeRadius: Int = 100,
     val distance: Double? = null,
     val isWithinRadius: Boolean = false,
+    val isWfa: Boolean = false, // Work From Anywhere - bypass radius check
     val error: String? = null
 )
 
@@ -154,6 +155,9 @@ class CheckInViewModel @Inject constructor(
                         var distance: Double? = null
                         var isWithinRadius = true
                         
+                        // WFA employees bypass radius check
+                        val isWfa = employee.isWfa
+                        
                         if (officeLat != null && officeLon != null) {
                             distance = LocationManager.calculateDistance(
                                 location.latitude,
@@ -161,7 +165,8 @@ class CheckInViewModel @Inject constructor(
                                 officeLat,
                                 officeLon
                             )
-                            isWithinRadius = distance <= radius
+                            // WFA employees always considered "within radius"
+                            isWithinRadius = isWfa || distance <= radius
                         }
                         
                         _state.value = _state.value.copy(
@@ -175,7 +180,8 @@ class CheckInViewModel @Inject constructor(
                                 officeName = office?.name,
                                 officeRadius = radius,
                                 distance = distance,
-                                isWithinRadius = isWithinRadius
+                                isWithinRadius = isWithinRadius,
+                                isWfa = isWfa
                             )
                         )
                     }
