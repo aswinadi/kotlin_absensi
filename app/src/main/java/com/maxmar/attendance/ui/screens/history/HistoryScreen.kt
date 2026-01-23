@@ -211,7 +211,8 @@ fun HistoryScreen(
                             text = { 
                                 Text(
                                     text = title,
-                                    fontWeight = if (state.selectedTab == index) FontWeight.Bold else FontWeight.Normal
+                                    fontWeight = if (state.selectedTab == index) FontWeight.Bold else FontWeight.Normal,
+                                    fontSize = androidx.compose.ui.unit.sp(12)
                                 ) 
                             },
                             selectedContentColor = MaxmarColors.Primary,

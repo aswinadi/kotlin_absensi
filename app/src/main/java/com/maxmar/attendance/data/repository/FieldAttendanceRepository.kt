@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import com.maxmar.attendance.data.api.FieldAttendanceApi
 import com.maxmar.attendance.data.model.FieldAttendance
 import com.maxmar.attendance.data.model.PaginationMeta
+import com.maxmar.attendance.util.DateTimeUtil
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -235,8 +236,8 @@ class FieldAttendanceRepository @Inject constructor(
                         date = fa.date,
                         locationName = fa.locationName,
                         purpose = fa.purpose,
-                        arrivalTime = fa.arrivalTime?.let { formatTime(it) },
-                        departureTime = fa.departureTime?.let { formatTime(it) },
+                        arrivalTime = DateTimeUtil.formatToHHmm(fa.arrivalTime),
+                        departureTime = DateTimeUtil.formatToHHmm(fa.departureTime),
                         arrivalPhotoUrl = fa.arrivalPhotoUrl,
                         departurePhotoUrl = fa.departurePhotoUrl,
                         hasArrived = fa.arrivalTime != null,

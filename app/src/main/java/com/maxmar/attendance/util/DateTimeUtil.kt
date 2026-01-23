@@ -24,10 +24,24 @@ object DateTimeUtil {
     fun formatToDDMMYYYY(isoString: String?): String {
         if (isoString.isNullOrEmpty()) return "--- ---"
         return try {
-            val zonedDateTime = ZonedDateTime.parse(isoString)
+            // Remove 'Z' if it's there to try parsing as LocalDateTime if ZonedDateTime fails
+            val cleaned = isoString.replace("Z", "+00:00")
+            val zonedDateTime = if (cleaned.contains("+") || cleaned.contains("-", ignoreCase = false) && cleaned.lastIndexOf("-") > cleaned.lastIndexOf("T")) {
+                ZonedDateTime.parse(cleaned)
+            } else {
+                // Try as Instant or specify UTC
+                ZonedDateTime.parse(cleaned + "Z")
+            }
             val localDateTime = zonedDateTime.withZoneSameInstant(java.time.ZoneId.systemDefault())
             localDateTime.format(dateFormatter)
         } catch (e: Exception) {
+            // Fallback: try simple substring if it's YYYY-MM-DD...
+            if (isoString!!.length >= 10 && isoString[4] == '-' && isoString[7] == '-') {
+                val parts = isoString.substring(0, 10).split("-")
+                if (parts.size == 3) {
+                    return "${parts[2]}-${parts[1]}-${parts[0]}"
+                }
+            }
             isoString
         }
     }
@@ -40,16 +54,16 @@ object DateTimeUtil {
         if (iso8601String.isNullOrEmpty()) return "--:--"
         
         return try {
-            val zonedDateTime = if (!iso8601String.contains("T")) {
-                // If it's just a time string, return as is or handle accordingly
-                return iso8601String.take(5)
-            } else {
-                ZonedDateTime.parse(iso8601String)
+            val zonedDateTime = when {
+                !iso8601String.contains("T") -> return iso8601String.take(5)
+                iso8601String.endsWith("Z") -> ZonedDateTime.parse(iso8601String)
+                iso8601String.contains("+") || (iso8601String.lastIndexOf("-") > iso8601String.lastIndexOf("T")) -> ZonedDateTime.parse(iso8601String)
+                else -> ZonedDateTime.parse(iso8601String + "Z") // Assume UTC if no TZ info
             }
             val localDateTime = zonedDateTime.withZoneSameInstant(java.time.ZoneId.systemDefault())
             localDateTime.format(shortTimeFormatter)
         } catch (e: Exception) {
-            iso8601String.take(5)
+            iso8601String.substringAfter("T").take(5)
         }
     }
     
