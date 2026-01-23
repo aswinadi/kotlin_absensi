@@ -237,6 +237,8 @@ class FieldAttendanceRepository @Inject constructor(
                         purpose = fa.purpose,
                         arrivalTime = fa.arrivalTime?.let { formatTime(it) },
                         departureTime = fa.departureTime?.let { formatTime(it) },
+                        arrivalPhotoUrl = fa.arrivalPhotoUrl,
+                        departurePhotoUrl = fa.departurePhotoUrl,
                         hasArrived = fa.arrivalTime != null,
                         hasDeparted = fa.departureTime != null
                     )

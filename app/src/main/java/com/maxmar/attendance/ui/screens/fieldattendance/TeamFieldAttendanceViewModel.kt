@@ -25,6 +25,8 @@ data class TeamFieldAttendanceItem(
     val purpose: String,
     val arrivalTime: String?,
     val departureTime: String?,
+    val arrivalPhotoUrl: String? = null,
+    val departurePhotoUrl: String? = null,
     val hasArrived: Boolean,
     val hasDeparted: Boolean
 )

@@ -81,6 +81,9 @@ import java.util.Locale
 import com.maxmar.attendance.util.TimeUtils
 import androidx.compose.material.icons.filled.FlightTakeoff
 import com.maxmar.attendance.data.model.FieldAttendance
+import coil.compose.AsyncImage
+import com.maxmar.attendance.util.DateTimeUtil
+import androidx.compose.ui.layout.ContentScale
 
 /**
  * History screen showing attendance records.
@@ -919,12 +922,7 @@ private fun StatItem(
 private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
     val appColors = LocalAppColors.current
     val displayDate = remember(fieldAttendance.date) {
-        try {
-            val date = LocalDate.parse(fieldAttendance.date)
-            date.format(DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy", Locale("id", "ID")))
-        } catch (e: Exception) {
-            fieldAttendance.date
-        }
+        DateTimeUtil.formatToDDMMYYYY(fieldAttendance.date)
     }
     
     val statusColor = when(fieldAttendance.status) {
@@ -1007,17 +1005,46 @@ private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
                         style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                         color = appColors.textPrimary
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = fieldAttendance.purpose,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = appColors.textSecondary,
-                        maxLines = 2
-                    )
+                    if (fieldAttendance.purpose.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = fieldAttendance.purpose,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = appColors.textSecondary,
+                            maxLines = 2
+                        )
+                    }
                 }
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Photo Thumbnails Row
+            if (fieldAttendance.arrivalPhotoUrl != null || fieldAttendance.departurePhotoUrl != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (fieldAttendance.arrivalPhotoUrl != null) {
+                        ThumbnailItem(
+                            label = "Foto Datang",
+                            imageUrl = fieldAttendance.arrivalPhotoUrl,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (fieldAttendance.departurePhotoUrl != null) {
+                        ThumbnailItem(
+                            label = "Foto Pulang",
+                            imageUrl = fieldAttendance.departurePhotoUrl,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else if (fieldAttendance.arrivalPhotoUrl != null) {
+                       // Placeholder to keep alignment if only one photo exists
+                       Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
             
             // Arrival & Departure times
             Row(
@@ -1031,11 +1058,7 @@ private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
                         style = MaterialTheme.typography.labelSmall,
                         color = appColors.textSecondary
                     )
-                    val arrivalTime = fieldAttendance.arrivalTime?.let {
-                        try {
-                            it.substringAfter("T").take(5)
-                        } catch (e: Exception) { "--:--" }
-                    } ?: "--:--"
+                    val arrivalTime = DateTimeUtil.formatToHHmm(fieldAttendance.arrivalTime)
                     Text(
                         text = arrivalTime,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -1058,11 +1081,7 @@ private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
                         style = MaterialTheme.typography.labelSmall,
                         color = appColors.textSecondary
                     )
-                    val departureTime = fieldAttendance.departureTime?.let {
-                        try {
-                            it.substringAfter("T").take(5)
-                        } catch (e: Exception) { "--:--" }
-                    } ?: "--:--"
+                    val departureTime = DateTimeUtil.formatToHHmm(fieldAttendance.departureTime)
                     Text(
                         text = departureTime,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -1071,5 +1090,32 @@ private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun ThumbnailItem(
+    label: String,
+    imageUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val appColors = LocalAppColors.current
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = appColors.textSecondary,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = label,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(appColors.surfaceVariant),
+            contentScale = ContentScale.Crop
+        )
     }
 }

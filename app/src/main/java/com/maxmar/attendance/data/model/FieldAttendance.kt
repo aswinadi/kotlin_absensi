@@ -84,8 +84,12 @@ data class TeamFieldAttendance(
     @SerializedName("location_name")
     val locationName: String = "",
     val purpose: String = "",
+    @SerializedName("arrival_photo_url")
+    val arrivalPhotoUrl: String? = null,
     @SerializedName("arrival_time")
     val arrivalTime: String? = null,
+    @SerializedName("departure_photo_url")
+    val departurePhotoUrl: String? = null,
     @SerializedName("departure_time")
     val departureTime: String? = null,
     val status: String = "in_progress",

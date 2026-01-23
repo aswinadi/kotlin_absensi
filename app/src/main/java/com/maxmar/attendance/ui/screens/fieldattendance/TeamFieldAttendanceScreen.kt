@@ -24,6 +24,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
+import coil.compose.AsyncImage
+import com.maxmar.attendance.util.DateTimeUtil
+import androidx.compose.ui.layout.ContentScale
 
 /**
  * Screen for supervisors to view their team's field attendance.
@@ -284,12 +287,65 @@ private fun TeamFieldAttendanceCard(item: TeamFieldAttendanceItem) {
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "Tiba: ${item.arrivalTime}${if (item.departureTime != null) " • Pulang: ${item.departureTime}" else ""}",
+                        text = "Tiba: ${DateTimeUtil.formatToHHmm(item.arrivalTime)}${if (item.departureTime != null) " • Pulang: ${DateTimeUtil.formatToHHmm(item.departureTime)}" else ""}",
                         style = MaterialTheme.typography.labelSmall,
                         color = appColors.textSecondary
                     )
                 }
             }
+            
+            // Photo Thumbnails Row
+            if (item.arrivalPhotoUrl != null || item.departurePhotoUrl != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    if (item.arrivalPhotoUrl != null) {
+                        TeamThumbnailItem(
+                            label = "Foto Datang",
+                            imageUrl = item.arrivalPhotoUrl,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    if (item.departurePhotoUrl != null) {
+                        TeamThumbnailItem(
+                            label = "Foto Pulang",
+                            imageUrl = item.departurePhotoUrl,
+                            modifier = Modifier.weight(1f)
+                        )
+                    } else if (item.arrivalPhotoUrl != null) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun TeamThumbnailItem(
+    label: String,
+    imageUrl: String,
+    modifier: Modifier = Modifier
+) {
+    val appColors = LocalAppColors.current
+    Column(modifier = modifier) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            color = appColors.textSecondary,
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        AsyncImage(
+            model = imageUrl,
+            contentDescription = label,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .background(appColors.surfaceVariant),
+            contentScale = ContentScale.Crop
+        )
     }
 }

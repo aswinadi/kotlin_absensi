@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.5.0] - 2026-01-23
+
+### Added
+- **Supervisor Dashboard**:
+  - **Supervisor Section**: Added new section on Home Screen for Supervisors (Position Level < 5).
+  - **Team Field Attendance**: View list of team members' field attendance (Today & Upcoming).
+  - **Navigation**: Moved "Approval" menu to Supervisor section.
+
+### Changed
+- **Home Screen**: Updated layout to accommodate Supervisor section.
+- **Field Attendance**: Added integration for fetching team field attendance status.
+
 ## [1.4.0] - 2026-01-22
 
 ### Added
