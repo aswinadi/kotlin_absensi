@@ -37,6 +37,8 @@ data class Employee(
     val email: String?,
     val phone: String?,
     val position: String?,  // API returns position_name as string
+    @SerializedName("position_level")
+    val positionLevel: Int? = null,  // Hierarchy level: 1 (Director) -> 5 (Staff)
     val department: String?,
     val company: String?,
     @SerializedName("sub_department")
@@ -62,7 +64,13 @@ data class Employee(
     // WFA status - when true, employee can check in/out without radius restriction
     @SerializedName("is_wfa")
     val isWfa: Boolean = false
-)
+) {
+    /** 
+     * Check if this employee is a supervisor (can see team data).
+     * Supervisors are employees with position level < 5 (not staff).
+     */
+    val isSupervisor: Boolean get() = (positionLevel ?: 99) < 5
+}
 
 /**
  * Full employee profile response containing employee, schedule, and leave quota.

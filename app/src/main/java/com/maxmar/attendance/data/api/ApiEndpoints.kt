@@ -80,6 +80,7 @@ object ApiEndpoints {
 
     // Field Attendance (Dinas Luar) endpoints
     const val FIELD_ATTENDANCES = "att/field-attendances"
+    const val TEAM_FIELD_ATTENDANCES = "att/field-attendances/team"
     fun fieldAttendanceDetail(id: Int) = "att/field-attendances/$id"
     fun fieldAttendanceDeparture(id: Int) = "att/field-attendances/$id/departure"
 }

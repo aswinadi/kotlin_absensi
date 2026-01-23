@@ -214,4 +214,55 @@ class FieldAttendanceRepository @Inject constructor(
             AuthResult.Error("Terjadi kesalahan: ${e.message}")
         }
     }
+
+    /**
+     * Fetch team field attendances for supervisors.
+     * Returns field attendances from subordinates.
+     */
+    suspend fun fetchTeamFieldAttendances(
+        filter: String = "today"
+    ): AuthResult<List<com.maxmar.attendance.ui.screens.fieldattendance.TeamFieldAttendanceItem>> {
+        return try {
+            val response = fieldAttendanceApi.getTeamList(filter)
+            if (response.success) {
+                val items = response.data.map { fa ->
+                    com.maxmar.attendance.ui.screens.fieldattendance.TeamFieldAttendanceItem(
+                        id = fa.id,
+                        employeeId = fa.employee?.id ?: 0,
+                        employeeName = fa.employee?.fullName ?: "Unknown",
+                        employeeCode = fa.employee?.employeeCode,
+                        position = fa.employee?.position,
+                        date = fa.date,
+                        locationName = fa.locationName,
+                        purpose = fa.purpose,
+                        arrivalTime = fa.arrivalTime?.let { formatTime(it) },
+                        departureTime = fa.departureTime?.let { formatTime(it) },
+                        hasArrived = fa.arrivalTime != null,
+                        hasDeparted = fa.departureTime != null
+                    )
+                }
+                AuthResult.Success(items)
+            } else {
+                AuthResult.Error("Gagal memuat data tim")
+            }
+        } catch (e: retrofit2.HttpException) {
+            if (e.code() == 403) {
+                AuthResult.Error("Anda tidak memiliki akses ke fitur ini")
+            } else {
+                AuthResult.Error("Error: ${e.code()}")
+            }
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
+
+    private fun formatTime(isoTime: String): String {
+        return try {
+            // Parse ISO 8601 and return just the time part HH:mm
+            val parsed = java.time.OffsetDateTime.parse(isoTime)
+            parsed.toLocalTime().toString().take(5)
+        } catch (e: Exception) {
+            isoTime.take(5)
+        }
+    }
 }

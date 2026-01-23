@@ -48,6 +48,7 @@ object Routes {
     // Field Attendance (Dinas Luar)
     const val FIELD_ATTENDANCE_FORM = "field_attendance_form"
     const val FIELD_ATTENDANCE_DEPARTURE = "field_attendance_departure/{fieldAttendanceId}"
+    const val TEAM_FIELD_ATTENDANCE = "team_field_attendance"
     fun fieldAttendanceDeparture(id: Int) = "field_attendance_departure/$id"
 }
 

@@ -30,6 +30,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Weekend
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
@@ -90,6 +91,7 @@ fun HomeScreen(
     onNavigateToBusinessTrip: () -> Unit = {},
     onNavigateToApproval: () -> Unit = {},
     onNavigateToFieldAttendance: () -> Unit = {},
+    onNavigateToTeamFieldAttendance: () -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -149,8 +151,7 @@ fun HomeScreen(
                         0 -> selectedNavIndex = 0 // Stay on home
                         1 -> onNavigateToBusinessTrip() // Perdin
                         2 -> onNavigateToHistory()
-                        3 -> onNavigateToApproval()
-                        4 -> onNavigateToProfile()
+                        3 -> onNavigateToProfile()
                     }
                 }
             )
@@ -214,6 +215,15 @@ fun HomeScreen(
                     onAbsent = onNavigateToAbsent,
                     onFieldAttendance = onNavigateToFieldAttendance
                 )
+                
+                // Supervisor Section (only visible for supervisors level < 5)
+                if (state.employee?.isSupervisor == true) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    SupervisorSection(
+                        onNavigateToApproval = onNavigateToApproval,
+                        onNavigateToTeamFieldAttendance = onNavigateToTeamFieldAttendance
+                    )
+                }
             }
         }
     }
@@ -676,8 +686,8 @@ private fun BottomNavBar(
             )
         )
         NavigationBarItem(
-            icon = { Icon(Icons.Default.Approval, contentDescription = "Approval") },
-            label = { Text("Approval") },
+            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+            label = { Text("Profile") },
             selected = selectedIndex == 3,
             onClick = { onItemSelected(3) },
             colors = NavigationBarItemDefaults.colors(
@@ -688,18 +698,116 @@ private fun BottomNavBar(
                 unselectedTextColor = appColors.textSecondary
             )
         )
-        NavigationBarItem(
-            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
-            label = { Text("Profile") },
-            selected = selectedIndex == 4,
-            onClick = { onItemSelected(4) },
-            colors = NavigationBarItemDefaults.colors(
-                selectedIconColor = MaxmarColors.Primary,
-                selectedTextColor = MaxmarColors.Primary,
-                indicatorColor = MaxmarColors.Primary.copy(alpha = 0.1f),
-                unselectedIconColor = appColors.textSecondary,
-                unselectedTextColor = appColors.textSecondary
-            )
+    }
+}
+
+@Composable
+private fun SupervisorSection(
+    onNavigateToApproval: () -> Unit,
+    onNavigateToTeamFieldAttendance: () -> Unit
+) {
+    val appColors = LocalAppColors.current
+    
+    Column {
+        Text(
+            text = "Supervisor Area",
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.Bold
+            ),
+            color = appColors.textPrimary
         )
+        
+        Spacer(modifier = Modifier.height(12.dp))
+        
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Persetujuan (Approvals) Card
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(100.dp)
+                    .clickable(onClick = onNavigateToApproval),
+                colors = CardDefaults.cardColors(containerColor = appColors.surface),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(MaxmarColors.Primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Approval,
+                            contentDescription = "Persetujuan",
+                            tint = MaxmarColors.Primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = "Persetujuan",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = appColors.textPrimary
+                    )
+                }
+            }
+            
+            // Tim Dinas Luar (Team Field Attendance) Card
+            Card(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(100.dp)
+                    .clickable(onClick = onNavigateToTeamFieldAttendance),
+                colors = CardDefaults.cardColors(containerColor = appColors.surface),
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(12.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(CircleShape)
+                            .background(MaxmarColors.Primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Groups,
+                            contentDescription = "Tim Dinas Luar",
+                            tint = MaxmarColors.Primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Text(
+                        text = "Tim Dinas Luar",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold
+                        ),
+                        color = appColors.textPrimary
+                    )
+                }
+            }
+        }
     }
 }

@@ -154,6 +154,9 @@ fun MaxmarNavHost(
                 },
                 onNavigateToFieldAttendance = {
                     navController.navigate(Routes.FIELD_ATTENDANCE_FORM)
+                },
+                onNavigateToTeamFieldAttendance = {
+                    navController.navigate(Routes.TEAM_FIELD_ATTENDANCE)
                 }
             )
         }
@@ -451,6 +454,13 @@ fun MaxmarNavHost(
                 fieldAttendanceId = fieldAttendanceId,
                 onNavigateBack = { navController.popBackStack() },
                 onSuccess = { navController.popBackStack() }
+            )
+        }
+
+        // Team Field Attendance Screen (Supervisor view)
+        composable(Routes.TEAM_FIELD_ATTENDANCE) {
+            com.maxmar.attendance.ui.screens.fieldattendance.TeamFieldAttendanceScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

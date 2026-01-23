@@ -3,6 +3,7 @@ package com.maxmar.attendance.data.api
 import com.maxmar.attendance.data.model.FieldAttendanceDetailResponse
 import com.maxmar.attendance.data.model.FieldAttendanceListResponse
 import com.maxmar.attendance.data.model.FieldAttendanceResponse
+import com.maxmar.attendance.data.model.TeamFieldAttendanceListResponse
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.http.GET
@@ -48,4 +49,9 @@ interface FieldAttendanceApi {
         @Part("departure_longitude") departureLongitude: RequestBody,
         @Part departurePhoto: MultipartBody.Part
     ): FieldAttendanceResponse
+
+    @GET(ApiEndpoints.TEAM_FIELD_ATTENDANCES)
+    suspend fun getTeamList(
+        @Query("filter") filter: String = "today" // "today" or "upcoming"
+    ): TeamFieldAttendanceListResponse
 }
