@@ -18,7 +18,9 @@ Field Attendance allows employees to record their attendance when working remote
 4. **Submit** the form.
 
 ### Departure (Check-Out)
-1. Open an active Field Attendance record.
+1. Open an active Field Attendance record from:
+   - **Home Screen**: Today's active attendance card.
+   - **History Screen**: "Dinas Luar" tab, clicking on a record with "Sedang Berlangsung" status.
 2. Review Arrival details.
 3. Take a **Departure Photo**.
    - Supports **Front** and **Back** camera switching.

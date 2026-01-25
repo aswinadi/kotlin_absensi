@@ -54,16 +54,22 @@ data class AbsentAttendance(
     @SerializedName("has_attachment")
     val hasAttachment: Boolean,
     val status: String,
+    val employee: Employee? = null,
     val acknowledged: ApprovalInfo?,
     val approved: ApprovalInfo?
-)
+) {
+    val isPendingAcknowledgement: Boolean get() = status == "pending_acknowledgement"
+    val isPendingApproval: Boolean get() = status == "pending_approval"
+    val isApproved: Boolean get() = status == "approved"
+}
 
 /**
  * Approval info (acknowledged/approved by).
  */
 data class ApprovalInfo(
     val by: String?,
-    val date: String?
+    val date: String?,
+    val notes: String? = null
 )
 
 /**
@@ -82,6 +88,15 @@ data class AbsentAttendanceResponse(
     val success: Boolean,
     val message: String?,
     val data: AbsentAttendanceResult?
+)
+
+/**
+ * Absent attendance detail response.
+ */
+data class AbsentAttendanceDetailResponse(
+    val success: Boolean,
+    val message: String?,
+    val data: AbsentAttendance?
 )
 
 /**

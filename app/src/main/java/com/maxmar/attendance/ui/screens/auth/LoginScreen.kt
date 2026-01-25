@@ -129,7 +129,7 @@ fun LoginScreen(
         
         // Proceed with login
         focusManager.clearFocus()
-        viewModel.login(username, password)
+        viewModel.login(username, password, rememberMe)
     }
     
     Scaffold(

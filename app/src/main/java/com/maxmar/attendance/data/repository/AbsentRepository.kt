@@ -149,4 +149,20 @@ class AbsentRepository @Inject constructor(
             AuthResult.Error("Terjadi kesalahan: ${e.message}")
         }
     }
+
+    /**
+     * Fetch a single absent attendance detail.
+     */
+    suspend fun fetchAbsentDetail(id: Int): AuthResult<AbsentAttendance> {
+        return try {
+            val response = absentApi.getAbsentDetail(id)
+            if (response.success && response.data != null) {
+                AuthResult.Success(response.data!!)
+            } else {
+                AuthResult.Error(response.message ?: "Gagal mengambil detail")
+            }
+        } catch (e: Exception) {
+            AuthResult.Error("Terjadi kesalahan: ${e.message}")
+        }
+    }
 }

@@ -23,6 +23,7 @@ object Routes {
     const val BUSINESS_TRIP_EDIT = "business_trip_edit/{tripId}"
     const val APPROVAL = "approval"
     const val NOTIFICATIONS = "notifications"
+    const val ABSENT_DETAIL = "absent_detail/{absentId}"
     const val CHANGE_PASSWORD = "change_password"
     const val COMPLETE_PROFILE = "complete_profile"
     
@@ -32,6 +33,7 @@ object Routes {
     
     // Helper function for routes with arguments
     fun absentEdit(absentId: Int) = "absent/$absentId"
+    fun absentDetail(absentId: Int) = "absent_detail/$absentId"
     fun businessTripDetail(tripId: String) = "business_trip/$tripId"
     fun businessTripEdit(tripId: Int) = "business_trip_edit/$tripId"
     fun realizationForm(tripId: Int) = "realization/$tripId"

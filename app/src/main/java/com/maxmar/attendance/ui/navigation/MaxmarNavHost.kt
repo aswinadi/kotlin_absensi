@@ -12,6 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.maxmar.attendance.ui.screens.absent.AbsentDetailScreen
 import com.maxmar.attendance.ui.screens.absent.AbsentScreen
 import com.maxmar.attendance.ui.screens.approval.ApprovalScreen
 import com.maxmar.attendance.ui.screens.auth.LoginScreen
@@ -69,6 +70,11 @@ fun MaxmarNavHost(
                     if (deepLinkData != null && (deepLinkData.type == "leave_request" || deepLinkData.type == "approval")) {
                         navController.navigate(Routes.APPROVAL)
                         onDeepLinkHandled()
+                    }
+                },
+                onNavigateToProfileCompletion = {
+                    navController.navigate(Routes.COMPLETE_PROFILE) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
                     }
                 }
             )
@@ -271,6 +277,12 @@ fun MaxmarNavHost(
             HistoryScreen(
                 onNavigateBack = {
                     navController.popBackStack()
+                },
+                onNavigateToAbsentDetail = { id ->
+                    navController.navigate(Routes.absentDetail(id))
+                },
+                onNavigateToFieldAttendanceDeparture = { id ->
+                    navController.navigate(Routes.fieldAttendanceDeparture(id))
                 }
             )
         }
@@ -295,6 +307,18 @@ fun MaxmarNavHost(
         // Change Password Screen
         composable(Routes.CHANGE_PASSWORD) {
             com.maxmar.attendance.ui.screens.profile.ChangePasswordScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        
+        // Absent Screen (Detail & Approval)
+        composable(
+            route = Routes.ABSENT_DETAIL,
+            arguments = listOf(navArgument("absentId") { type = NavType.IntType })
+        ) { backStackEntry ->
+            val absentId = backStackEntry.arguments?.getInt("absentId") ?: 0
+            com.maxmar.attendance.ui.screens.absent.AbsentDetailScreen(
+                absentId = absentId,
                 onNavigateBack = { navController.popBackStack() }
             )
         }

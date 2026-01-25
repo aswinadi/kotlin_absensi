@@ -25,6 +25,7 @@ class TokenManager @Inject constructor(
     companion object {
         private val TOKEN_KEY = stringPreferencesKey("auth_token")
         private val FCM_TOKEN_KEY = stringPreferencesKey("fcm_token")
+        private val REMEMBER_ME_KEY = androidx.datastore.preferences.core.booleanPreferencesKey("remember_me")
     }
     
     /**
@@ -34,6 +35,25 @@ class TokenManager @Inject constructor(
         context.dataStore.edit { preferences ->
             preferences[TOKEN_KEY] = token
         }
+    }
+
+    /**
+     * Save "Remember Me" preference.
+     */
+    suspend fun saveRememberMe(rememberMe: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[REMEMBER_ME_KEY] = rememberMe
+        }
+    }
+
+    /**
+     * Check if user wants to be remembered.
+     * Defaults to true for backward compatibility.
+     */
+    suspend fun shouldRememberMe(): Boolean {
+        return context.dataStore.data
+            .map { preferences -> preferences[REMEMBER_ME_KEY] ?: true }
+            .first()
     }
     
     /**

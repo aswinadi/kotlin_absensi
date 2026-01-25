@@ -92,6 +92,8 @@ import androidx.compose.ui.layout.ContentScale
 @Composable
 fun HistoryScreen(
     onNavigateBack: () -> Unit = {},
+    onNavigateToAbsentDetail: (Int) -> Unit = {},
+    onNavigateToFieldAttendanceDeparture: (Int) -> Unit = {},
     viewModel: HistoryViewModel = hiltViewModel()
 ) {
     val state by viewModel.historyState.collectAsState()
@@ -289,7 +291,12 @@ fun HistoryScreen(
                                 item { Spacer(modifier = Modifier.height(8.dp)) }
                                 
                                 items(state.absents, key = { it.id }) { absent ->
-                                    AbsentCard(absent = absent)
+                                    AbsentCard(
+                                        absent = absent,
+                                        onClick = {
+                                            onNavigateToAbsentDetail(absent.id)
+                                        }
+                                    )
                                 }
                                 
                                 item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -313,7 +320,14 @@ fun HistoryScreen(
                                 item { Spacer(modifier = Modifier.height(8.dp)) }
                                 
                                 items(state.fieldAttendances, key = { it.id }) { fieldAttendance ->
-                                    FieldAttendanceCard(fieldAttendance = fieldAttendance)
+                                    FieldAttendanceCard(
+                                        fieldAttendance = fieldAttendance,
+                                        onClick = {
+                                            if (fieldAttendance.status != "completed") {
+                                                onNavigateToFieldAttendanceDeparture(fieldAttendance.id)
+                                            }
+                                        }
+                                    )
                                 }
                                 
                                 item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -704,7 +718,10 @@ private fun MonthYearScrollablePicker(
 }
 
 @Composable
-private fun AbsentCard(absent: AbsentAttendance) {
+private fun AbsentCard(
+    absent: AbsentAttendance,
+    onClick: () -> Unit = {}
+) {
     val appColors = LocalAppColors.current
     val displayDate = remember(absent.date) {
         try {
@@ -919,7 +936,10 @@ private fun StatItem(
 }
 
 @Composable
-private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
+private fun FieldAttendanceCard(
+    fieldAttendance: FieldAttendance,
+    onClick: () -> Unit = {}
+) {
     val appColors = LocalAppColors.current
     val displayDate = remember(fieldAttendance.date) {
         DateTimeUtil.formatToDDMMYYYY(fieldAttendance.date)
@@ -936,7 +956,9 @@ private fun FieldAttendanceCard(fieldAttendance: FieldAttendance) {
     }
 
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(enabled = fieldAttendance.status != "completed") { onClick() },
         colors = CardDefaults.cardColors(containerColor = appColors.surface),
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)

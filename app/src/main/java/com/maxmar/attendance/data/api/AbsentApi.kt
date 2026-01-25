@@ -36,4 +36,9 @@ interface AbsentApi {
         @Part("notes") notes: RequestBody?,
         @Part attachment: MultipartBody.Part? = null
     ): AbsentAttendanceResponse
+
+    @GET("${ApiEndpoints.ABSENT_ATTENDANCES}/{id}")
+    suspend fun getAbsentDetail(
+        @retrofit2.http.Path("id") id: Int
+    ): com.maxmar.attendance.data.model.AbsentAttendanceDetailResponse
 }

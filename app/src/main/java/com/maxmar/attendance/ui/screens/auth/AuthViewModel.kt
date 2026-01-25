@@ -43,6 +43,13 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             
+            // If user didn't want to be remembered, clear token now (app restart)
+            if (!authRepository.shouldRememberMe()) {
+                authRepository.logout()
+                _authState.value = AuthState.Unauthenticated
+                return@launch
+            }
+
             when (val result = authRepository.checkAuthStatus()) {
                 is AuthResult.Success -> {
                     checkProfileStatus(result.data)
@@ -57,11 +64,11 @@ class AuthViewModel @Inject constructor(
     /**
      * Login with username and password.
      */
-    fun login(username: String, password: String) {
+    fun login(username: String, password: String, rememberMe: Boolean) {
         viewModelScope.launch {
             _authState.value = AuthState.Loading
             
-            when (val result = authRepository.login(username, password)) {
+            when (val result = authRepository.login(username, password, rememberMe)) {
                 is AuthResult.Success -> {
                     // Update device token if available
                     viewModelScope.launch {

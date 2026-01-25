@@ -23,6 +23,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,25 +39,32 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.maxmar.attendance.R
+import com.maxmar.attendance.ui.screens.auth.AuthState
+import com.maxmar.attendance.ui.screens.auth.AuthViewModel
 import com.maxmar.attendance.ui.theme.LocalAppColors
 import com.maxmar.attendance.ui.theme.MaxmarColors
 import kotlinx.coroutines.delay
 
 /**
  * Splash screen with animated logo and loading indicator.
- * Navigates to login after a brief delay.
+ * Checks authentication status and navigates accordingly.
  */
 @Composable
 fun SplashScreen(
     onNavigateToLogin: () -> Unit,
-    onNavigateToHome: () -> Unit
+    onNavigateToHome: () -> Unit,
+    onNavigateToProfileCompletion: () -> Unit,
+    viewModel: AuthViewModel = hiltViewModel()
 ) {
     // Animation values
     val fadeAnim = remember { Animatable(0f) }
     val scaleAnim = remember { Animatable(0.8f) }
     val appColors = LocalAppColors.current
     val isLight = appColors.backgroundGradientStart.luminance() > 0.5f
+    
+    val authState by viewModel.authState.collectAsState()
     
     // Glow animation
     val infiniteTransition = rememberInfiniteTransition(label = "glow")
@@ -69,8 +78,10 @@ fun SplashScreen(
         label = "glowAlpha"
     )
     
-    // Start animations
+    // Start animations and auth check
     LaunchedEffect(Unit) {
+        viewModel.checkAuthStatus()
+        
         fadeAnim.animateTo(
             targetValue = 1f,
             animationSpec = tween(1000, easing = FastOutSlowInEasing)
@@ -81,10 +92,18 @@ fun SplashScreen(
         )
     }
     
-    // Navigate to login after delay (simplified - skip auth check for now)
-    LaunchedEffect(Unit) {
-        delay(2500)
-        onNavigateToLogin()
+    // Navigate based on auth status after animations
+    LaunchedEffect(authState) {
+        if (authState !is AuthState.Initial && authState !is AuthState.Loading) {
+            // Wait at least 2 seconds for branding
+            delay(2000)
+            
+            when (authState) {
+                is AuthState.Authenticated -> onNavigateToHome()
+                is AuthState.RequiresProfileCompletion -> onNavigateToProfileCompletion()
+                else -> onNavigateToLogin()
+            }
+        }
     }
     
     // UI

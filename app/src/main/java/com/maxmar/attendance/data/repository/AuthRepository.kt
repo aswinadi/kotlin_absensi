@@ -28,12 +28,13 @@ class AuthRepository @Inject constructor(
      * Login with username and password.
      * Saves token on success.
      */
-    suspend fun login(username: String, password: String): AuthResult<User> {
+    suspend fun login(username: String, password: String, rememberMe: Boolean = true): AuthResult<User> {
         return try {
             val response = authApi.login(LoginRequest(username, password))
             
             if (response.success && response.data != null) {
                 tokenManager.saveToken(response.data.token)
+                tokenManager.saveRememberMe(rememberMe)
                 AuthResult.Success(response.data.user)
             } else {
                 AuthResult.Error(response.message ?: "Login gagal")
@@ -104,6 +105,13 @@ class AuthRepository @Inject constructor(
         }
     }
     
+    /**
+     * Check if user wants to be remembered.
+     */
+    suspend fun shouldRememberMe(): Boolean {
+        return tokenManager.shouldRememberMe()
+    }
+
     private fun parseErrorMessage(errorBody: String?): String? {
         if (errorBody.isNullOrEmpty()) return null
         
