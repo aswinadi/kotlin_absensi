@@ -202,9 +202,11 @@ private fun ProfileContent(
         
         // Position
         state.employee?.position?.let { position ->
+            val level = state.employee?.positionLevel
+            val displayText = if (level != null) "$position (Level $level)" else position
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = position,
+                text = displayText,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaxmarColors.Primary
             )
@@ -285,6 +287,16 @@ private fun ProfileContent(
                         icon = Icons.Default.Work,
                         label = "Jabatan",
                         value = it
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                // Position Level
+                state.employee?.positionLevel?.let { level ->
+                    ProfileInfoRow(
+                        icon = Icons.Default.Work,
+                        label = "Level Jabatan",
+                        value = level.toString()
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
